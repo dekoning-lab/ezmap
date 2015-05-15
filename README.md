@@ -1,7 +1,14 @@
 # viral-metagen
 NGS pipeline for viral metagenomics analysis
 
-# How to use
-Call the prinseqScript.sh file within the command line. To provide it a folder to scan and clean pass the full file path as the second command line argument. See example bellow.
+#Using on SLURM
+prinseqBatchScript.sbacth needs to be run which will grab all the different FASTQ files and then pass that array fo files to prinseqIndividualScript.sh to run all files through prinseq
 
-./prinseqScript.sh /Desktop/SampleData/
+Default PRINSEQ parameters:
+
+out_format=3 (FATSQ Files)
+min_qual_score=33
+lc_method="dust"
+lc_threshold=7 
+
+Note: PRINSEQ parameters can be changes in prinseqIndvidualScript.sbatch

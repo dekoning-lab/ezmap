@@ -1,7 +1,5 @@
 #!/bin/bash
 #!/usr/bin/perl
-#SBATCH --job-name=JobName
-#SBATCH --output=res.txt
 #
 #SBATCH --ntasks=1
 #SBATCH --time=10:00
