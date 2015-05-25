@@ -23,7 +23,9 @@ min_qual_score=33
 lc_method="dust"
 lc_threshold=7
 
-while getopts f:q:m:t: opt; do
+dir=""
+
+while getopts f:q:m:t:p: opt; do
   case $opt in
   f)
       out_format=$OPTARG
@@ -37,12 +39,15 @@ while getopts f:q:m:t: opt; do
   t)
       lc_threshold=$OPTARG
       ;;
+  p)
+      dir=$OPTARG
+      ;;
   esac
 done
 
 shift $((OPTIND - 1))
 
-#fileArray=($(python missingFiles.py | tr -d '[],'))
+fileArray=($(python missingFiles.py ${dir}| tr -d '[],'))
 
 #echo ${fileArray[@]}
 
@@ -54,4 +59,4 @@ TEMP2=${TEMP%\'}
 
 echo $TEMP2
 
-perl -w prinseq-lite.pl -fastq ${TEMP2} -out_format ${out_format} -log  -min_qual_score {$min_qual_score} -lc_method {$lc_method} -lc_threshold {$lc_threshold}
+#perl -w prinseq-lite.pl -fastq ${TEMP2} -out_format $out_format -log  -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -out_bad null
