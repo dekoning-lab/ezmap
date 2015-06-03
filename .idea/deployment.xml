@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="hyperion">
+    <serverData>
+      <paths name="hyperion">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/hyperion/work/patrick" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath path="/hyperion/work/patrick/BLAST" />
+            <excludedPath path="/hyperion/work/patrick/quakeData" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

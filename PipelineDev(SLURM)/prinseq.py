@@ -42,4 +42,4 @@ def createPRINSEQjobs (datasets,dir):
             datasetsToProcess.append(dataset.fileName)
 
     print(datasetsToProcess)
-    subprocess.Popen(['sh','prinseqIndividualScript.sbatch','-p',dir])
+    subprocess.Popen(['sh','prinseqIndividualScript.sh','-p',dir])
