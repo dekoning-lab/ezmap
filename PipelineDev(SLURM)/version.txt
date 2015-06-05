@@ -1,7 +1,0 @@
-
-===================================================================
-Viral Metagenomics Abundance Pipeline (VMAP)
-
-Author: Patrick Czeczko @ University of Calgary (de Koning Lab)
-Version: 0.1
-===================================================================

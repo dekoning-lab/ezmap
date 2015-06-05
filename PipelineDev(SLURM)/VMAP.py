@@ -1,40 +1,51 @@
 # ===================================================================
 # Viral Metagenomics Abundance Pipeline (VMAP)
 #
-# Author: Patrick Czeczko @ University of Calgary (de Koning Lab)
+# Author: Patrick Czeczko @ de Koning Lab
 # Version: 0.1
 #
-# Description:
-#
-# The intent of this pipeline is to enable the identification of
-# viral composition within a sample of DNA.
 # ===================================================================
 
 __author__ = 'patrickczeczko'
 
-import arguments
-import prinseq
+from scripts import arguments
+from scripts.dataset import dataset
+from scripts import prinseq
 
 # Main Function
 if __name__ == "__main__":
+    # Get all arguments
     parser = arguments.createArguments()
     args = parser.parse_args()
 
-    dir = args.fileDir
+    # Determine the directory files are located in
+    filedir = args.fileDir
+    projdir = args.projDir
 
-    f = open('version.txt','r')
-    print(f.read())
+    # Generate a data set of all files
+    allFiles = dataset(projdir)
+    allFiles.makeSubDirectories()
+    allFiles.generateDataSet(filedir)
 
-    datasets = prinseq.getListOfFiles(str(dir))
+    print(allFiles.samples[0].filePath)
 
-    if prinseq.checkForPRINSEQLogs(datasets) == False:
-        print("\nPRINSEQ log files missing\n")
-        print("SLURM Jobs will be created to process the following files:")
-        prinseq.createPRINSEQjobs(datasets,dir)
-    else:
-        print("All PRINSEQ log files found")
+    allFiles.createFileListFile('original')
 
-    print('\n')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

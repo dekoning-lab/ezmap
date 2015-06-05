@@ -6,5 +6,5 @@ numOfFiles=${#fileArray[@]}
 
 echo ${numOfFiles}
 
-#sbatch --array=0-${#fileArray[@]} prinseqIndividualScript.sh
+sbatch --array=0-20 prinseqIndividualScript.sh
 
