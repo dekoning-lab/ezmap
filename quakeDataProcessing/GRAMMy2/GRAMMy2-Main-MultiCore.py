@@ -10,17 +10,19 @@ import time
 BLASTFileDir = ""
 BLASTFileArray = []
 
+outputFileName = ""
+
 information = {}
 pi = []
 pMatrix = []
 totalNumberOfReads = 0
-numberOfThreads = 8
+numberOfThreads = 1
 
 verbose = False
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments ():
-    global BLASTFileDir
+    global BLASTFileDir, outputFileName
     global verbose
     global numberOfThreads
 
@@ -35,16 +37,22 @@ def parseCommandLineArguments ():
                         help="Outline steps of the program as they occur, this will also provide a statment every 5 "
                              "minutes when working on large datasets to ensure operations a stil occuring")
     parser.add_argument("-t","--threads", type=int,
-                        help="Number of concurrent threads to run")
+                        help="Number of concurrent threads to run. Default value is 1")
+    parser.add_argument("-c","--csvname", type=str,
+                        help="Indicate a filename for the file output csv to be written to. Default: 'output.csv")
 
     args = parser.parse_args()
 
+    # Set arguments
     BLASTFileDir = args.directory
     if not BLASTFileDir.endswith("/"):
         BLASTFileDir+='/'
     if args.threads is not None:
         numberOfThreads = args.threads
-        print("Number of threads:"+str(numberOfThreads))
+    if args.csvname is not None:
+        outputFileName = args.csvname
+        if not outputFileName.endswith('.csv'):
+            outputFileName += '.csv'
     if args.verbose:
         verbose = True
 
@@ -70,6 +78,7 @@ def initializeInformation (information):
             list [1] = taxonID
             list [2] = genomeLen
             information[genomeID] = list
+
 # Gather important initial information from the read files
 def processBLASTFiles (fileList):
     totalNumberOfReads = 0
@@ -211,6 +220,13 @@ def mStep (pi,outputQ):
     return pi
 
 def outputCSV (information,pi):
+    global outputFileName
+
+    try:
+        outputFile = open(os.getcwd()+outputFileName,'w+')
+    except:
+        outputFile = open('output.csv','w+')
+
     genomeIDs = ["GenomeID"]
     taxonIDs = ["TaxonID"]
     abundances = ["Relative Abundancies"]
@@ -233,8 +249,8 @@ def outputCSV (information,pi):
 
     for i in range(0,len(csv)):
         for j in range (0,len(csv[i])):
-            print(str(csv[i][j])+',',end='')
-        print()
+            outputFile.write(str(csv[i][j])+',')
+        outputFile.write('\n')
 
 if __name__ == '__main__':
     parseCommandLineArguments()
