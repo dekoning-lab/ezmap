@@ -3,11 +3,10 @@ __author__ = 'patrickczeczko'
 # Required Modules
 import os
 import argparse
-import threading
 import multiprocessing as mp
 import time
 
-BLASTFileDir = ""
+BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeData/BLASTResults/MPT1.75/"
 BLASTFileArray = []
 
 outputFileName = ""
@@ -18,13 +17,14 @@ pMatrix = []
 totalNumberOfReads = 0
 numberOfThreads = 1
 
-verbose = False
+verbose = True
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments ():
-    global BLASTFileDir, outputFileName
+    global BLASTFileDir
     global verbose
     global numberOfThreads
+    global outputFileName
 
     parser = argparse.ArgumentParser()
 
@@ -34,12 +34,11 @@ def parseCommandLineArguments ():
 
     #Optional Arguments
     parser.add_argument("-v", "--verbose", action="store_true" ,
-                        help="Outline steps of the program as they occur, this will also provide a statment every 5 "
-                             "minutes when working on large datasets to ensure operations a stil occuring")
+                        help="Outline steps of the program as they occur")
     parser.add_argument("-t","--threads", type=int,
                         help="Number of concurrent threads to run. Default value is 1")
     parser.add_argument("-c","--csvname", type=str,
-                        help="Indicate a filename for the file output csv to be written to. Default: 'output.csv")
+                        help="Indicate a filename for the file output csv to be written to. Default: output.csv")
 
     args = parser.parse_args()
 
@@ -51,8 +50,6 @@ def parseCommandLineArguments ():
         numberOfThreads = args.threads
     if args.csvname is not None:
         outputFileName = args.csvname
-        if not outputFileName.endswith('.csv'):
-            outputFileName += '.csv'
     if args.verbose:
         verbose = True
 
@@ -103,20 +100,41 @@ def makePiVectorIndicies (information):
     vector = [0] * len(list)
     return information, vector
 
+def processOnefile (file,outputQ):
+    inputFile = open(file,'r')
+    for line in inputFile:
+        linePar = line.split('\t')
+        genomeID = linePar[1].split('|')[1]
+        try:
+            piIndex = information[str(genomeID)][3]
+            pi[piIndex] += 1
+        except:
+            # print(',')
+            print('Missing information for Id: ' + genomeID)
+    outputQ.put(pi)
+
 # Goes through each file in the directory and reads the number of blast hits in each file
 # Each blast hit adds 1 to the corresponding pi matrix location
 def initializePiVector (fileList,totalNumberOfReads):
+    global numberOfThreads
+    pool = mp.Pool(numberOfThreads)
+    m = mp.Manager()
+    outputQ = m.Queue()
+
+    results=[]
+
     for file in fileList:
-        inputFile = open(file,'r')
-        for line in inputFile:
-            linePar = line.split('\t')
-            genomeID = linePar[1].split('|')[1]
-            try:
-                piIndex = information[str(genomeID)][3]
-                pi[piIndex] += 1
-            except:
-                #print(',')
-                print('Missing information for Id: '+genomeID)
+        proc = pool.apply_async(processOnefile, args=[file, outputQ])
+        results.append(proc)
+
+    pool.close()
+    pool.join()
+
+    while not outputQ.empty():
+        piRow = outputQ.get()
+        for i in range(len(piRow)):
+            pi[i] += piRow[i]
+
     return pi, totalNumberOfReads
 
 # Goes through and standardizes the pi vector after it has been set
@@ -129,29 +147,64 @@ def standardizeVector(vector):
     return vector
 
 # Creates the initial PMatrix
-def initializePmatrix(matrix,totalNumberOfReads,numOfCol,information,fileList):
-    columnHead = [0] * numOfCol
+def initializePmatrix(numOfGenomes,numOfReads,fileList):
+    columnHead = [0 for col in range(numOfGenomes)]
     columnHead[0] = 'ID'
-    for x in information:
-        columnHead[information[x][3]+1] = x
-    matrix.append(columnHead)
+
+    matrix = [[0 for col in range(numOfGenomes)] for row in range(numOfReads)]
+    matrix[0] = columnHead
 
     for file in fileList:
-        with open(file,'r') as inFile:
-            for i,line in enumerate(inFile):
-                linePar = line.split('\t')
-                row = [0] * numOfCol
-                row[0] = linePar[0]
-                genomeID = linePar[1].split('|')[1]
-                try:
-                    index = information[str(genomeID)][3] + 1
-                    row[index] += 1
-                    matrix.append(row)
-                except:
-                    #print(',')
-                    print('Missing information for Id: '+genomeID)
+        oFile = open(file)
+        for i,line in enumerate(oFile):
+            i += 1
+            parse = line.split('\t')
+            readID = parse[0]
+            genomeID = parse[1].split('|')[1]
+            columnIndex = information[str(genomeID)][3]+1
+
+            matrix[i][0] = readID
+            matrix[i][columnIndex] += 1
+            if matrix[0][columnIndex] == 0:
+                matrix[0][columnIndex] = genomeID
 
     return matrix
+
+def initializePDictionary (numOfGenomes,numOfReads,fileList,information):
+    pDiction = {}
+
+    for file in fileList:
+        oFile = open(file)
+        for i,line in enumerate(oFile):
+            parse = line.split('\t')
+            readID = parse[0]
+            genomeID = parse[1].split('|')[1]
+            try:
+                genomeLength = int(information[genomeID][2])
+                if not readID in pDiction:
+                    pDiction[readID] = [[genomeID,(1/genomeLength)]]
+                else:
+                    list = pDiction[readID]
+                    list.append([genomeID,(1/genomeLength)])
+                    pDiction[readID] = list
+            except:
+                print('Missing Genome Information :'+str(genomeID))
+
+    return pDiction
+
+def standardizePDictionary (pDiction):
+    for read in pDiction:
+        mappedLoci = pDiction[read]
+        sum = 0
+        for x in mappedLoci:
+            sum += x[1]
+        updateDic = {}
+        list = []
+        for x in mappedLoci:
+            list.append([x[0], (x[1] / sum)])
+        updateDic[read] = list
+        pDiction.update(updateDic)
+    return pDiction
 
 def standardizeMatrixByColumn(matrix):
     for j in range(1,len(matrix[0])):
@@ -164,41 +217,34 @@ def standardizeMatrixByColumn(matrix):
                 matrix[i][j] = float(value)/sum
     return matrix
 
-def calculateZRow (i,cCol,pi,outputQ):
-    zRow = []
-    for j in i:
-        if isinstance(j, str):
-            continue
-        p = j
-        piValue = pi[cCol]
-        z = p * piValue
-        xCol = 0
-        sValue = 0
-        for x in i:
-            if isinstance(x, str):
-                continue
-            sValue += (x * pi[xCol])
-            xCol += 1
-        z = z / sValue
-        zRow.append(z)
-        cCol += 1
+def calculateZRow (mappedRead,numOfGenomes,pi,outputQ,information):
+    zRow = [0.0 for col in range(numOfGenomes)]
+
+    for loci in mappedRead:
+        genomeID = loci[0]
+        genomeIndex = information[genomeID][3]
+        pValue = loci[1]
+        piValue = pi[genomeIndex]
+
+        zRow[genomeIndex] = pValue * piValue
+
+    sumOfRow = sum(zRow)
+    for j in range(len(zRow)):
+        zRow[j] = zRow[j]/sumOfRow
+
     outputQ.put(zRow)
 
-def eStep (pMatrix,pi,cpu_count):
-    cCol = 0
-
+def eStep (pDiction,pi,cpu_count,information):
     pool = mp.Pool(cpu_count)
     m = mp.Manager()
     outputQ = m.Queue()
 
     results=[]
 
-    for i in pMatrix:
-        if i[0] == 'ID':
-            continue
-        proc = pool.apply_async(calculateZRow,args=[i,cCol,pi,outputQ])
+    for i in pDiction:
+        mappedRead = pDiction[i]
+        proc = pool.apply_async(calculateZRow,args=[mappedRead,len(pi),pi,outputQ,information])
         results.append(proc)
-        cCol = 0
 
     pool.close()
     pool.join()
@@ -221,11 +267,10 @@ def mStep (pi,outputQ):
 
 def outputCSV (information,pi):
     global outputFileName
+    print(outputFileName)
 
-    try:
-        outputFile = open(os.getcwd()+outputFileName,'w+')
-    except:
-        outputFile = open('output.csv','w+')
+    print(os.getcwd())
+    outputFile = open(os.getcwd()+'/'+outputFileName,'w+')
 
     genomeIDs = ["GenomeID"]
     taxonIDs = ["TaxonID"]
@@ -255,13 +300,14 @@ def outputCSV (information,pi):
 if __name__ == '__main__':
     parseCommandLineArguments()
     if verbose == True:
-        print("GRAMMy2 0.1b \n")
+        print("\nGRAMMy2 0.1b \n")
 
         print("Grabbing list of files to process from:\n"+BLASTFileDir)
         getBlastFileList(BLASTFileDir)
 
         print("Preparing to run...")
         information, totalNumberOfReads = processBLASTFiles(BLASTFileArray)
+
         print("Starting run...")
         print("1. Calulating PiVector...")
         information, pi = makePiVectorIndicies(information)
@@ -272,31 +318,30 @@ if __name__ == '__main__':
         initializeInformation(information)
 
         print("3.Initialzing PMatrix...")
-        pMatrix = initializePmatrix(pMatrix,totalNumberOfReads,len(pi)+1,information,BLASTFileArray)
-        pMatrix = standardizeMatrixByColumn(pMatrix)
+        pDiction = initializePDictionary(len(pi)+1,totalNumberOfReads+1,BLASTFileArray,information)
+        pDiction = standardizePDictionary(pDiction)
 
         print("4.Starting Abundance Calculation...")
         print("This could take a while perhaps you would like to grab a beverage...")
 
         start = time.time()
-
         previousPi = pi
-        outputQ = eStep(pMatrix,pi,numberOfThreads)
+        outputQ = eStep(pDiction,pi,numberOfThreads,information)
         pi = mStep(pi,outputQ)
 
         while pi != previousPi:
             previousPi = pi
-            outputQ = eStep(pMatrix,pi,numberOfThreads)
+            outputQ = eStep(pDiction,pi,numberOfThreads,information)
             pi = mStep(pi,outputQ)
-
         end = time.time()
+
         print("Abundance Calculations took: "+str(end-start))
         print("5. Calculation Complete!")
         print("6. Printing results in CSV format!")
         outputCSV(information,pi)
         print("Exiting...")
     else:
-        print("GRAMMy2 0.1b\n")
+        print("\nGRAMMy2 0.1b\n")
 
         getBlastFileList(BLASTFileDir)
 
@@ -308,17 +353,17 @@ if __name__ == '__main__':
 
         initializeInformation(information)
 
-        pMatrix = initializePmatrix(pMatrix,totalNumberOfReads,len(pi)+1,information,BLASTFileArray)
-        pMatrix = standardizeMatrixByColumn(pMatrix)
+        pDiction = initializePDictionary(len(pi)+1,totalNumberOfReads+1,BLASTFileArray,information)
+        pDiction = standardizePDictionary(pDiction)
 
         previousPi = pi
-        outputQ = eStep(pMatrix,pi,numberOfThreads)
+        outputQ = eStep(pDiction,pi,numberOfThreads,information)
         pi = mStep(pi,outputQ)
-
+        outputQ.queue.clear()
         while pi != previousPi:
             previousPi = pi
-            outputQ = eStep(pMatrix,pi,numberOfThreads)
+            outputQ = eStep(pDiction,pi,numberOfThreads,information)
             pi = mStep(pi,outputQ)
-
+            outputQ.queue.clear()
         outputCSV(information,pi)
         print("Exiting...")
