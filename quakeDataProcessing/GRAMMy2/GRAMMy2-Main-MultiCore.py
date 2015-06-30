@@ -68,7 +68,7 @@ def getBlastFileList (fileDir):
 def initializeInformation (information):
     inputFile = open("combinedGenomeData.csv","r")
     for line in inputFile:
-        genomeID, taxonID, genomeLen, other = line.split(',')
+        genomeID, taxonID, genomeLen = line.split(',')
 
         if genomeID in information:
             list = information[genomeID]
@@ -217,22 +217,44 @@ def standardizeMatrixByColumn(matrix):
                 matrix[i][j] = float(value)/sum
     return matrix
 
-def calculateZRow (mappedRead,numOfGenomes,pi,outputQ,information):
-    zRow = [0.0 for col in range(numOfGenomes)]
+def calculateZRow (mappedRead,readID,numOfGenomes,pi,outputQ,information):
+    zValues = {}
 
     for loci in mappedRead:
         genomeID = loci[0]
         genomeIndex = information[genomeID][3]
         pValue = loci[1]
         piValue = pi[genomeIndex]
+        z = (pValue * piValue)
 
-        zRow[genomeIndex] = pValue * piValue
+        if not readID in zValues:
+            zValues[readID] = [[genomeID,z]]
+        else:
+            list = zValues[readID]
+            list.append([genomeID,z])
+            zValues[readID] = list
 
-    sumOfRow = sum(zRow)
-    for j in range(len(zRow)):
-        zRow[j] = zRow[j]/sumOfRow
+    sumValue = 0
+    zValueArray = zValues[readID]
+    for i in zValueArray:
+        sumValue += i[1]
 
-    outputQ.put(zRow)
+    for i in range(len(zValueArray)):
+        num = zValueArray[i][1]
+        num = num/sumValue
+        zValueArray[i][1] = num
+
+    finalArray=zValueArray
+    for i in range(len(zValueArray)):
+        for j in range(len(zValueArray)):
+            if not i == j:
+                if zValueArray[i][0] == zValueArray[j][0]:
+                    finalArray[i][0] *= 2
+                    del finalArray[j]
+
+    zValues[readID] = finalArray
+
+    outputQ.put(zValues)
 
 def eStep (pDiction,pi,cpu_count,information):
     pool = mp.Pool(cpu_count)
@@ -243,7 +265,7 @@ def eStep (pDiction,pi,cpu_count,information):
 
     for i in pDiction:
         mappedRead = pDiction[i]
-        proc = pool.apply_async(calculateZRow,args=[mappedRead,len(pi),pi,outputQ,information])
+        proc = pool.apply_async(calculateZRow,args=[mappedRead,i,len(pi),pi,outputQ,information])
         results.append(proc)
 
     pool.close()
@@ -252,14 +274,22 @@ def eStep (pDiction,pi,cpu_count,information):
     return outputQ
 
 def mStep (pi,outputQ):
-    newPi = [0.0]*len(pi)
+    global totalNumberOfReads, information
+    newPi = [0.0 for col in range(len(pi))]
 
     tNR = 0
+
     while not outputQ.empty():
-        zRow = outputQ.get()
-        for i in range(len(zRow)):
-            newPi[i] += zRow[i]
+        read = outputQ.get()
         tNR += 1
+        for i in read:
+            zijs = read[i]
+            for x in zijs:
+                genomeID = x[0]
+                z = x[1]
+                index = information[genomeID][3]
+                newPi[index] += z
+
     for j in range(len(pi)):
         pi[j] = newPi[j]/tNR
 
@@ -267,9 +297,7 @@ def mStep (pi,outputQ):
 
 def outputCSV (information,pi):
     global outputFileName
-    print(outputFileName)
 
-    print(os.getcwd())
     outputFile = open(os.getcwd()+'/'+outputFileName,'w+')
 
     genomeIDs = ["GenomeID"]

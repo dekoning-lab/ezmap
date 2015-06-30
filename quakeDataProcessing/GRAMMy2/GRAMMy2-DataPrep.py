@@ -62,7 +62,7 @@ def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueu
                     t = list(allInformation[nuclID])
                     t[1] = info[1]
                     allInformation[nuclID] = tuple(t)
-                    outputString = str(t[0]) + ',' + str(t[1]) + ',' + str(t[2]) + ',\n'
+                    outputString = str(t[0]) + ',' + str(t[1]) + ',' + str(t[2]) + '\n'
                     outputArray.append(outputString)
 
     outputQueue.put(outputArray)
