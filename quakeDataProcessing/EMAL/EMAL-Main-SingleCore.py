@@ -210,7 +210,7 @@ def printit():
 
 if __name__ == '__main__':
     if verbose == True:
-        print("GRAMMy2 0.1b\n")
+        print("EMAL 0.1b\n")
         parseCommandLineArguments()
 
         print("Grabbing list of files to process from:\n"+BLASTFileDir)
@@ -249,7 +249,7 @@ if __name__ == '__main__':
         outputCSV(information,pi)
         print("Exiting...")
     else:
-        print("GRAMMy2 0.1b\n")
+        print("EMAL 0.1b\n")
         parseCommandLineArguments()
 
         getBlastFileList(BLASTFileDir)

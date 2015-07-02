@@ -4,7 +4,7 @@ import os
 import time
 
 allInformation = {}
-fileName = "/hyperion/work/patrick/quakeDataProcessing/GRAMMy2/new.xml"
+fileName = "/hyperion/work/patrick/quakeDataProcessing/EMAL/new.xml"
 SRRFileDirPath = "/hyperion/work/patrick/quakeData/BLASTResults/"
 outputFile = open('new.csv', 'w+')
 
