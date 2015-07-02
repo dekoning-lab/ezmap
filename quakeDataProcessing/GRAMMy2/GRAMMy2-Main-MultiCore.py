@@ -6,10 +6,10 @@ import argparse
 import multiprocessing as mp
 import time
 
-BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeData/BLASTResults/MPT1.75/"
+BLASTFileDir = ""
 BLASTFileArray = []
 
-outputFileName = ""
+outputFileName = "output.csv"
 
 information = {}
 pi = []
@@ -20,7 +20,7 @@ numberOfThreads = 1
 verbose = True
 
 # Allow for command line arguments to be set and parsed
-def parseCommandLineArguments ():
+def parseCommandLineArguments():
     global BLASTFileDir
     global verbose
     global numberOfThreads
@@ -28,16 +28,16 @@ def parseCommandLineArguments ():
 
     parser = argparse.ArgumentParser()
 
-    #Required Arguments
-    parser.add_argument("-d","--directory", type=str, required=True,
+    # Required Arguments
+    parser.add_argument("-d", "--directory", type=str, required=True,
                         help="Provide a complete path to a direcotry containing the files of interest")
 
-    #Optional Arguments
-    parser.add_argument("-v", "--verbose", action="store_true" ,
+    # Optional Arguments
+    parser.add_argument("-v", "--verbose", action="store_true",
                         help="Outline steps of the program as they occur")
-    parser.add_argument("-t","--threads", type=int,
+    parser.add_argument("-t", "--threads", type=int,
                         help="Number of concurrent threads to run. Default value is 1")
-    parser.add_argument("-c","--csvname", type=str,
+    parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
 
     args = parser.parse_args()
@@ -45,7 +45,7 @@ def parseCommandLineArguments ():
     # Set arguments
     BLASTFileDir = args.directory
     if not BLASTFileDir.endswith("/"):
-        BLASTFileDir+='/'
+        BLASTFileDir += '/'
     if args.threads is not None:
         numberOfThreads = args.threads
     if args.csvname is not None:
@@ -54,43 +54,30 @@ def parseCommandLineArguments ():
         verbose = True
 
 
-# Generate a list of all files to be processed
-def getBlastFileList (fileDir):
+# Generate a list of all files within the BLASTFileDir to be processed
+def getBlastFileList(fileDir):
     for file in os.listdir(fileDir):
-        BLASTFileArray.append(fileDir+file)
+        BLASTFileArray.append(fileDir + file)
 
-# Create a dictionary that contains relevant information about each sample
-# Each value within the dictionary is a list containing the following information
-#   0: NCBI Nucleotide ID
-#   1: NCBI Taxonomy ID
-#   2: Length of Corresponding Genome
-#   3: Index in pi array
-def initializeInformation (information):
-    inputFile = open("combinedGenomeData.csv","r")
-    for line in inputFile:
-        genomeID, taxonID, genomeLen = line.split(',')
-
-        if genomeID in information:
-            list = information[genomeID]
-            list [1] = taxonID
-            list [2] = genomeLen
-            information[genomeID] = list
 
 # Gather important initial information from the read files
-def processBLASTFiles (fileList):
+# - NCBI Nucleotide IDs
+# - Total Number of Reads within all files
+def processBLASTFiles(fileList):
     totalNumberOfReads = 0
     for file in fileList:
-        with open(file,'r') as inFile:
+        with open(file, 'r') as inFile:
             for line in inFile:
                 linePar = line.split('\t')
                 genomeID = linePar[1].split('|')[1]
-                list = [genomeID,0,0,0,0]
+                list = [genomeID, 0, 0, 0, 0]
                 information[genomeID] = list
                 totalNumberOfReads += 1
     return information, totalNumberOfReads
 
-# Create the pi vecotr that will store the probabilities throughout the process
-def makePiVectorIndicies (information):
+
+# Create a list to be used to store the pi values
+def makePiVectorIndicies(information):
     list = []
     for x in information:
         list.append(x)
@@ -100,8 +87,11 @@ def makePiVectorIndicies (information):
     vector = [0] * len(list)
     return information, vector
 
-def processOnefile (file,outputQ):
-    inputFile = open(file,'r')
+
+# Processes one file to initalize the Pi vector
+# Returns a list which is placed into the output queue
+def processOnefile(file, outputQ):
+    inputFile = open(file, 'r')
     for line in inputFile:
         linePar = line.split('\t')
         genomeID = linePar[1].split('|')[1]
@@ -113,15 +103,16 @@ def processOnefile (file,outputQ):
             print('Missing information for Id: ' + genomeID)
     outputQ.put(pi)
 
+
 # Goes through each file in the directory and reads the number of blast hits in each file
 # Each blast hit adds 1 to the corresponding pi matrix location
-def initializePiVector (fileList,totalNumberOfReads):
+def initializePiVector(fileList, totalNumberOfReads):
     global numberOfThreads
     pool = mp.Pool(numberOfThreads)
     m = mp.Manager()
     outputQ = m.Queue()
 
-    results=[]
+    results = []
 
     for file in fileList:
         proc = pool.apply_async(processOnefile, args=[file, outputQ])
@@ -137,62 +128,63 @@ def initializePiVector (fileList,totalNumberOfReads):
 
     return pi, totalNumberOfReads
 
-# Goes through and standardizes the pi vector after it has been set
+
+# Standardizes a list of values
 def standardizeVector(vector):
     total = 0
     for x in vector:
         total += x
     for i in range(len(vector)):
-        vector[i] = float(vector[i])/total
+        vector[i] = float(vector[i]) / total
     return vector
 
-# Creates the initial PMatrix
-def initializePmatrix(numOfGenomes,numOfReads,fileList):
-    columnHead = [0 for col in range(numOfGenomes)]
-    columnHead[0] = 'ID'
 
-    matrix = [[0 for col in range(numOfGenomes)] for row in range(numOfReads)]
-    matrix[0] = columnHead
+# Create a dictionary that contains relevant information about each sample
+# Each value within the dictionary is a list containing the following information
+#   0: NCBI Nucleotide ID
+#   1: NCBI Taxonomy ID
+#   2: Length of Corresponding Genome
+#   3: Index in pi array
+def initializeInformation(information):
+    inputFile = open("combinedGenomeData.csv", "r")
+    for line in inputFile:
+        genomeID, taxonID, genomeLen = line.split(',')
 
-    for file in fileList:
-        oFile = open(file)
-        for i,line in enumerate(oFile):
-            i += 1
-            parse = line.split('\t')
-            readID = parse[0]
-            genomeID = parse[1].split('|')[1]
-            columnIndex = information[str(genomeID)][3]+1
+        if genomeID in information:
+            list = information[genomeID]
+            list[1] = taxonID
+            list[2] = genomeLen
+            information[genomeID] = list
 
-            matrix[i][0] = readID
-            matrix[i][columnIndex] += 1
-            if matrix[0][columnIndex] == 0:
-                matrix[0][columnIndex] = genomeID
 
-    return matrix
-
-def initializePDictionary (numOfGenomes,numOfReads,fileList,information):
+# Initializes a dictionary filled with Maximum Likelihood Estimates (MLE)
+#   - Key: readID (Identifier found in 1st Column of Tabular blastn output)
+#   - Values: [[NCBI NucleotideID, MLE]...]
+def initializePDictionary(numOfGenomes, numOfReads, fileList, information):
     pDiction = {}
 
     for file in fileList:
         oFile = open(file)
-        for i,line in enumerate(oFile):
+        for i, line in enumerate(oFile):
             parse = line.split('\t')
             readID = parse[0]
             genomeID = parse[1].split('|')[1]
             try:
                 genomeLength = int(information[genomeID][2])
                 if not readID in pDiction:
-                    pDiction[readID] = [[genomeID,(1/genomeLength)]]
+                    pDiction[readID] = [[genomeID, (1 / genomeLength)]]
                 else:
                     list = pDiction[readID]
-                    list.append([genomeID,(1/genomeLength)])
+                    list.append([genomeID, (1 / genomeLength)])
                     pDiction[readID] = list
             except:
-                print('Missing Genome Information :'+str(genomeID))
+                print('Missing Genome Information :' + str(genomeID))
 
     return pDiction
 
-def standardizePDictionary (pDiction):
+
+# Function will standardize the entire MLE dictionary by read
+def standardizePDictionary(pDiction):
     for read in pDiction:
         mappedLoci = pDiction[read]
         sum = 0
@@ -206,18 +198,11 @@ def standardizePDictionary (pDiction):
         pDiction.update(updateDic)
     return pDiction
 
-def standardizeMatrixByColumn(matrix):
-    for j in range(1,len(matrix[0])):
-        sum = 0
-        for i in range(1,len(matrix)):
-            sum += matrix[i][j]
-        if sum > 0:
-            for i in range(1,len(matrix)):
-                value = matrix[i][j]
-                matrix[i][j] = float(value)/sum
-    return matrix
 
-def calculateZRow (mappedRead,readID,numOfGenomes,pi,outputQ,information):
+# Calculates a single row of posterior probabilities
+# Results are placed in dictionaries to reduce the required
+# amount of memory used for this algorithm
+def calculateZRow(mappedRead, readID, pi, outputQ, information):
     zValues = {}
 
     for loci in mappedRead:
@@ -228,10 +213,10 @@ def calculateZRow (mappedRead,readID,numOfGenomes,pi,outputQ,information):
         z = (pValue * piValue)
 
         if not readID in zValues:
-            zValues[readID] = [[genomeID,z]]
+            zValues[readID] = [[genomeID, z]]
         else:
             list = zValues[readID]
-            list.append([genomeID,z])
+            list.append([genomeID, z])
             zValues[readID] = list
 
     sumValue = 0
@@ -241,10 +226,10 @@ def calculateZRow (mappedRead,readID,numOfGenomes,pi,outputQ,information):
 
     for i in range(len(zValueArray)):
         num = zValueArray[i][1]
-        num = num/sumValue
+        num = num / sumValue
         zValueArray[i][1] = num
 
-    finalArray=zValueArray
+    finalArray = zValueArray
     for i in range(len(zValueArray)):
         for j in range(len(zValueArray)):
             if not i == j:
@@ -256,16 +241,21 @@ def calculateZRow (mappedRead,readID,numOfGenomes,pi,outputQ,information):
 
     outputQ.put(zValues)
 
-def eStep (pDiction,pi,cpu_count,information):
+
+# Runs the estimation step of the EM algorithm used.
+# The process has been broken down so that each read can be processed by a
+# single thread reducing the amount of time needed to achieve final viral
+# abundances
+def eStep(pDiction, pi, cpu_count, information):
     pool = mp.Pool(cpu_count)
     m = mp.Manager()
     outputQ = m.Queue()
 
-    results=[]
+    results = []
 
     for i in pDiction:
         mappedRead = pDiction[i]
-        proc = pool.apply_async(calculateZRow,args=[mappedRead,i,len(pi),pi,outputQ,information])
+        proc = pool.apply_async(calculateZRow, args=[mappedRead, i, pi, outputQ, information])
         results.append(proc)
 
     pool.close()
@@ -273,7 +263,12 @@ def eStep (pDiction,pi,cpu_count,information):
 
     return outputQ
 
-def mStep (pi,outputQ):
+
+# Runs the maximization step of the EM algorithm used.
+# This step essentially calculates new pi values from the results of the
+# estimation step. These pi value are then used in the next iteration of
+# the algorithm to determine relative abundances
+def mStep(pi, outputQ):
     global totalNumberOfReads, information
     newPi = [0.0 for col in range(len(pi))]
 
@@ -291,14 +286,20 @@ def mStep (pi,outputQ):
                 newPi[index] += z
 
     for j in range(len(pi)):
-        pi[j] = newPi[j]/tNR
+        pi[j] = newPi[j] / tNR
 
     return pi
 
-def outputCSV (information,pi):
+
+# This function writes the results to a CSV file.
+# Format (Columns):
+#   1: NCBI Nucleotide ID
+#   2: NCBI Taxonomy ID
+#   3: Relative Abundance for that genome
+def outputCSV(information, pi):
     global outputFileName
 
-    outputFile = open(os.getcwd()+'/'+outputFileName,'w+')
+    outputFile = open(os.getcwd() + '/' + outputFileName, 'w+')
 
     genomeIDs = ["GenomeID"]
     taxonIDs = ["TaxonID"]
@@ -311,27 +312,33 @@ def outputCSV (information,pi):
         taxonIDs.append(0)
 
     for x in information:
-        index = information[x][3]+1
+        index = information[x][3] + 1
         genomeIDs[index] = information[x][0]
         taxonIDs[index] = information[x][1]
 
     csv = []
 
-    for i in range (0,len(genomeIDs)):
-        csv.append([genomeIDs[i],taxonIDs[i],abundances[i]])
+    for i in range(0, len(genomeIDs)):
+        csv.append([genomeIDs[i], taxonIDs[i], abundances[i]])
 
-    for i in range(0,len(csv)):
-        for j in range (0,len(csv[i])):
-            outputFile.write(str(csv[i][j])+',')
+    for i in range(0, len(csv)):
+        for j in range(0, len(csv[i])):
+            outputFile.write(str(csv[i][j]) + ',')
         outputFile.write('\n')
 
+# Main Function
 if __name__ == '__main__':
+    # Parse command line arguments to ensure correct process occurs
     parseCommandLineArguments()
     if verbose == True:
-        print("\nGRAMMy2 0.1b \n")
+        print("\nGRAMMy2 0.2b \n")
 
-        print("Grabbing list of files to process from:\n"+BLASTFileDir)
+        # Grab all files in the directory specified
+        print("Grabbing list of files to process from:\n" + BLASTFileDir)
         getBlastFileList(BLASTFileDir)
+        print(str(len(BLASTFileArray)) + " files found to process:")
+        for x in BLASTFileArray:
+            print(x)
 
         print("Preparing to run...")
         information, totalNumberOfReads = processBLASTFiles(BLASTFileArray)
@@ -339,34 +346,33 @@ if __name__ == '__main__':
         print("Starting run...")
         print("1. Calulating PiVector...")
         information, pi = makePiVectorIndicies(information)
-        pi, totalNumberOfReads = initializePiVector(BLASTFileArray,totalNumberOfReads)
+        pi, totalNumberOfReads = initializePiVector(BLASTFileArray, totalNumberOfReads)
         pi = standardizeVector(pi)
 
         print("2.Gathering information...")
         initializeInformation(information)
 
-        print("3.Initialzing PMatrix...")
-        pDiction = initializePDictionary(len(pi)+1,totalNumberOfReads+1,BLASTFileArray,information)
+        print("3.Initialzing MLEs...")
+        pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
         pDiction = standardizePDictionary(pDiction)
 
         print("4.Starting Abundance Calculation...")
         print("This could take a while perhaps you would like to grab a beverage...")
-
-        start = time.time()
+        start = time.time()  # Grab the start time
         previousPi = pi
-        outputQ = eStep(pDiction,pi,numberOfThreads,information)
-        pi = mStep(pi,outputQ)
+        outputQ = eStep(pDiction, pi, numberOfThreads, information)
+        pi = mStep(pi, outputQ)
 
         while pi != previousPi:
             previousPi = pi
-            outputQ = eStep(pDiction,pi,numberOfThreads,information)
-            pi = mStep(pi,outputQ)
-        end = time.time()
+            outputQ = eStep(pDiction, pi, numberOfThreads, information)
+            pi = mStep(pi, outputQ)
+        end = time.time()  # Grab the end time
 
-        print("Abundance Calculations took: "+str(end-start))
+        print("Abundance Calculations took: " + str(end - start))
         print("5. Calculation Complete!")
         print("6. Printing results in CSV format!")
-        outputCSV(information,pi)
+        outputCSV(information, pi)
         print("Exiting...")
     else:
         print("\nGRAMMy2 0.1b\n")
@@ -376,22 +382,22 @@ if __name__ == '__main__':
         information, totalNumberOfReads = processBLASTFiles(BLASTFileArray)
 
         information, pi = makePiVectorIndicies(information)
-        pi, totalNumberOfReads = initializePiVector(BLASTFileArray,totalNumberOfReads)
+        pi, totalNumberOfReads = initializePiVector(BLASTFileArray, totalNumberOfReads)
         pi = standardizeVector(pi)
 
         initializeInformation(information)
 
-        pDiction = initializePDictionary(len(pi)+1,totalNumberOfReads+1,BLASTFileArray,information)
+        pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
         pDiction = standardizePDictionary(pDiction)
 
         previousPi = pi
-        outputQ = eStep(pDiction,pi,numberOfThreads,information)
-        pi = mStep(pi,outputQ)
+        outputQ = eStep(pDiction, pi, numberOfThreads, information)
+        pi = mStep(pi, outputQ)
         outputQ.queue.clear()
         while pi != previousPi:
             previousPi = pi
-            outputQ = eStep(pDiction,pi,numberOfThreads,information)
-            pi = mStep(pi,outputQ)
+            outputQ = eStep(pDiction, pi, numberOfThreads, information)
+            pi = mStep(pi, outputQ)
             outputQ.queue.clear()
-        outputCSV(information,pi)
+        outputCSV(information, pi)
         print("Exiting...")
