@@ -36,3 +36,4 @@ if __name__ == "__main__":
     prinseq.generateSLURMScript(origFiles, projdir)
 
     print('EXITING...')
+
