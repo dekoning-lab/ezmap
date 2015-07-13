@@ -2,56 +2,37 @@
 # Viral Metagenomics Abundance Pipeline (VMAP)
 #
 # Author: Patrick Czeczko @ de Koning Lab
-# Version: 0.1
+# Version: 0.1a
 #
 # ===================================================================
 
 __author__ = 'patrickczeczko'
+import sys
 
-from scripts import arguments
-from scripts.dataset import dataset
-from scripts import prinseq
+import Scripts.arguments as arguments
+import Scripts.fileManager as fileman
+import Scripts.prinseqPrep as prinseq
 
 # Main Function
 if __name__ == "__main__":
-    # Get all arguments
-    parser = arguments.createArguments()
-    args = parser.parse_args()
+    # Get all user set arguments before starting pipeline
+    allArgs = arguments.parseCommandLineArguments()
 
-    # Determine the directory files are located in
-    filedir = args.fileDir
-    projdir = args.projDir
+    # Create subdirectories where intermediate files will live
+    createdSubDir = fileman.createSubFolders(allArgs['projDir'])
+    # If sub directories don't exist, don't continue
+    if createdSubDir == False:
+        print("Error unable to create intermediate file directories")
+        sys.exit()
 
-    # Generate a data set of all files
-    allFiles = dataset(projdir)
-    allFiles.makeSubDirectories()
-    allFiles.generateDataSet(filedir)
+    # Get list of FASTQ files to process
+    origFiles = fileman.getListOfOriginalFiles(allArgs['directory'], allArgs['projDir'])
 
-    print(allFiles.samples[0].filePath)
+    # Check if there is at least one file to process
+    if len(origFiles) < 1:
+        sys.exit()
 
-    allFiles.createFileListFile('original')
+    projdir = list(origFiles.values())[0].projDirectory
+    prinseq.generateSLURMScript(origFiles, projdir)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print('EXITING...')
