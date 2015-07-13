@@ -6,7 +6,7 @@ import argparse
 import multiprocessing as mp
 import time
 
-BLASTFileDir = ""
+BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
 BLASTFileArray = []
 
 outputFileName = "output.csv"
@@ -16,8 +16,8 @@ pi = []
 pMatrix = []
 totalNumberOfReads = 0
 numberOfThreads = 1
-
-verbose = True
+acceptanceValue = 0.1
+verbose = False
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -25,12 +25,13 @@ def parseCommandLineArguments():
     global verbose
     global numberOfThreads
     global outputFileName
+    global acceptanceValue
 
     parser = argparse.ArgumentParser()
 
     # Required Arguments
     parser.add_argument("-d", "--directory", type=str, required=True,
-                        help="Provide a complete path to a direcotry containing the files of interest")
+                        help="Provide a complete path to a directory containing the files of interest")
 
     # Optional Arguments
     parser.add_argument("-v", "--verbose", action="store_true",
@@ -39,7 +40,8 @@ def parseCommandLineArguments():
                         help="Number of concurrent threads to run. Default value is 1")
     parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
-
+    parser.add_argument("-a", "--acceptanceCutoff", type=float,
+                        help="Indicate the acceptable difference with range of this numebr. Default: 0.1")
     args = parser.parse_args()
 
     # Set arguments
@@ -52,6 +54,8 @@ def parseCommandLineArguments():
         outputFileName = args.csvname
     if args.verbose:
         verbose = True
+    if args.acceptanceCutoff is not None:
+        acceptanceValue = args.acceptanceCutoff
 
 
 # Generate a list of all files within the BLASTFileDir to be processed
@@ -286,9 +290,9 @@ def mStep(pi, outputQ):
                 newPi[index] += z
 
     for j in range(len(pi)):
-        pi[j] = newPi[j] / tNR
+        newPi[j] = newPi[j] / tNR
 
-    return pi
+    return newPi
 
 
 # This function writes the results to a CSV file.
@@ -326,12 +330,25 @@ def outputCSV(information, pi):
             outputFile.write(str(csv[i][j]) + ',')
         outputFile.write('\n')
 
+
+def compareLists(old, new, acceptance):
+    diff = []
+    accept = True
+
+    for i in range(len(old)):
+        diff.append(abs(old[i] - new[i]))
+    for i in diff:
+        if i > acceptance:
+            accept = False
+    # print(old,new,diff)
+    return accept
+
 # Main Function
 if __name__ == '__main__':
     # Parse command line arguments to ensure correct process occurs
     parseCommandLineArguments()
-    if verbose == True:
-        print("\nGRAMMy2 0.2b \n")
+    if verbose:
+        print("\nEMAL 0.2b \n")
 
         # Grab all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
@@ -355,27 +372,35 @@ if __name__ == '__main__':
         print("3.Initialzing MLEs...")
         pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
         pDiction = standardizePDictionary(pDiction)
-
         print("4.Starting Abundance Calculation...")
         print("This could take a while perhaps you would like to grab a beverage...")
         start = time.time()  # Grab the start time
-        previousPi = pi
-        outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        pi = mStep(pi, outputQ)
 
-        while pi != previousPi:
-            previousPi = pi
-            outputQ = eStep(pDiction, pi, numberOfThreads, information)
-            pi = mStep(pi, outputQ)
+        count = 0
+
+        oldPi = pi
+        outputQ = eStep(pDiction, pi, numberOfThreads, information)
+        newPi = mStep(pi, outputQ)
+
+        count += 1
+        accept = compareLists(oldPi, newPi, acceptanceValue)
+        while accept == False:
+            oldPi = newPi
+            outputQ = eStep(pDiction, newPi, numberOfThreads, information)
+            newPi = mStep(newPi, outputQ)
+            count += 1
+            accept = compareLists(oldPi, newPi, acceptanceValue)
+            print(str(count) + 'Cycles completed')
+
         end = time.time()  # Grab the end time
 
         print("Abundance Calculations took: " + str(end - start))
-        print("5. Calculation Complete!")
+        print("5. Calculation Complete! Took " + str(count) + " cycles")
         print("6. Printing results in CSV format!")
-        outputCSV(information, pi)
+        outputCSV(information, newPi)
         print("Exiting...")
     else:
-        print("\nGRAMMy2 0.1b\n")
+        print("\nEMAL 0.1b\n")
 
         getBlastFileList(BLASTFileDir)
 
@@ -390,14 +415,17 @@ if __name__ == '__main__':
         pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
         pDiction = standardizePDictionary(pDiction)
 
-        previousPi = pi
+        oldPi = pi
         outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        pi = mStep(pi, outputQ)
-        outputQ.queue.clear()
-        while pi != previousPi:
-            previousPi = pi
-            outputQ = eStep(pDiction, pi, numberOfThreads, information)
-            pi = mStep(pi, outputQ)
+        newPi = mStep(pi, outputQ)
+
+        accept = compareLists(oldPi, newPi, acceptanceValue)
+        while accept == False:
+            oldPi = newPi
+            outputQ = eStep(pDiction, newPi, numberOfThreads, information)
+            newPi = mStep(newPi, outputQ)
+            accept = compareLists(oldPi, newPi, acceptanceValue)
+
             outputQ.queue.clear()
         outputCSV(information, pi)
         print("Exiting...")

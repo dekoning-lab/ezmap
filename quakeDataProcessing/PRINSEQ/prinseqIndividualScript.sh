@@ -28,10 +28,10 @@ fileArray=($(python missingFiles.py | tr -d '[],'))
 #echo ${fileArray[@]}
 
 #Grab array of filenames from parent shell
-FILENAME=${fileArray[$SLURM_ARRAY_TASK_ID]}
+TEMP=${fileArray[$SLURM_ARRAY_TASK_ID]}
 
-TEMP=${FILENAME#\'}
-TEMP2=${TEMP%\'}
+TEMP2=${TEMP#\'}
+FILENAME=${TEMP2%\'}
 
 echo $TEMP2
 #echo 'perl prinseq-lite.pl -fastq ${TEMP2} -out_format $out_format -log  -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold'
