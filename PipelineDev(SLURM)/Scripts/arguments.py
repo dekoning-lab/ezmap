@@ -13,6 +13,9 @@ def parseCommandLineArguments():
                         help="Provide a complete path to a directory where all intermediate files and folders will "
                              "be placed")
 
+
+
+
     args = parser.parse_args()
 
     allArgs = {}
