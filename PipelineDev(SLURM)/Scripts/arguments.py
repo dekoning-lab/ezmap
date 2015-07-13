@@ -14,8 +14,6 @@ def parseCommandLineArguments():
                              "be placed")
 
 
-
-
     args = parser.parse_args()
 
     allArgs = {}
