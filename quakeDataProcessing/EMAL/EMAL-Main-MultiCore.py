@@ -9,15 +9,18 @@ import time
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
 BLASTFileArray = []
 
-outputFileName = "output.csv"
+outputFileName = ""
 
 information = {}
 pi = []
 pMatrix = []
 totalNumberOfReads = 0
+totalGenomeSizes = 0
+
+# Command Line Options
 numberOfThreads = 1
-acceptanceValue = 0.1
-verbose = False
+acceptanceValue = 0.0000001
+verbose = True
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -150,6 +153,8 @@ def standardizeVector(vector):
 #   2: Length of Corresponding Genome
 #   3: Index in pi array
 def initializeInformation(information):
+    global totalGenomeSizes
+
     inputFile = open("combinedGenomeData.csv", "r")
     for line in inputFile:
         genomeID, taxonID, genomeLen = line.split(',')
@@ -158,6 +163,7 @@ def initializeInformation(information):
             list = information[genomeID]
             list[1] = taxonID
             list[2] = genomeLen
+            totalGenomeSizes += int(genomeLen)
             information[genomeID] = list
 
 
@@ -206,14 +212,14 @@ def standardizePDictionary(pDiction):
 # Calculates a single row of posterior probabilities
 # Results are placed in dictionaries to reduce the required
 # amount of memory used for this algorithm
-def calculateZRow(mappedRead, readID, pi, outputQ, information):
+def calculateZRow(mappedRead, readID, pi2, outputQ, information):
     zValues = {}
 
     for loci in mappedRead:
         genomeID = loci[0]
         genomeIndex = information[genomeID][3]
         pValue = loci[1]
-        piValue = pi[genomeIndex]
+        piValue = pi2[genomeIndex]
         z = (pValue * piValue)
 
         if not readID in zValues:
@@ -250,7 +256,7 @@ def calculateZRow(mappedRead, readID, pi, outputQ, information):
 # The process has been broken down so that each read can be processed by a
 # single thread reducing the amount of time needed to achieve final viral
 # abundances
-def eStep(pDiction, pi, cpu_count, information):
+def eStep(pDiction, pi2, cpu_count, information):
     pool = mp.Pool(cpu_count)
     m = mp.Manager()
     outputQ = m.Queue()
@@ -259,7 +265,7 @@ def eStep(pDiction, pi, cpu_count, information):
 
     for i in pDiction:
         mappedRead = pDiction[i]
-        proc = pool.apply_async(calculateZRow, args=[mappedRead, i, pi, outputQ, information])
+        proc = pool.apply_async(calculateZRow, args=[mappedRead, i, pi2, outputQ, information])
         results.append(proc)
 
     pool.close()
@@ -272,11 +278,18 @@ def eStep(pDiction, pi, cpu_count, information):
 # This step essentially calculates new pi values from the results of the
 # estimation step. These pi value are then used in the next iteration of
 # the algorithm to determine relative abundances
-def mStep(pi, outputQ):
-    global totalNumberOfReads, information
-    newPi = [0.0 for col in range(len(pi))]
+def mStep(pi2, outputQ):
+    global totalNumberOfReads, information, totalGenomeSizes
+    newPi = [0.0 for col in range(len(pi2))]
 
     tNR = 0
+
+    indexLength = {}
+    for x in information:
+        list = information[x]
+        length = list[2]
+        index = list[3]
+        indexLength[index] = float(length)
 
     while not outputQ.empty():
         read = outputQ.get()
@@ -289,8 +302,10 @@ def mStep(pi, outputQ):
                 index = information[genomeID][3]
                 newPi[index] += z
 
-    for j in range(len(pi)):
-        newPi[j] = newPi[j] / tNR
+    for j in range(len(pi2)):
+        newPi[j] = totalGenomeSizes * (newPi[j] / (tNR * indexLength[j]))
+
+    newPi = standardizeVector(newPi)
 
     return newPi
 
@@ -331,6 +346,8 @@ def outputCSV(information, pi):
         outputFile.write('\n')
 
 
+# Compare each list and determine if the differences in value as small enough
+# between iterations to accept result
 def compareLists(old, new, acceptance):
     diff = []
     accept = True
@@ -340,7 +357,6 @@ def compareLists(old, new, acceptance):
     for i in diff:
         if i > acceptance:
             accept = False
-    # print(old,new,diff)
     return accept
 
 # Main Function
@@ -372,6 +388,7 @@ if __name__ == '__main__':
         print("3.Initialzing MLEs...")
         pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
         pDiction = standardizePDictionary(pDiction)
+
         print("4.Starting Abundance Calculation...")
         print("This could take a while perhaps you would like to grab a beverage...")
         start = time.time()  # Grab the start time
@@ -384,6 +401,7 @@ if __name__ == '__main__':
 
         count += 1
         accept = compareLists(oldPi, newPi, acceptanceValue)
+
         while accept == False:
             oldPi = newPi
             outputQ = eStep(pDiction, newPi, numberOfThreads, information)
