@@ -7,9 +7,10 @@
 # ===================================================================
 
 __author__ = 'patrickczeczko'
-import sys
+import sys, subprocess
 
 import Scripts.arguments as arguments
+import Scripts.configOptions as config
 import Scripts.fileManager as fileman
 import Scripts.prinseqPrep as prinseq
 
@@ -17,6 +18,7 @@ import Scripts.prinseqPrep as prinseq
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline
     allArgs = arguments.parseCommandLineArguments()
+    configOptions = config.parseConfigOptions()
 
     # Create subdirectories where intermediate files will live
     createdSubDir = fileman.createSubFolders(allArgs['projDir'])
@@ -33,7 +35,8 @@ if __name__ == "__main__":
         sys.exit()
 
     projdir = list(origFiles.values())[0].projDirectory
-    prinseq.generateSLURMScript(origFiles, projdir)
+
+    prinseq.generateSLURMScript(origFiles, projdir, configOptions)
+    prinseq.processAllFiles(len(origFiles), projdir)
 
     print('EXITING...')
-
