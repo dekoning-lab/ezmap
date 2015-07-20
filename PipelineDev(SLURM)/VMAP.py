@@ -7,7 +7,7 @@
 # ===================================================================
 
 __author__ = 'patrickczeczko'
-import sys, subprocess
+import sys
 
 import Scripts.arguments as arguments
 import Scripts.configOptions as config
@@ -32,11 +32,18 @@ if __name__ == "__main__":
 
     # Check if there is at least one file to process
     if len(origFiles) < 1:
+        print('No files found to process!')
         sys.exit()
 
+    # Get the project directory to pass to functions that follow
     projdir = list(origFiles.values())[0].projDirectory
 
+    # Generate Job script for step 1 and run all jobs
     prinseq.generateSLURMScript(origFiles, projdir, configOptions)
-    prinseq.processAllFiles(len(origFiles), projdir)
+    prinseqJobID = prinseq.processAllFiles(len(origFiles), projdir)
+
+    # Update the prinseq jobID for all datasets
+    for x in origFiles:
+        origFiles[x].updateJobID(1, prinseqJobID)
 
     print('EXITING...')

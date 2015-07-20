@@ -7,9 +7,10 @@ import multiprocessing as mp
 import time
 
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
+#BLASTFileArray = [BLASTFileDir + 'newDataDuplicateMappings.tblat']
 BLASTFileArray = []
 
-outputFileName = ""
+outputFileName = "output2.csv"
 
 information = {}
 pi = []
@@ -19,7 +20,7 @@ totalGenomeSizes = 0
 
 # Command Line Options
 numberOfThreads = 1
-acceptanceValue = 0.0000001
+acceptanceValue = 0.0001
 verbose = True
 
 # Allow for command line arguments to be set and parsed
@@ -97,7 +98,10 @@ def makePiVectorIndicies(information):
 
 # Processes one file to initalize the Pi vector
 # Returns a list which is placed into the output queue
-def processOnefile(file, outputQ):
+def processOnefile(info):
+    file = info[0]
+    outputQ = info[1]
+
     inputFile = open(file, 'r')
     for line in inputFile:
         linePar = line.split('\t')
@@ -119,11 +123,13 @@ def initializePiVector(fileList, totalNumberOfReads):
     m = mp.Manager()
     outputQ = m.Queue()
 
-    results = []
+    iterInfo = []
 
     for file in fileList:
-        proc = pool.apply_async(processOnefile, args=[file, outputQ])
-        results.append(proc)
+        print (file)
+        iterInfo.append([file, outputQ])
+
+    proc = pool.map_async(processOnefile, iterInfo)
 
     pool.close()
     pool.join()
@@ -135,7 +141,6 @@ def initializePiVector(fileList, totalNumberOfReads):
 
     return pi, totalNumberOfReads
 
-
 # Standardizes a list of values
 def standardizeVector(vector):
     total = 0
@@ -144,7 +149,6 @@ def standardizeVector(vector):
     for i in range(len(vector)):
         vector[i] = float(vector[i]) / total
     return vector
-
 
 # Create a dictionary that contains relevant information about each sample
 # Each value within the dictionary is a list containing the following information
@@ -212,7 +216,13 @@ def standardizePDictionary(pDiction):
 # Calculates a single row of posterior probabilities
 # Results are placed in dictionaries to reduce the required
 # amount of memory used for this algorithm
-def calculateZRow(mappedRead, readID, pi2, outputQ, information):
+def calculateZRow(info):
+    mappedRead = info[0]
+    readID = info[1]
+    pi2 = info[2]
+    outputQ = info[3]
+    information = info[4]
+
     zValues = {}
 
     for loci in mappedRead:
@@ -239,13 +249,17 @@ def calculateZRow(mappedRead, readID, pi2, outputQ, information):
         num = num / sumValue
         zValueArray[i][1] = num
 
-    finalArray = zValueArray
+    duplicates = {}
+    finalArray = []
+
     for i in range(len(zValueArray)):
-        for j in range(len(zValueArray)):
-            if not i == j:
-                if zValueArray[i][0] == zValueArray[j][0]:
-                    finalArray[i][0] *= 2
-                    del finalArray[j]
+        if zValueArray[i][0] in duplicates:
+            duplicates[zValueArray[i][0]] += zValueArray[i][1]
+        else:
+            duplicates[zValueArray[i][0]] = zValueArray[i][1]
+
+    for i in duplicates:
+        finalArray.append([str(i), duplicates[i]])
 
     zValues[readID] = finalArray
 
@@ -261,12 +275,12 @@ def eStep(pDiction, pi2, cpu_count, information):
     m = mp.Manager()
     outputQ = m.Queue()
 
-    results = []
-
+    iterbaleInformation = []
     for i in pDiction:
         mappedRead = pDiction[i]
-        proc = pool.apply_async(calculateZRow, args=[mappedRead, i, pi2, outputQ, information])
-        results.append(proc)
+        iterbaleInformation.append([mappedRead, i, pi2, outputQ, information])
+
+    proc = pool.map_async(calculateZRow, iterbaleInformation)
 
     pool.close()
     pool.join()
@@ -305,7 +319,7 @@ def mStep(pi2, outputQ):
     for j in range(len(pi2)):
         newPi[j] = totalGenomeSizes * (newPi[j] / (tNR * indexLength[j]))
 
-    newPi = standardizeVector(newPi)
+    # newPi = standardizeVector(newPi)
 
     return newPi
 
@@ -410,6 +424,7 @@ if __name__ == '__main__':
             accept = compareLists(oldPi, newPi, acceptanceValue)
             print(str(count) + 'Cycles completed')
 
+        newPi = standardizeVector(newPi)
         end = time.time()  # Grab the end time
 
         print("Abundance Calculations took: " + str(end - start))
@@ -445,5 +460,7 @@ if __name__ == '__main__':
             accept = compareLists(oldPi, newPi, acceptanceValue)
 
             outputQ.queue.clear()
-        outputCSV(information, pi)
+
+        newPi = standardizeVector(newPi)
+        outputCSV(information, newPi)
         print("Exiting...")

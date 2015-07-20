@@ -22,7 +22,7 @@ def createSubFolders(projDir):
         return True
     return False
 
-# return a list of dataset objects corressponding to each file
+# return a dictionary of dataset objects corressponding to each file
 def getListOfOriginalFiles(fileDir,projDir):
     origfiles = {}
     for file in os.listdir(fileDir):

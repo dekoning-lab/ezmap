@@ -5,7 +5,12 @@ import os
 
 
 def generateSLURMScript(dataSets, projdir, configOptions):
+    print('Setting up jobs for Step 1...')
+
     cwd = os.getcwd()
+    cwd = cwd.replace('(', '\(')
+    cwd = cwd.replace(')', '\)')
+
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
     script.writelines(['#!/bin/bash\n',
@@ -14,8 +19,8 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '# Mandatory settings\n',
                        '#SBATCH --job-name=VMAP-1\n',
                        '#SBATCH --workdir=' + cwd + '\n',
-                       '#SBATCH --output=VMAP-1-%j' + '\n',
-                       '#SBATCH --error=VMAP-1-%j' + '\n',
+                       '#SBATCH --output=VMAP-1-%j' + '.out\n',
+                       '#SBATCH --error=VMAP-1-%j' + '.err\n',
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
                        '# Resources required\n',
                        '#SBATCH --ntasks=1\n',
@@ -35,26 +40,42 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        'lc_threshold=' + configOptions['prinseq-lc_threshold'] + '\n\n'])
 
     filelist = ''
+    fileOutputList = ''
     for x in dataSets:
-        filelist += '\'' + dataSets[x].prinseqOutputName + '\' '
+        filelist += '' + dataSets[x].origFileName + ' '
+        fileOutputList += '' + dataSets[x].prinseqOutputName + ' '
+        origFilePath = dataSets[x].origFilePath + '/'
 
-    script.write('fileArray = (' + filelist + ')\n\n')
+    script.write('fileArray=( ' + filelist + ')\n\n')
+    script.write('fileOutputArray=( ' + fileOutputList + ')\n\n')
 
     script.writelines(['TEMP=${fileArray[$SLURM_ARRAY_TASK_ID]}\n',
                        'TEMP2=${TEMP#\\\'}\n',
                        'FILENAME=${TEMP2%\\\'}\n\n',
-                       'perl -w ' + cwd + '/tools/' + 'prinseq-lite.pl '
-                                                      '-fastq ${TEMP2} '
-                                                      '-out_format $out_format '
-                                                      '-min_qual_score $min_qual_score '
-                                                      '-lc_method $lc_method '
-                                                      '-lc_threshold $lc_threshold '
-                                                      '-out_good '+projdir+'1-Cleaning/${FILENAME}'+
-                                                      '-out_bad null '
-                                                      '-log '
-                                                      '\n'])
+                       '',
+                       'TEMP3=${fileOutputArray[$SLURM_ARRAY_TASK_ID]}\n',
+                       'TEMP4=${TEMP3#\\\'}\n',
+                       'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
+                       'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'
+                       'perl -w ' + cwd + '/tools/PRINSEQ/' + 'prinseq-lite.pl '
+                                                              '-fastq ' + origFilePath + '${TEMP2} '
+                                                                                         '-out_format $out_format '
+                                                                                         '-min_qual_score $min_qual_score '
+                                                                                         '-lc_method $lc_method '
+                                                                                         '-lc_threshold $lc_threshold '
+                                                                                         '-out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
+                       '-out_bad null '
+                       '-log '
+                       '\n'])
 
 
 def processAllFiles(numOfFiles, projDir):
-    output = subprocess.call(['sbatch', '--array=0' + str(numOfFiles), projDir + '1-Cleaning/prinseqScript.sh'])
-    print(output)
+    print('Starting step 1 jobs...')
+    proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
+                            stdout=subprocess.PIPE)
+
+    outs, errs = proc.communicate()
+    outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
+
+    lastJobID = int(outs) + numOfFiles - 1
+    return lastJobID

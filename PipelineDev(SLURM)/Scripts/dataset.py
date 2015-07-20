@@ -18,6 +18,12 @@ class Dataset:
     blastnOutputName = ""
     EMALOutputName = ""
 
+    prinseqJobID = 0
+    bowtie2JobID = 0
+    samtoolsJobID = 0
+    blastnJobID = 0
+    EMALJobID = 0
+
     # Gather initial information
     def __init__(self, origfilename, filepath, projdir):
         self.origFileName = origfilename
@@ -36,4 +42,14 @@ class Dataset:
         self.blastnOutputName = root + "-blastn"
         self.EMALOutputName = root + "-emal"
 
-
+    def updateJobID(self, step, ID):
+        if step == 1:
+            self.prinseqJobID = ID
+        elif step == 2:
+            self.bowtie2JobID = ID
+        elif step == 3:
+            self.samtoolsJobID = ID
+        elif step == 4:
+            self.blastnJobID = ID
+        elif step == 5:
+            self.EMALJobID = ID
