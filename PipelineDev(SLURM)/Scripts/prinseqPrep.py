@@ -2,6 +2,7 @@ __author__ = 'patrickczeczko'
 
 import subprocess
 import os
+import Scripts.slurmScript as slurmScript
 
 
 def generateSLURMScript(dataSets, projdir, configOptions):
@@ -13,25 +14,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
 
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
-    script.writelines(['#!/bin/bash\n',
-                       '#!/usr/bin/perl\n',
-                       '#---------------------------------\n',
-                       '# Mandatory settings\n',
-                       '#SBATCH --job-name=VMAP-1\n',
-                       '#SBATCH --workdir=' + cwd + '\n',
-                       '#SBATCH --output=VMAP-1-%j' + '.out\n',
-                       '#SBATCH --error=VMAP-1-%j' + '.err\n',
-                       '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
-                       '# Resources required\n',
-                       '#SBATCH --ntasks=1\n',
-                       '#SBATCH --partition=' + configOptions['slurm-partition'] + '\n'])
-
-    if configOptions['slurm-share'] == 'yes':
-        script.write('#SBATCH --share\n')
-    if configOptions['slurm-test-only'] == 'yes':
-        script.write('#SBATCH --test-only\n')
-
-    script.write('#---------------------------------\n\n')
+    slurmScript.getSBATCHSettings(script, 1, cwd, configOptions)
 
     script.write('## PRINSEQ PARAMETERS\n')
     script.writelines(['out_format=3\n',
@@ -69,7 +52,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '\n'])
 
 
-def processAllFiles(numOfFiles, projDir):
+def processAllFiles(numOfFiles, projDir, configOptions):
     print('Starting step 1 jobs...')
     proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
                             stdout=subprocess.PIPE)
@@ -77,5 +60,7 @@ def processAllFiles(numOfFiles, projDir):
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
 
+    if configOptions['slurm-test-only'] == 'yes':
+        outs = '123456'
     lastJobID = int(outs) + numOfFiles - 1
     return lastJobID

@@ -21,19 +21,18 @@ numCores=4
 
 fileArray=($(python errorCheck.py | tr -d '[],'))
 
-#!/bin/bash
 start=$(date +%s.%N)
 
 echo "Start time: ${start}"
 
 #Grab array of filenames from parent shell
-FILENAME=${fileArray[${SLURM_ARRAY_TASK_ID}]}
+TEMP=${fileArray[${SLURM_ARRAY_TASK_ID}]}
 
-TEMP=${FILENAME#\'}
-TEMP2=${TEMP%\'}
+TEMP2=${TEMP#\'}
+FILENAME=${TEMP2%\'}
 
 echo "Input file: ${TEMP2}"
-/hyperion/work/patrick/quakeDataMapping/bowtie2-2.2.5/bowtie2 --sensitive -x hg19 -U /hyperion/work/patrick/quake-data/prinseqResults-minQual21/${TEMP2} -S ${TEMP2}.sam -p ${numCores}
+/hyperion/work/patrick/quakeDataMapping/bowtie2-2.2.5/bowtie2 --sensitive -x hg19 -U /hyperion/work/patrick/quake-data/prinseqResults-minQual21/${FILENAME} -S ${TEMP2}.sam -p ${numCores}
 
 end=$(date +%s.%N)
 echo "End time: ${end}"

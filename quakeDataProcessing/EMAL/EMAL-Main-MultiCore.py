@@ -7,8 +7,8 @@ import multiprocessing as mp
 import time
 
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
-#BLASTFileArray = [BLASTFileDir + 'newDataDuplicateMappings.tblat']
-BLASTFileArray = []
+BLASTFileArray = [BLASTFileDir + 'newDataDuplicateMappings.tblat']
+# BLASTFileArray = []
 
 outputFileName = "output2.csv"
 
@@ -19,7 +19,7 @@ totalNumberOfReads = 0
 totalGenomeSizes = 0
 
 # Command Line Options
-numberOfThreads = 1
+numberOfThreads = 8
 acceptanceValue = 0.0001
 verbose = True
 
@@ -376,13 +376,13 @@ def compareLists(old, new, acceptance):
 # Main Function
 if __name__ == '__main__':
     # Parse command line arguments to ensure correct process occurs
-    parseCommandLineArguments()
+    #parseCommandLineArguments()
     if verbose:
         print("\nEMAL 0.2b \n")
 
         # Grab all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
-        getBlastFileList(BLASTFileDir)
+        #getBlastFileList(BLASTFileDir)
         print(str(len(BLASTFileArray)) + " files found to process:")
         for x in BLASTFileArray:
             print(x)

@@ -13,6 +13,7 @@ import Scripts.arguments as arguments
 import Scripts.configOptions as config
 import Scripts.fileManager as fileman
 import Scripts.prinseqPrep as prinseq
+import Scripts.bowtie2Prep as bowtie2
 
 # Main Function
 if __name__ == "__main__":
@@ -40,10 +41,12 @@ if __name__ == "__main__":
 
     # Generate Job script for step 1 and run all jobs
     prinseq.generateSLURMScript(origFiles, projdir, configOptions)
-    prinseqJobID = prinseq.processAllFiles(len(origFiles), projdir)
+    prinseqJobID = prinseq.processAllFiles(len(origFiles), projdir, configOptions)
 
     # Update the prinseq jobID for all datasets
     for x in origFiles:
         origFiles[x].updateJobID(1, prinseqJobID)
+
+    bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, allArgs['maxThreads'])
 
     print('EXITING...')

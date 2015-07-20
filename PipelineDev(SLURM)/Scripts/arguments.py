@@ -12,6 +12,8 @@ def parseCommandLineArguments():
     parser.add_argument("--projDir", type=str, required=True,
                         help="Provide a complete path to a directory where all intermediate files and folders will "
                              "be placed")
+    parser.add_argument("-mt", "--maxThreads", type=str, required=True,
+                        help="The maximum number of threads allowed to run concurrently at any point. Default: 1")
     # PRINSEQ Arguments
     parser.add_argument("-pof", "--prinseq-out_format", type=int,
                         help="Output format"
@@ -26,10 +28,12 @@ def parseCommandLineArguments():
                              "uses this as maximum allowed score and the entropy method as minimum allowed value. "
                              "INT [0..100] Default: 7")
 
+
     args = parser.parse_args()
 
     allArgs = {}
     allArgs['directory'] = args.directory
     allArgs['projDir'] = args.projDir
+    allArgs['maxThreads'] = args.maxThreads
 
     return allArgs
