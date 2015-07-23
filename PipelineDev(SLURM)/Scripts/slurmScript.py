@@ -20,4 +20,4 @@ def getSBATCHSettings(script, step, cwd, configOptions):
     if configOptions['slurm-test-only'] == 'yes':
         script.write('#SBATCH --test-only\n')
 
-    script.write('#---------------------------------\n\n')
+
