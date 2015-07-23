@@ -28,12 +28,14 @@ def parseCommandLineArguments():
                              "uses this as maximum allowed score and the entropy method as minimum allowed value. "
                              "INT [0..100] Default: 7")
 
-
     args = parser.parse_args()
 
     allArgs = {}
     allArgs['directory'] = args.directory
-    allArgs['projDir'] = args.projDir
+    if args.projDir.endswith("/"):
+        allArgs['projDir'] = args.projDir
+    else:
+        allArgs['projDir'] = args.projDir + '/'
     allArgs['maxThreads'] = args.maxThreads
 
     return allArgs
