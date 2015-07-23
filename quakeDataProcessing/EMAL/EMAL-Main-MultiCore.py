@@ -4,13 +4,16 @@ __author__ = 'patrickczeczko'
 import os
 import argparse
 import multiprocessing as mp
-import time
+import time, math
+from functools import reduce
 
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
-BLASTFileArray = [BLASTFileDir + 'newDataDuplicateMappings.tblat']
-# BLASTFileArray = []
+# BLASTFileArray = [BLASTFileDir + 'newDataNoDuplicateMappings.tblat']
+BLASTFileArray = []
 
-outputFileName = "output2.csv"
+outputFileName = "Validation6KNoDuplicatesEqualGenomeSize.csv"
+
+logfile = open('Log.txt', 'w+')
 
 information = {}
 pi = []
@@ -19,7 +22,7 @@ totalNumberOfReads = 0
 totalGenomeSizes = 0
 
 # Command Line Options
-numberOfThreads = 8
+numberOfThreads = 4
 acceptanceValue = 0.0001
 verbose = True
 
@@ -126,7 +129,7 @@ def initializePiVector(fileList, totalNumberOfReads):
     iterInfo = []
 
     for file in fileList:
-        print (file)
+        print(file)
         iterInfo.append([file, outputQ])
 
     proc = pool.map_async(processOnefile, iterInfo)
@@ -141,6 +144,7 @@ def initializePiVector(fileList, totalNumberOfReads):
 
     return pi, totalNumberOfReads
 
+
 # Standardizes a list of values
 def standardizeVector(vector):
     total = 0
@@ -149,6 +153,7 @@ def standardizeVector(vector):
     for i in range(len(vector)):
         vector[i] = float(vector[i]) / total
     return vector
+
 
 # Create a dictionary that contains relevant information about each sample
 # Each value within the dictionary is a list containing the following information
@@ -266,6 +271,11 @@ def calculateZRow(info):
     outputQ.put(zValues)
 
 
+def append_list(l, el):
+    l.append(el)
+    return l
+
+
 # Runs the estimation step of the EM algorithm used.
 # The process has been broken down so that each read can be processed by a
 # single thread reducing the amount of time needed to achieve final viral
@@ -277,10 +287,9 @@ def eStep(pDiction, pi2, cpu_count, information):
 
     iterbaleInformation = []
     for i in pDiction:
-        mappedRead = pDiction[i]
-        iterbaleInformation.append([mappedRead, i, pi2, outputQ, information])
+        iterbaleInformation.append([pDiction[i], i, pi2, outputQ, information])
 
-    proc = pool.map_async(calculateZRow, iterbaleInformation)
+    proc = pool.map(calculateZRow, iterbaleInformation)
 
     pool.close()
     pool.join()
@@ -288,15 +297,46 @@ def eStep(pDiction, pi2, cpu_count, information):
     return outputQ
 
 
+def processMStepChunk(chunk):
+    global information
+    global pi
+
+    newPi = [0.0 for col in range(len(pi))]
+
+    for i in range(len(chunk)):
+        index = information[chunk[i][0]][3]
+        newPi[index] += chunk[i][1]
+
+    return newPi
+
+
 # Runs the maximization step of the EM algorithm used.
 # This step essentially calculates new pi values from the results of the
 # estimation step. These pi value are then used in the next iteration of
 # the algorithm to determine relative abundances
-def mStep(pi2, outputQ):
-    global totalNumberOfReads, information, totalGenomeSizes
-    newPi = [0.0 for col in range(len(pi2))]
+def mStep(pi2, outputQ, cpu_count):
+    global totalNumberOfReads
+    pool = mp.Pool(cpu_count)
 
-    tNR = 0
+    iterInfo = []
+    while not outputQ.empty():
+        read = outputQ.get()
+        for x in read:
+            reduce(append_list, read[x], iterInfo)
+
+    chunkSize = math.ceil(len(iterInfo) / (cpu_count))
+
+    chunks = [iterInfo[x:x + chunkSize] for x in range(0, len(iterInfo), chunkSize)]
+
+    proc = pool.map(processMStepChunk, chunks)
+
+    pool.close()
+    pool.join()
+
+    sumPi = [0.0 for col in range(len(pi2))]
+
+    for i in proc:
+        sumPi = [x + y for x, y in zip(i, sumPi)]
 
     indexLength = {}
     for x in information:
@@ -305,23 +345,10 @@ def mStep(pi2, outputQ):
         index = list[3]
         indexLength[index] = float(length)
 
-    while not outputQ.empty():
-        read = outputQ.get()
-        tNR += 1
-        for i in read:
-            zijs = read[i]
-            for x in zijs:
-                genomeID = x[0]
-                z = x[1]
-                index = information[genomeID][3]
-                newPi[index] += z
+    for j in range(len(sumPi)):
+        sumPi[j] = sumPi[j] / (totalNumberOfReads * (indexLength[j] / totalGenomeSizes))
 
-    for j in range(len(pi2)):
-        newPi[j] = totalGenomeSizes * (newPi[j] / (tNR * indexLength[j]))
-
-    # newPi = standardizeVector(newPi)
-
-    return newPi
+    return sumPi
 
 
 # This function writes the results to a CSV file.
@@ -363,6 +390,7 @@ def outputCSV(information, pi):
 # Compare each list and determine if the differences in value as small enough
 # between iterations to accept result
 def compareLists(old, new, acceptance):
+    global logfile
     diff = []
     accept = True
 
@@ -371,18 +399,23 @@ def compareLists(old, new, acceptance):
     for i in diff:
         if i > acceptance:
             accept = False
+    logfile.write(str(old) + '\n')
+    logfile.write(str(new) + '\n')
+    logfile.write(str(diff) + '\n')
     return accept
 
 # Main Function
 if __name__ == '__main__':
     # Parse command line arguments to ensure correct process occurs
-    #parseCommandLineArguments()
+    parseCommandLineArguments()
     if verbose:
         print("\nEMAL 0.2b \n")
+        print("Number of Threads: " + str(numberOfThreads))
+        print("Acceptance Value: " + str(acceptanceValue))
 
         # Grab all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
-        #getBlastFileList(BLASTFileDir)
+        getBlastFileList(BLASTFileDir)
         print(str(len(BLASTFileArray)) + " files found to process:")
         for x in BLASTFileArray:
             print(x)
@@ -411,18 +444,22 @@ if __name__ == '__main__':
 
         oldPi = pi
         outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        newPi = mStep(pi, outputQ)
+        newPi = mStep(pi, outputQ, numberOfThreads)
 
         count += 1
+        logfile.write(str(count) + ' Cycles completed\n')
         accept = compareLists(oldPi, newPi, acceptanceValue)
 
         while accept == False:
             oldPi = newPi
             outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-            newPi = mStep(newPi, outputQ)
+            newPi = mStep(newPi, outputQ, numberOfThreads)
             count += 1
+            logfile.write(str(count) + ' Cycles completed\n')
             accept = compareLists(oldPi, newPi, acceptanceValue)
-            print(str(count) + 'Cycles completed')
+            print(str(count) + ' Cycles completed')
+            if count > 50:
+                accept = True
 
         newPi = standardizeVector(newPi)
         end = time.time()  # Grab the end time
@@ -450,17 +487,16 @@ if __name__ == '__main__':
 
         oldPi = pi
         outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        newPi = mStep(pi, outputQ)
+        newPi = mStep(pi, outputQ, numberOfThreads)
 
         accept = compareLists(oldPi, newPi, acceptanceValue)
         while accept == False:
             oldPi = newPi
             outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-            newPi = mStep(newPi, outputQ)
+            newPi = mStep(newPi, outputQ, numberOfThreads)
             accept = compareLists(oldPi, newPi, acceptanceValue)
 
-            outputQ.queue.clear()
-
         newPi = standardizeVector(newPi)
+
         outputCSV(information, newPi)
         print("Exiting...")

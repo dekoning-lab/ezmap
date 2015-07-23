@@ -5,7 +5,7 @@ import time
 
 allInformation = {}
 fileName = "/hyperion/work/patrick/quakeDataProcessing/EMAL/new.xml"
-SRRFileDirPath = "/hyperion/work/patrick/quakeData/BLASTResults/"
+SRRFileDirPath = "/hyperion/work/patrick/quakeData/BLASTResults/fasta/"
 outputFile = open('new.csv', 'w+')
 
 MPTList = []
@@ -35,11 +35,11 @@ for x in MPTList:
         os.mkdir(SRRFileDirPath+'MPT'+str(x))
 
 for file in os.listdir(SRRFileDirPath):
-    if file.endswith('.txt'):
-        filename = file.strip('.txt')
+    if file.endswith('.fasta'):
+        filename = file.strip('.fasta')
 
         src = SRRFileDirPath+file
-        dst = SRRFileDirPath+'MPT'+str(allInformation[filename])+'/'+filename+'.tblat'
+        dst = SRRFileDirPath+'MPT'+str(allInformation[filename])+'/'+filename+'.fasta'
 
         os.rename(src,dst)
         print('Moved '+src+' to '+dst)
