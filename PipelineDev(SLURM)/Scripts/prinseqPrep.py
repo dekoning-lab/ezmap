@@ -60,7 +60,11 @@ def processAllFiles(numOfFiles, projDir, configOptions):
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
 
+    jobIDS = []
+    for x in range(numOfFiles):
+        jobIDS.append(int(outs) + x)
     if configOptions['slurm-test-only'] == 'yes':
-        outs = '123456'
-    lastJobID = int(outs) + numOfFiles - 1
-    return lastJobID
+        jobIDS = [123456]
+
+    return jobIDS
+
