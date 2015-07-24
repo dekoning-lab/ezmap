@@ -4,7 +4,7 @@ import subprocess
 import os
 import Scripts.slurmScript as slurmScript
 
-
+# Generates bash script to launch all required jobs within job manager
 def generateSLURMScript(dataSets, projdir, configOptions):
     print('Setting up jobs for Step 1...')
 
@@ -52,7 +52,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '\n'])
     script.close()
 
-
+# Launch job to run within job manager
 def processAllFiles(numOfFiles, projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')
 

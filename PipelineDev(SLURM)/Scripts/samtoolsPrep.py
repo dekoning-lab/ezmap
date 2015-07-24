@@ -4,7 +4,7 @@ import subprocess
 import os
 import Scripts.slurmScript as slurmScript
 
-
+# Generates bash script to launch all required jobs within job manager
 def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     print('Setting up jobs for Step 3...')
 

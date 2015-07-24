@@ -3,7 +3,7 @@ __author__ = 'patrickczeczko'
 import os, subprocess
 import Scripts.slurmScript as slurmScript
 
-#SRR1024804
+# Generates bash script to launch all required jobs within job manager
 def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
 
@@ -49,6 +49,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
                        'srun $COMMAND'])
     script.close()
 
+# Launch job to run within job manager
 def processAllFiles(projDir, numOfFiles, configOptions):
     print('Starting step 2 jobs...')
     proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '2-HumanMapping/bowtie2Script.sh'],
