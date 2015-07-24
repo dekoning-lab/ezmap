@@ -52,8 +52,13 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '\n'])
 
 
-def processAllFiles(numOfFiles, projDir, configOptions):
+def processAllFiles(numOfFiles, projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')
+
+    for x in dataSets:
+        file = open(projDir + dataSets[x].prinseqOutputName + '.fastq', 'w+')
+        file.close()
+
     proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
                             stdout=subprocess.PIPE)
 
@@ -67,4 +72,3 @@ def processAllFiles(numOfFiles, projDir, configOptions):
         jobIDS = [123456]
 
     return jobIDS
-
