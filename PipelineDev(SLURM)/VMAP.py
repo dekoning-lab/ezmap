@@ -14,6 +14,7 @@ import Scripts.configOptions as config
 import Scripts.fileManager as fileman
 import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
+import Scripts.samtoolsPrep as samtools
 
 # Main Function
 if __name__ == "__main__":
@@ -43,7 +44,11 @@ if __name__ == "__main__":
     prinseq.generateSLURMScript(origFiles, projdir, configOptions)
     prinseqJobIDS = prinseq.processAllFiles(len(origFiles), projdir, configOptions)
 
+    # Generate Job script for step 2 and run all jobs
     bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, allArgs['maxThreads'], prinseqJobIDS)
-    bowtie2.processAllFiles(projdir,len(origFiles),configOptions)
+    bowtie2JobIDS = bowtie2.processAllFiles(projdir, len(origFiles), configOptions)
+
+    # Generate Job script for step 3 and run all jobs
+    samtools.generateSLURMScript(origFiles, projdir, configOptions, bowtie2JobIDS)
 
     print('EXITING...')
