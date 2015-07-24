@@ -50,6 +50,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '-out_bad null '
                        '-log '
                        '\n'])
+    script.close()
 
 
 def processAllFiles(numOfFiles, projDir, configOptions, dataSets):

@@ -19,5 +19,3 @@ def getSBATCHSettings(script, step, cwd, configOptions):
         script.write('#SBATCH --share\n')
     if configOptions['slurm-test-only'] == 'yes':
         script.write('#SBATCH --test-only\n')
-
-

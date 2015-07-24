@@ -22,7 +22,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
     for x in dataSets:
         filelist += '' + dataSets[x].prinseqOutputName + ' '
         fileOutputList += '' + dataSets[x].bowtie2OutputName + ' '
-        origFilePath = dataSets[x].origFilePath + '/'
+        origFilePath = dataSets[x].projDirectory + '/'
 
     IDList = ''
     for i in prinseqJobIDS:
@@ -47,7 +47,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
                              '-U ' + projdir + '1-Cleaning/${FILENAME}.fastq '
                                                '-S ' + projdir + '2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
                        'srun $COMMAND'])
-
+    script.close()
 
 def processAllFiles(projDir, numOfFiles, configOptions):
     print('Starting step 2 jobs...')

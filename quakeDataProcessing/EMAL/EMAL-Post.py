@@ -68,7 +68,7 @@ def grabEntrezRecord(TaxID):
 def processOneLine(line, outputQ):
     parse = line.split(',')
     TaxID = parse[1]
-
+    print(TaxID)
     lineage, species = grabEntrezRecord(TaxID)
 
     noRank = False
@@ -120,12 +120,12 @@ def processCSV(file):
     inputFile = open(file, 'r')
     for i, line in enumerate(inputFile):
         if i != 0:
-            # processOneLine(line,outputQ)
-            proc = pool.apply(processOneLine, args=[line, outputQ])
-            results.append(proc)
+            processOneLine(line, outputQ)
+            # proc = pool.apply(processOneLine, args=[line, outputQ])
+            # results.append(proc)
 
-    pool.close()
-    pool.join()
+    # pool.close()
+    # pool.join()
     count = 0
 
     while not outputQ.empty():
@@ -138,7 +138,6 @@ def processCSV(file):
             GRATot = GRA + GRA2
             dataDic[TaxID][0] = GRATot
 
-            #print(TaxID,type(GRA),type(GRA2),GRATot)
         else:
             dataDic[info[0]] = info[1]
 
@@ -164,5 +163,5 @@ if __name__ == '__main__':
     print("Reading in information...")
     processCSV(inputFile)
     print('Creating new output file')
-    createNewCSV(dataDic, outputDir+outputFileName)
+    createNewCSV(dataDic, outputDir + outputFileName)
     print('New CSV created')
