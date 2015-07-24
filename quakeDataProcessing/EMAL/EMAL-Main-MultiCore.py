@@ -129,7 +129,6 @@ def initializePiVector(fileList, totalNumberOfReads):
     iterInfo = []
 
     for file in fileList:
-        print(file)
         iterInfo.append([file, outputQ])
 
     proc = pool.map_async(processOnefile, iterInfo)
