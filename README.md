@@ -1,8 +1,9 @@
-# viral-metagen
+# Viral Metagenomics Abundance Pipleine
 NGS pipeline for viral metagenomics analysis
 
-#Using on SLURM
-prinseqBatchScript.sbacth needs to be run which will grab all the different FASTQ files and then pass that array fo files to prinseqIndividualScript.sh to run all files through prinseq
+## Parameters
+
+All parameters can be changed within the param.config file
 
 Default PRINSEQ parameters:
 
@@ -11,4 +12,3 @@ min_qual_score=33
 lc_method="dust"
 lc_threshold=7 
 
-Note: PRINSEQ parameters can be changes in prinseqIndvidualScript.sbatch
