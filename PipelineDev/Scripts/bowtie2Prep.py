@@ -8,8 +8,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
     print('Setting up jobs for Step 2...')
 
     cwd = os.getcwd()
-    # cwd = cwd.replace('(', '\(')
-    # cwd = cwd.replace(')', '\)')
+
 
     os.environ["BOWTIE2_INDEXES"] = cwd + '/tools/BOWTIE2/'
 
@@ -28,7 +27,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
     for i in prinseqJobIDS:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterok:' + IDList[1:] + '\n')
+    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
 
     script.write('numCores=' + maxThreads + '\n\n')
 
@@ -50,8 +49,9 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
     script.close()
 
 # Launch job to run within job manager
-def processAllFiles(projDir, numOfFiles, configOptions):
+def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 2 jobs...')
+    numOfFiles = len(dataSets)
     proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '2-HumanMapping/bowtie2Script.sh'],
                             stdout=subprocess.PIPE)
 

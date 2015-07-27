@@ -9,8 +9,6 @@ def generateSLURMScript(dataSets, projdir, configOptions):
     print('Setting up jobs for Step 1...')
 
     cwd = os.getcwd()
-    cwd = cwd.replace('(', '\(')
-    cwd = cwd.replace(')', '\)')
 
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
@@ -52,13 +50,11 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        '\n'])
     script.close()
 
-# Launch job to run within job manager
-def processAllFiles(numOfFiles, projDir, configOptions, dataSets):
-    print('Starting step 1 jobs...')
 
-    for x in dataSets:
-        file = open(projDir + dataSets[x].prinseqOutputName + '.fastq', 'w+')
-        file.close()
+# Launch job to run within job manager
+def processAllFiles(projDir, configOptions, dataSets):
+    print('Starting step 1 jobs...')
+    numOfFiles = len(dataSets)
 
     proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
                             stdout=subprocess.PIPE)
