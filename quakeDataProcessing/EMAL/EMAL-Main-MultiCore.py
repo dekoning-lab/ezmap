@@ -8,8 +8,8 @@ import time, math
 from functools import reduce
 
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
-# BLASTFileArray = [BLASTFileDir + 'newDataNoDuplicateMappings.tblat']
-BLASTFileArray = []
+BLASTFileArray = [BLASTFileDir + 'newDataNoDuplicateMappings.tblat']
+# BLASTFileArray = []
 
 outputFileName = "Validation6KNoDuplicatesEqualGenomeSize.csv"
 
@@ -20,6 +20,7 @@ pi = []
 pMatrix = []
 totalNumberOfReads = 0
 totalGenomeSizes = 0
+genomeTaxon = {}
 
 # Command Line Options
 numberOfThreads = 4
@@ -71,20 +72,37 @@ def getBlastFileList(fileDir):
         BLASTFileArray.append(fileDir + file)
 
 
-# Gather important initial information from the read files
-# - NCBI Nucleotide IDs
-# - Total Number of Reads within all files
-def processBLASTFiles(fileList):
+def gatherInformation(fileList):
+    global totalGenomeSizes
     totalNumberOfReads = 0
+    genomeTaxon = {}
+
+    information = {}
+
+    inputFile = open("combinedGenomeData.csv", "r")
+    for line in inputFile:
+        genomeID, taxonID, genomeLen = line.split(',')
+
+        genomeTaxon[int(genomeID)] = [int(taxonID), int(genomeLen)]
+
     for file in fileList:
         with open(file, 'r') as inFile:
             for line in inFile:
-                linePar = line.split('\t')
-                genomeID = linePar[1].split('|')[1]
-                list = [genomeID, 0, 0, 0, 0]
-                information[genomeID] = list
                 totalNumberOfReads += 1
-    return information, totalNumberOfReads
+
+                linePar = line.split('\t')
+                genomeID = int(linePar[1].split('|')[1])
+                taxonID = genomeTaxon[genomeID][0]
+                genomeLen = int(genomeTaxon[genomeID][1])
+                totalGenomeSizes += genomeLen
+
+                if taxonID in information:
+                    oldGenome = information[taxonID][2]
+                    information[taxonID][2] = genomeLen + oldGenome
+                else:
+                    information[taxonID] = [taxonID, genomeID, genomeLen, 0]
+
+    return information, genomeTaxon, totalNumberOfReads
 
 
 # Create a list to be used to store the pi values
@@ -95,7 +113,7 @@ def makePiVectorIndicies(information):
     list.sort()
     for x in list:
         information[x][3] = list.index(x)
-    vector = [0] * len(list)
+    vector = [0.0 for col in range(len(list))]
     return information, vector
 
 
@@ -104,23 +122,24 @@ def makePiVectorIndicies(information):
 def processOnefile(info):
     file = info[0]
     outputQ = info[1]
+    genomeTaxon = info[2]
 
     inputFile = open(file, 'r')
     for line in inputFile:
         linePar = line.split('\t')
-        genomeID = linePar[1].split('|')[1]
+        genomeID = int(linePar[1].split('|')[1])
+        taxonID = genomeTaxon[genomeID][0]
         try:
-            piIndex = information[str(genomeID)][3]
+            piIndex = information[taxonID][3]
             pi[piIndex] += 1
         except:
-            # print(',')
             print('Missing information for Id: ' + genomeID)
     outputQ.put(pi)
 
 
 # Goes through each file in the directory and reads the number of blast hits in each file
 # Each blast hit adds 1 to the corresponding pi matrix location
-def initializePiVector(fileList, totalNumberOfReads):
+def initializePiVector(fileList, genomeTaxon):
     global numberOfThreads
     pool = mp.Pool(numberOfThreads)
     m = mp.Manager()
@@ -129,7 +148,7 @@ def initializePiVector(fileList, totalNumberOfReads):
     iterInfo = []
 
     for file in fileList:
-        iterInfo.append([file, outputQ])
+        iterInfo.append([file, outputQ, genomeTaxon])
 
     proc = pool.map_async(processOnefile, iterInfo)
 
@@ -141,7 +160,7 @@ def initializePiVector(fileList, totalNumberOfReads):
         for i in range(len(piRow)):
             pi[i] += piRow[i]
 
-    return pi, totalNumberOfReads
+    return pi
 
 
 # Standardizes a list of values
@@ -154,31 +173,10 @@ def standardizeVector(vector):
     return vector
 
 
-# Create a dictionary that contains relevant information about each sample
-# Each value within the dictionary is a list containing the following information
-#   0: NCBI Nucleotide ID
-#   1: NCBI Taxonomy ID
-#   2: Length of Corresponding Genome
-#   3: Index in pi array
-def initializeInformation(information):
-    global totalGenomeSizes
-
-    inputFile = open("combinedGenomeData.csv", "r")
-    for line in inputFile:
-        genomeID, taxonID, genomeLen = line.split(',')
-
-        if genomeID in information:
-            list = information[genomeID]
-            list[1] = taxonID
-            list[2] = genomeLen
-            totalGenomeSizes += int(genomeLen)
-            information[genomeID] = list
-
-
 # Initializes a dictionary filled with Maximum Likelihood Estimates (MLE)
 #   - Key: readID (Identifier found in 1st Column of Tabular blastn output)
 #   - Values: [[NCBI NucleotideID, MLE]...]
-def initializePDictionary(numOfGenomes, numOfReads, fileList, information):
+def initializePDictionary(fileList, information, genomeTaxon):
     pDiction = {}
 
     for file in fileList:
@@ -186,17 +184,18 @@ def initializePDictionary(numOfGenomes, numOfReads, fileList, information):
         for i, line in enumerate(oFile):
             parse = line.split('\t')
             readID = parse[0]
-            genomeID = parse[1].split('|')[1]
+            genomeID = int(parse[1].split('|')[1])
+            taxonID = genomeTaxon[genomeID][0]
             try:
-                genomeLength = int(information[genomeID][2])
+                genomeLength = information[taxonID][2]
                 if not readID in pDiction:
-                    pDiction[readID] = [[genomeID, (1 / genomeLength)]]
+                    pDiction[readID] = [[taxonID, (1 / genomeLength)]]
                 else:
                     list = pDiction[readID]
-                    list.append([genomeID, (1 / genomeLength)])
+                    list.append([taxonID, (1 / genomeLength)])
                     pDiction[readID] = list
             except:
-                print('Missing Genome Information :' + str(genomeID))
+                print('Missing Genome Information :' + str(taxonID))
 
     return pDiction
 
@@ -230,17 +229,17 @@ def calculateZRow(info):
     zValues = {}
 
     for loci in mappedRead:
-        genomeID = loci[0]
-        genomeIndex = information[genomeID][3]
+        taxonID = loci[0]
+        piIndex = information[taxonID][3]
         pValue = loci[1]
-        piValue = pi2[genomeIndex]
+        piValue = pi2[piIndex]
         z = (pValue * piValue)
 
         if not readID in zValues:
-            zValues[readID] = [[genomeID, z]]
+            zValues[readID] = [[taxonID, z]]
         else:
             list = zValues[readID]
-            list.append([genomeID, z])
+            list.append([taxonID, z])
             zValues[readID] = list
 
     sumValue = 0
@@ -263,7 +262,7 @@ def calculateZRow(info):
             duplicates[zValueArray[i][0]] = zValueArray[i][1]
 
     for i in duplicates:
-        finalArray.append([str(i), duplicates[i]])
+        finalArray.append([int(i), duplicates[i]])
 
     zValues[readID] = finalArray
 
@@ -303,7 +302,8 @@ def processMStepChunk(chunk):
     newPi = [0.0 for col in range(len(pi))]
 
     for i in range(len(chunk)):
-        index = information[chunk[i][0]][3]
+        taxonID = chunk[i][0]
+        index = information[taxonID][3]
         newPi[index] += chunk[i][1]
 
     return newPi
@@ -372,8 +372,8 @@ def outputCSV(information, pi):
 
     for x in information:
         index = information[x][3] + 1
-        genomeIDs[index] = information[x][0]
-        taxonIDs[index] = information[x][1]
+        genomeIDs[index] = information[x][1]
+        taxonIDs[index] = information[x][0]
 
     csv = []
 
@@ -405,34 +405,31 @@ def compareLists(old, new, acceptance):
 
 # Main Function
 if __name__ == '__main__':
+    print("\nEMAL 0.2b \n")
     # Parse command line arguments to ensure correct process occurs
-    parseCommandLineArguments()
+    # parseCommandLineArguments()
     if verbose:
-        print("\nEMAL 0.2b \n")
         print("Number of Threads: " + str(numberOfThreads))
         print("Acceptance Value: " + str(acceptanceValue))
 
         # Grab all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
-        getBlastFileList(BLASTFileDir)
+        # getBlastFileList(BLASTFileDir)
         print(str(len(BLASTFileArray)) + " files found to process:")
         for x in BLASTFileArray:
             print(x)
 
         print("Preparing to run...")
-        information, totalNumberOfReads = processBLASTFiles(BLASTFileArray)
+        information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
 
         print("Starting run...")
         print("1. Calulating PiVector...")
         information, pi = makePiVectorIndicies(information)
-        pi, totalNumberOfReads = initializePiVector(BLASTFileArray, totalNumberOfReads)
+        pi = initializePiVector(BLASTFileArray, genomeTaxon)
         pi = standardizeVector(pi)
 
-        print("2.Gathering information...")
-        initializeInformation(information)
-
         print("3.Initialzing MLEs...")
-        pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
+        pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
         pDiction = standardizePDictionary(pDiction)
 
         print("4.Starting Abundance Calculation...")
@@ -446,6 +443,7 @@ if __name__ == '__main__':
         newPi = mStep(pi, outputQ, numberOfThreads)
 
         count += 1
+
         logfile.write(str(count) + ' Cycles completed\n')
         accept = compareLists(oldPi, newPi, acceptanceValue)
 
@@ -469,19 +467,15 @@ if __name__ == '__main__':
         outputCSV(information, newPi)
         print("Exiting...")
     else:
-        print("\nEMAL 0.1b\n")
-
         getBlastFileList(BLASTFileDir)
 
-        information, totalNumberOfReads = processBLASTFiles(BLASTFileArray)
+        information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
 
         information, pi = makePiVectorIndicies(information)
-        pi, totalNumberOfReads = initializePiVector(BLASTFileArray, totalNumberOfReads)
+        pi = initializePiVector(BLASTFileArray, genomeTaxon)
         pi = standardizeVector(pi)
 
-        initializeInformation(information)
-
-        pDiction = initializePDictionary(len(pi) + 1, totalNumberOfReads + 1, BLASTFileArray, information)
+        pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
         pDiction = standardizePDictionary(pDiction)
 
         oldPi = pi
