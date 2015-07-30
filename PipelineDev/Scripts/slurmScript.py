@@ -1,13 +1,13 @@
 __author__ = 'patrickczeczko'
 
 
-def getSBATCHSettings(script, step, cwd, configOptions):
+def getSBATCHSettings(script, step, dir, configOptions):
     script.writelines(['#!/bin/bash\n',
                        '#!/usr/bin/perl\n',
                        '#---------------------------------\n',
                        '# Mandatory settings\n',
                        '#SBATCH --job-name=VMAP-' + str(step) + '\n',
-                       '#SBATCH --workdir=' + cwd + '/\n',
+                       '#SBATCH --workdir=' + dir + '\n',
                        '#SBATCH --output=VMAP-' + str(step) + '-%j' + '.out\n',
                        '#SBATCH --error=VMAP-' + str(step) + '-%j' + '.err\n',
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',

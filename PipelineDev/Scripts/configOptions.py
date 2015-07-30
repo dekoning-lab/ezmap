@@ -4,7 +4,7 @@ import os
 
 
 def parseConfigOptions():
-    cwd = os.getcwd() + '/'
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     configFile = open(cwd + 'param.config', 'r')
 
     configOptions = {}

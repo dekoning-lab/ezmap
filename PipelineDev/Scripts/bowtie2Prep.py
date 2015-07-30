@@ -7,14 +7,13 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
 
-    cwd = os.getcwd()
-
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     os.environ["BOWTIE2_INDEXES"] = cwd + '/tools/BOWTIE2/'
 
     script = open(projdir + '2-HumanMapping/bowtie2Script.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 2, cwd, configOptions)
+    slurmScript.getSBATCHSettings(script, 2, projdir + '2-HumanMapping/', configOptions)
 
     filelist = ''
     fileOutputList = ''
@@ -42,11 +41,13 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
                        'echo "Input file: ${FILENAME}"\n',
-                       'COMMAND="'+cwd + '/tools/BOWTIE2/bowtie2-2.2.5/bowtie2 --sensitive -x hg19 '
-                             '-U ' + projdir + '1-Cleaning/${FILENAME}.fastq '
-                                               '-S ' + projdir + '2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
+                       'COMMAND="' + cwd + '/tools/BOWTIE2/bowtie2-2.2.5/bowtie2 --sensitive ' +
+                       '-x ' + cwd + '/tools/BOWTIE2/hg19/hg19 ' +
+                       '-U ' + projdir + '1-Cleaning/${FILENAME}.fastq ' +
+                       '-S ' + projdir + '2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
                        'srun $COMMAND'])
     script.close()
+
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):

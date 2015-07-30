@@ -8,11 +8,11 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     print('Setting up jobs for Step 3...')
 
-    cwd = os.getcwd()
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     script = open(projdir + '3-UnmappedCollection/samtoolsScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 3, cwd, configOptions)
+    slurmScript.getSBATCHSettings(script, 3, projdir + '3-UnmappedCollection/', configOptions)
 
     IDList = ''
     for i in bowtie2JobIDS:

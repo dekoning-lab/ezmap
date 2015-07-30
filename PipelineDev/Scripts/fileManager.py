@@ -19,6 +19,8 @@ def createSubFolders(projDir):
             os.mkdir(projDir + '/5-RelativeAbundanceEstimation/')
         if not os.path.exists(projDir + '/6-FinalResult/'):
             os.mkdir(projDir + '/6-FinalResult/')
+        if not os.path.exists(projDir + '/6-FinalResult/information/'):
+            os.mkdir(projDir + '/6-FinalResult/information/')
         return True
     return False
 

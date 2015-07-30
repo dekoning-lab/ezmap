@@ -16,6 +16,18 @@ import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
 import Scripts.samtoolsPrep as samtools
 
+import Scripts.finalScript as final
+
+
+def outputFileList(files, projDir):
+    outputfile = open(projdir + '6-FinalResult/information/' + 'filelist.txt', 'w+')
+    outputfile.write('<table class="table table-striped table-bordered"><thead><tr><td>Filename</td></tr></thead>')
+
+    outputfile.write('<tbody>')
+    for x in files:
+        outputfile.write('<tr><td>' + files[x].origFileName + '</td></tr>')
+    outputfile.write('</tbody></table>')
+
 # Main Function
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline
@@ -51,4 +63,8 @@ if __name__ == "__main__":
     # Generate Job script for step 3 and run all jobs
     samtools.generateSLURMScript(origFiles, projdir, configOptions, bowtie2JobIDS)
     samtoolsJobIDS = samtools.processAllFiles(projdir, configOptions, origFiles)
+
+    outputFileList(origFiles, projdir)
+    final.collectPipelineResult(projdir, configOptions, samtoolsJobIDS)
+
     print('EXITING...')

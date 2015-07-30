@@ -8,11 +8,11 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions):
     print('Setting up jobs for Step 1...')
 
-    cwd = os.getcwd()
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 1, cwd, configOptions)
+    slurmScript.getSBATCHSettings(script, 1, projdir + '1-Cleaning/', configOptions)
 
     script.write('## PRINSEQ PARAMETERS\n')
     script.writelines(['out_format=3\n',
