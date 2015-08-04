@@ -15,6 +15,7 @@ import Scripts.fileManager as fileman
 import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
 import Scripts.samtoolsPrep as samtools
+import Scripts.blastprep as blast
 
 import Scripts.finalScript as final
 
@@ -63,6 +64,10 @@ if __name__ == "__main__":
     # Generate Job script for step 3 and run all jobs
     samtools.generateSLURMScript(origFiles, projdir, configOptions, bowtie2JobIDS)
     samtoolsJobIDS = samtools.processAllFiles(projdir, configOptions, origFiles)
+
+    # Generate Job script for step 4 and run all jobs
+    blast.generateSLURMScript(origFiles, projdir, configOptions, samtoolsJobIDS)
+    blastJobIDS = blast.processAllFiles(projdir, configOptions, origFiles)
 
     outputFileList(origFiles, projdir)
     final.collectPipelineResult(projdir, configOptions, samtoolsJobIDS)
