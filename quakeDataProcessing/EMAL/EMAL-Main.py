@@ -7,7 +7,8 @@ import multiprocessing as mp
 import time, math
 from functools import reduce
 
-BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
+# Global information
+BLASTFileDir = ""
 BLASTFileArray = []
 
 outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
@@ -21,8 +22,6 @@ pMatrix = []
 totalNumberOfReads = 0
 totalGenomeSizes = 0
 genomeTaxon = {}
-
-missing = []
 
 # Command Line Options
 numberOfThreads = 4
@@ -74,13 +73,15 @@ def getBlastFileList(fileDir):
         BLASTFileArray.append(fileDir + file)
 
 
+# Gathers initial information about genomes to be evaluated
 def gatherInformation(fileList):
-    global totalGenomeSizes, missing
+    global totalGenomeSizes
     totalNumberOfReads = 0
     genomeTaxon = {}
 
     information = {}
 
+    # Create Genbank ID and Taxonomy ID associations
     inputFile = open("combinedGenomeData.csv", "r")
     for line in inputFile:
         genomeID, taxonID, genomeLen = line.split(',')
@@ -103,9 +104,9 @@ def gatherInformation(fileList):
                     else:
                         information[taxonID] = [taxonID, genomeID, genomeLen, 0]
                 except:
-                    missing.append(genomeID)
+                    missing = genomeID
+
     logfile.write("Total number of reads that match taxon information: " + str(totalNumberOfReads) + '\n')
-    logfile.write(str(list(set(missing))))
 
     return information, genomeTaxon, totalNumberOfReads
 
@@ -148,7 +149,7 @@ def processOnefile(info):
 # Goes through each file in the directory and reads the number of blast hits in each file
 # Each blast hit adds 1 to the corresponding pi matrix location
 def initializePiVector(fileList, genomeTaxon):
-    global numberOfThreads, missing
+    global numberOfThreads
     pool = mp.Pool(numberOfThreads)
     m = mp.Manager()
     outputQ = m.Queue()
@@ -277,11 +278,6 @@ def calculateZRow(info):
     outputQ.put(zValues)
 
 
-def append_list(l, el):
-    l.append(el)
-    return l
-
-
 # Runs the estimation step of the EM algorithm used.
 # The process has been broken down so that each read can be processed by a
 # single thread reducing the amount of time needed to achieve final viral
@@ -315,6 +311,11 @@ def processMStepChunk(chunk):
         newPi[index] += chunk[i][1]
 
     return newPi
+
+
+def append_list(l, el):
+    l.append(el)
+    return l
 
 
 # Runs the maximization step of the EM algorithm used.

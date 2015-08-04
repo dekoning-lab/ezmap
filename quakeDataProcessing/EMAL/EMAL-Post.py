@@ -55,7 +55,36 @@ def parseCommandLineArguments():
         if not outputDir.endswith('/'):
             outputDir += '/'
 
+# Read in information from EMAL-Main output CSV
+def processCSV(file):
+    global numberOfThreads
 
+    m = mp.Manager()
+    outputQ = m.Queue()
+    results = []
+
+    inputFile = open(file, 'r')
+    for i, line in enumerate(inputFile):
+        if i != 0:
+            processOneLine(line, outputQ)
+
+    count = 0
+
+    while not outputQ.empty():
+        count += 1
+        info = outputQ.get()
+        if info[0] in dataDic:
+            TaxID = info[0]
+            GRA = float(info[1][0])
+            GRA2 = float(dataDic[TaxID][0])
+            GRATot = GRA + GRA2
+            dataDic[TaxID][0] = GRATot
+
+        else:
+            dataDic[info[0]] = info[1]
+
+
+# Retreive record from NCBI Entrez Database
 def grabEntrezRecord(TaxID):
     Entrez.email = "pkczeczk@ucalgary.ca"
     handle = Entrez.efetch(db='taxonomy', id=TaxID)
@@ -65,6 +94,7 @@ def grabEntrezRecord(TaxID):
     return record[0]['LineageEx'], record[0]['ScientificName']
 
 
+# Gather require information from Entrez Record
 def processOneLine(line, outputQ):
     parse = line.split(',')
     TaxID = parse[1]
@@ -109,39 +139,7 @@ def processOneLine(line, outputQ):
 
     outputQ.put([TaxID, [parse[2], species, superKingdom, Q1, Order, Family, SubFamily, Genus]])
 
-
-def processCSV(file):
-    global numberOfThreads
-    pool = mp.Pool(numberOfThreads)
-    m = mp.Manager()
-    outputQ = m.Queue()
-    results = []
-
-    inputFile = open(file, 'r')
-    for i, line in enumerate(inputFile):
-        if i != 0:
-            processOneLine(line, outputQ)
-            # proc = pool.apply(processOneLine, args=[line, outputQ])
-            # results.append(proc)
-
-    # pool.close()
-    # pool.join()
-    count = 0
-
-    while not outputQ.empty():
-        count += 1
-        info = outputQ.get()
-        if info[0] in dataDic:
-            TaxID = info[0]
-            GRA = float(info[1][0])
-            GRA2 = float(dataDic[TaxID][0])
-            GRATot = GRA + GRA2
-            dataDic[TaxID][0] = GRATot
-
-        else:
-            dataDic[info[0]] = info[1]
-
-
+# Output all gathered information into a final CSV file
 def createNewCSV(dataDic, outputFilename):
     with open(outputFilename, 'w+', newline='') as csvFile:
         writer = csv.writer(csvFile, delimiter=',')
