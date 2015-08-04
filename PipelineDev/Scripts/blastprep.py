@@ -61,3 +61,21 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
                  configOptions['blastn-min-alignment-length'] +
                  ' ${FILENAMEOUTPUT}"')
 
+
+# Launch job to run within job manager
+def processAllFiles(projDir, configOptions, dataSets):
+    print('Queueing step 4...')
+    numOfFiles = len(dataSets)
+    proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '4-OrganismMapping/blastnScript.sh'],
+                            stdout=subprocess.PIPE)
+
+    outs, errs = proc.communicate()
+    outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
+
+    jobIDS = []
+    for x in range(numOfFiles):
+        jobIDS.append(int(outs) + x)
+    if configOptions['slurm-test-only'] == 'yes':
+        jobIDS = []
+
+    return jobIDS
