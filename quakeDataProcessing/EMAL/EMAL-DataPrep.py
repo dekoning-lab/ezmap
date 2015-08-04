@@ -1,7 +1,7 @@
 __author__ = 'patrickczeczko'
 
 import multiprocessing as mp
-import os
+import os, sys
 
 allInformation = {}
 numOfDataChunks = 0
@@ -29,11 +29,12 @@ def getNucleotideIDs(fileName):
             else:
                 genomeLength += len(line) - 1
 
+
 # Process a section in the file to obtain a NCBI Taxonomy ID corresponding to the relative Genbank IDs
 def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueue):
     outputArray = []
 
-    print('Starting work on data partition '+str(currentChunk)+' of '+str(numOfDataChunks))
+    print('Starting work on data partition ' + str(currentChunk) + ' of ' + str(numOfDataChunks))
 
     if start == 0 and stop == 0:
         with open(fileName) as input_file:
@@ -69,7 +70,7 @@ def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueu
 
 
 # Reads in the file information and parses the taxonomy file in sections so that it can be processed in parallel
-def readInTaxonInformation(fileName,cpu_count,currentChunk):
+def readInTaxonInformation(fileName, cpu_count, currentChunk):
     # get file size and set chuck size
     filesize = os.path.getsize(fileName)
     split_size = 100 * 1024 * 1024
@@ -86,7 +87,7 @@ def readInTaxonInformation(fileName,cpu_count,currentChunk):
         with open(fileName, 'r') as fh:
             # for every chunk in the file...
             numOfDataChunks = (filesize // split_size)
-            print(str(numOfDataChunks)+' partitions of data to process')
+            print(str(numOfDataChunks) + ' partitions of data to process')
 
             for chunk in range(filesize // split_size):
 
@@ -105,14 +106,13 @@ def readInTaxonInformation(fileName,cpu_count,currentChunk):
                 end = fh.tell()
 
                 # add chunk to process pool, save reference to get results
-                proc = pool.apply_async(processfile, args=[fileName, cursor, end, currentChunk, numOfDataChunks, outputQ])
-                currentChunk +=1
+                proc = pool.apply_async(processfile,
+                                        args=[fileName, cursor, end, currentChunk, numOfDataChunks, outputQ])
+                currentChunk += 1
                 results.append(proc)
 
                 # setup next chunk
                 cursor = end
-                #if currentChunk == 4:
-                    #break
 
         # close and wait for pool to finish
         pool.close()
@@ -123,13 +123,18 @@ def readInTaxonInformation(fileName,cpu_count,currentChunk):
             for x in array:
                 outputFile.write(x)
 
+
 if __name__ == '__main__':
+    blastGenomeDBPath = sys.argv[1]
+    gitaxiddmpPath = sys.argv[2]
+    maxThreads = sys.argv[3]
+
     outputInfo = []
 
-    print('Determining Genebank ID and Caluclating Genome Langths.....')
-    getNucleotideIDs('/Users/patrickczeczko/Desktop/viral.1.1.genomic.fna')
+    print('Determining Genebank ID and Caluclating Genome Lengths.....')
+    getNucleotideIDs(blastGenomeDBPath)
 
     print('Gather relavent taxon IDs.....')
-    readInTaxonInformation('/Users/patrickczeczko/Desktop/gi_taxid_nucl.dmp', 4, currentChunk)
+    readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
 
     print('Information has been written to file... exiting')

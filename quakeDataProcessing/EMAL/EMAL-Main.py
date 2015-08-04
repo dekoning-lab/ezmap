@@ -1,19 +1,19 @@
 __author__ = 'patrickczeczko'
 
 # Required Modules
-import os
+import os, random, string
 import argparse
 import multiprocessing as mp
 import time, math
 from functools import reduce
 
 BLASTFileDir = "/Users/patrickczeczko/GithubRepos/viral-metagen/quakeDataProcessing/EMAL-Validation/"
-BLASTFileArray = [BLASTFileDir + 'newDataNoDuplicateMappings.tblat']
-# BLASTFileArray = []
+BLASTFileArray = []
 
-outputFileName = "Validation6KNoDuplicatesEqualGenomeSize.csv"
+outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
 
-logfile = open('Log.txt', 'w+')
+logfile = open('EMALLog-' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt',
+               'w+')
 
 information = {}
 pi = []
@@ -22,10 +22,12 @@ totalNumberOfReads = 0
 totalGenomeSizes = 0
 genomeTaxon = {}
 
+missing = []
+
 # Command Line Options
 numberOfThreads = 4
 acceptanceValue = 0.0001
-verbose = True
+verbose = False
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -73,7 +75,7 @@ def getBlastFileList(fileDir):
 
 
 def gatherInformation(fileList):
-    global totalGenomeSizes
+    global totalGenomeSizes, missing
     totalNumberOfReads = 0
     genomeTaxon = {}
 
@@ -88,19 +90,22 @@ def gatherInformation(fileList):
     for file in fileList:
         with open(file, 'r') as inFile:
             for line in inFile:
-                totalNumberOfReads += 1
-
                 linePar = line.split('\t')
                 genomeID = int(linePar[1].split('|')[1])
-                taxonID = genomeTaxon[genomeID][0]
-                genomeLen = int(genomeTaxon[genomeID][1])
-                totalGenomeSizes += genomeLen
-
-                if taxonID in information:
-                    oldGenome = information[taxonID][2]
-                    information[taxonID][2] = genomeLen + oldGenome
-                else:
-                    information[taxonID] = [taxonID, genomeID, genomeLen, 0]
+                try:
+                    taxonID = genomeTaxon[genomeID][0]
+                    genomeLen = int(genomeTaxon[genomeID][1])
+                    totalGenomeSizes += genomeLen
+                    totalNumberOfReads += 1
+                    if taxonID in information:
+                        oldGenome = information[taxonID][2]
+                        information[taxonID][2] = genomeLen + oldGenome
+                    else:
+                        information[taxonID] = [taxonID, genomeID, genomeLen, 0]
+                except:
+                    missing.append(genomeID)
+    logfile.write("Total number of reads that match taxon information: " + str(totalNumberOfReads) + '\n')
+    logfile.write(str(list(set(missing))))
 
     return information, genomeTaxon, totalNumberOfReads
 
@@ -120,6 +125,8 @@ def makePiVectorIndicies(information):
 # Processes one file to initalize the Pi vector
 # Returns a list which is placed into the output queue
 def processOnefile(info):
+    piRow = [0.0 for col in range(len(pi))]
+
     file = info[0]
     outputQ = info[1]
     genomeTaxon = info[2]
@@ -128,19 +135,20 @@ def processOnefile(info):
     for line in inputFile:
         linePar = line.split('\t')
         genomeID = int(linePar[1].split('|')[1])
-        taxonID = genomeTaxon[genomeID][0]
         try:
+            taxonID = genomeTaxon[genomeID][0]
             piIndex = information[taxonID][3]
-            pi[piIndex] += 1
+            piRow[piIndex] += 1
         except:
-            print('Missing information for Id: ' + genomeID)
-    outputQ.put(pi)
+            num = genomeID
+
+    outputQ.put(piRow)
 
 
 # Goes through each file in the directory and reads the number of blast hits in each file
 # Each blast hit adds 1 to the corresponding pi matrix location
 def initializePiVector(fileList, genomeTaxon):
-    global numberOfThreads
+    global numberOfThreads, missing
     pool = mp.Pool(numberOfThreads)
     m = mp.Manager()
     outputQ = m.Queue()
@@ -150,7 +158,7 @@ def initializePiVector(fileList, genomeTaxon):
     for file in fileList:
         iterInfo.append([file, outputQ, genomeTaxon])
 
-    proc = pool.map_async(processOnefile, iterInfo)
+    proc = pool.map(processOnefile, iterInfo)
 
     pool.close()
     pool.join()
@@ -185,8 +193,8 @@ def initializePDictionary(fileList, information, genomeTaxon):
             parse = line.split('\t')
             readID = parse[0]
             genomeID = int(parse[1].split('|')[1])
-            taxonID = genomeTaxon[genomeID][0]
             try:
+                taxonID = genomeTaxon[genomeID][0]
                 genomeLength = information[taxonID][2]
                 if not readID in pDiction:
                     pDiction[readID] = [[taxonID, (1 / genomeLength)]]
@@ -195,7 +203,7 @@ def initializePDictionary(fileList, information, genomeTaxon):
                     list.append([taxonID, (1 / genomeLength)])
                     pDiction[readID] = list
             except:
-                print('Missing Genome Information :' + str(taxonID))
+                num = taxonID
 
     return pDiction
 
@@ -345,7 +353,7 @@ def mStep(pi2, outputQ, cpu_count):
         indexLength[index] = float(length)
 
     for j in range(len(sumPi)):
-        sumPi[j] = sumPi[j] / (totalNumberOfReads * (indexLength[j] / totalGenomeSizes))
+        sumPi[j] = sumPi[j] / (totalNumberOfReads)  # * (indexLength[j] / totalGenomeSizes))
 
     return sumPi
 
@@ -407,14 +415,14 @@ def compareLists(old, new, acceptance):
 if __name__ == '__main__':
     print("\nEMAL 0.2b \n")
     # Parse command line arguments to ensure correct process occurs
-    # parseCommandLineArguments()
+    parseCommandLineArguments()
     if verbose:
         print("Number of Threads: " + str(numberOfThreads))
         print("Acceptance Value: " + str(acceptanceValue))
 
         # Grab all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
-        # getBlastFileList(BLASTFileDir)
+        getBlastFileList(BLASTFileDir)
         print(str(len(BLASTFileArray)) + " files found to process:")
         for x in BLASTFileArray:
             print(x)
@@ -427,6 +435,7 @@ if __name__ == '__main__':
         information, pi = makePiVectorIndicies(information)
         pi = initializePiVector(BLASTFileArray, genomeTaxon)
         pi = standardizeVector(pi)
+        print(pi)
 
         print("3.Initialzing MLEs...")
         pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
@@ -455,8 +464,6 @@ if __name__ == '__main__':
             logfile.write(str(count) + ' Cycles completed\n')
             accept = compareLists(oldPi, newPi, acceptanceValue)
             print(str(count) + ' Cycles completed')
-            if count > 50:
-                accept = True
 
         newPi = standardizeVector(newPi)
         end = time.time()  # Grab the end time
