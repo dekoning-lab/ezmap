@@ -63,6 +63,6 @@ def processAllFiles(projDir, configOptions, dataSets):
     for x in range(numOfFiles):
         jobIDS.append(int(outs) + x)
     if configOptions['slurm-test-only'] == 'yes':
-        jobIDS = [123456]
+        jobIDS = []
 
     return jobIDS
