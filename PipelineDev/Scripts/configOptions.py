@@ -13,4 +13,5 @@ def parseConfigOptions():
             option = line.split('=')
             option[1] = option[1].replace('\n', '')
             configOptions[option[0][1:]] = option[1]
+
     return configOptions
