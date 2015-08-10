@@ -1,6 +1,7 @@
 __author__ = 'patrickczeczko'
 
-import sys, os
+import sys, os, csv
+from operator import itemgetter
 
 
 def getPRINSEQResults(fileDir):
@@ -22,27 +23,24 @@ def getPRINSEQResults(fileDir):
                     numGood = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
                 elif 'Bad sequences:' in line:
                     numBad = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
-            prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, numBad]
+
+            percentGood = format((float(numGood) / numReads) * 100, '.3f')
+            percentBad = format((float(numBad) / numReads) * 100, '.3f')
+            prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, percentGood, numBad, percentBad]
     return prinseqInfo
 
 
 def writePrinseqTableFile(dict, outfile):
-    output = open(outfile, 'w+')
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
 
-    output.write(
-        '<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td># Input Reads</td><td>Mean Seq. Reads</td>'
-        '<td># Good Reads</td><td># Bad Reads</td></tr></thead>')
+        writer.writerow(['Filename', '# Input Reads', 'Mean Read Length', '# Good Reads', '% Good Reads', '# Bad Reads',
+                         '% Bad Reads'])
 
-    output.write('<tbody>')
-    for x in dict:
-        output.write('<tr>' +
-                     '<td>' + str(dict[x][0]) + '</td>' +
-                     '<td>' + str(dict[x][1]) + '</td>' +
-                     '<td>' + str(dict[x][2]) + '</td>' +
-                     '<td>' + str(dict[x][3]) + '</td>' +
-                     '<td>' + str(dict[x][4]) + '</td>' +
-                     '</tr>')
-    output.write('</tbody></table>')
+        for x in dict:
+            writer.writerow(dict[x])
+        del writer
+        csvfile.close()
 
 
 def getBowtie2Results(fileDir):
@@ -72,27 +70,91 @@ def getBowtie2Results(fileDir):
 
 
 def writeBowtieTableFile(dict, outfile):
-    output = open(outfile, 'w+')
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
 
-    output.write(
-        '<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td># Reads</td><td># Reads Not Aligned</td>'
-        '<td># Reads Aligned Once</td><td># Reads Aligned Multiple</td></tr></thead>')
+        writer.writerow(
+            ['Filename', '# Reads', '# Reads Not Aligned', '# Reads Aligned Once', '# Reads Aligned Multiple'])
+        for x in dict:
+            writer.writerow(dict[x])
+        csvfile.close()
 
-    output.write('<tbody>')
-    for x in dict:
-        output.write('<tr>' +
-                     '<td>' + str(dict[x][0]) + '</td>' +
-                     '<td>' + str(dict[x][1]) + '</td>' +
-                     '<td>' + str(dict[x][2]) + '</td>' +
-                     '<td>' + str(dict[x][3]) + '</td>' +
-                     '<td>' + str(dict[x][4]) + '</td>' +
-                     '</tr>')
-    output.write('</tbody></table>')
+
+def getSamtoolsResults(fileDir):
+    samtoolsInfo = {}
+    for file in os.listdir(fileDir):
+        if file.endswith('.fasta'):
+            num_lines = int(sum(1 for line in open(fileDir + file)) / 2)
+            filename = file.replace('-samtool.fasta', '')
+            samtoolsInfo[filename] = [filename, num_lines]
+    return samtoolsInfo
+
+
+def writeSamtoolsTable(dict, outfile):
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+
+        writer.writerow(
+            ['Filename', '# of Non Human Reads'])
+        for x in dict:
+            writer.writerow(dict[x])
+        csvfile.close()
+
+
+def gatherBlastResults(fileDir):
+    blastInfo = {}
+
+    for file in os.listdir(fileDir):
+        if file.endswith('-blastn.tsv'):
+            fileName = file.replace('-blastn.tsv', '')
+            num_lines = int(sum(1 for line in open(fileDir + file)))
+            blastInfo[fileName] = [fileName, num_lines]
+
+    return blastInfo
+
+
+def writeBlastTable(dict, outfile):
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+
+        writer.writerow(
+            ['Filename', '# of Blast Hits'])
+        for x in dict:
+            writer.writerow(dict[x])
+        csvfile.close()
+
+
+def gatherEMALResults(fileDir):
+    EMALInfo = []
+
+    for file in os.listdir(fileDir):
+        if file.endswith('-emal.csv'):
+            openfile = open(fileDir + file, newline='')
+            csvreader = csv.reader(openfile, delimiter=',', quotechar='"')
+            for row in csvreader:
+                row[5] = row[5].replace(',', '')
+                EMALInfo.append(row)
+    return EMALInfo
+
+
+def writeEMALTable(list, outfile):
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+
+        for x in list:
+            writer.writerow(x)
+        csvfile.close()
 
 
 if __name__ == "__main__":
     projDir = sys.argv[1]
     prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
-    writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.txt')
+    writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
     bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
-    writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.txt')
+    writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
+    samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
+    writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult/information/' + 'samtools-tbl-1.csv')
+    blastInfo = gatherBlastResults(projDir + '4-OrganismMapping/')
+    writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
+    emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
+    writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
