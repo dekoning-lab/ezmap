@@ -16,17 +16,17 @@ import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
 import Scripts.samtoolsPrep as samtools
 import Scripts.blastprep as blast
-
+import Scripts.emalPrep as emal
 import Scripts.finalScript as final
 
 
 def outputFileList(files, projDir):
     outputfile = open(projdir + '6-FinalResult/information/' + 'filelist.txt', 'w+')
-    outputfile.write('<table class="table table-striped table-bordered"><thead><tr><td>Filename</td></tr></thead>')
+    outputfile.write('<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td>Path</td></tr></thead>')
 
     outputfile.write('<tbody>')
     for x in files:
-        outputfile.write('<tr><td>' + files[x].origFileName + '</td></tr>')
+        outputfile.write('<tr><td>' + files[x].origFileName + '</td>' + files[x].origFilePath + '</tr>')
     outputfile.write('</tbody></table>')
 
 # Main Function
@@ -69,7 +69,17 @@ if __name__ == "__main__":
     blast.generateSLURMScript(origFiles, projdir, configOptions, samtoolsJobIDS)
     blastJobIDS = blast.processAllFiles(projdir, configOptions, origFiles)
 
+    # Generate Job script for step 5 and run all jobs
+    emalPre = emal.generatePreScript(origFiles, projdir, configOptions, blastJobIDS)
+    emalPreJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 1, emalPre)
+
+    emalMain = emal.generateMainScript(origFiles, projdir, configOptions, emalPreJobIDS)
+    emalMainJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 2, emalMain)
+
+    emalPost = emal.generatePostScript(origFiles, projdir, configOptions, emalMainJobIDS)
+    emalPostJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 3, emalPost)
+
     outputFileList(origFiles, projdir)
-    final.collectPipelineResult(projdir, configOptions, samtoolsJobIDS)
+    final.collectPipelineResult(projdir, configOptions, emalPostJobIDS)
 
     print('EXITING...')
