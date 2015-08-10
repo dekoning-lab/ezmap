@@ -12,6 +12,7 @@ def getSBATCHSettings(script, step, dir, configOptions):
                        '#SBATCH --error=VMAP-' + str(step) + '-%j' + '.err\n',
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
                        '# Resources required\n',
+                       # '#SBATCH --begin=now+10hour\n',
                        '#SBATCH --ntasks=1\n',
                        '#SBATCH --partition=' + configOptions['slurm-partition'] + '\n'])
 
