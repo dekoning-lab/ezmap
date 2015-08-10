@@ -1,7 +1,7 @@
 __author__ = 'patrickczeczko'
 
 from Bio import Entrez
-import csv, os
+import csv, os, sys
 import multiprocessing as mp
 import argparse
 
@@ -14,9 +14,9 @@ SBFDic = {}
 GDic = {}
 
 numberOfThreads = 1
-inputFile = '/Users/patrickczeczko/GithubRepos/viral-metagen/quakeData/EMALResult/MPT1.75.csv'
+inputFile = ''
 outputFileName = 'output.csv'
-outputDir = os.getcwd()
+outputDir = ''
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -54,6 +54,7 @@ def parseCommandLineArguments():
         outputDir = args.outputdir
         if not outputDir.endswith('/'):
             outputDir += '/'
+
 
 # Read in information from EMAL-Main output CSV
 def processCSV(file):
@@ -139,21 +140,30 @@ def processOneLine(line, outputQ):
 
     outputQ.put([TaxID, [parse[2], species, superKingdom, Q1, Order, Family, SubFamily, Genus]])
 
+
 # Output all gathered information into a final CSV file
 def createNewCSV(dataDic, outputFilename):
     with open(outputFilename, 'w+', newline='') as csvFile:
         writer = csv.writer(csvFile, delimiter=',')
-        writer.writerow(('TaxonID', 'GRA', 'Species', 'SuperKingdom', 'TaxonID', 'Q1', 'TaxonID',
-                         'Order', 'TaxonID', 'Family', 'TaxonID', 'SubFamily', 'TaxonID', 'Genus', 'TaxonID'))
+        writer.writerow(('GRA', 'Species', 'SuperKingdom', 'Q1', 'Order', 'Family', 'SubFamily', 'Genus'))
         for i in dataDic:
             info = dataDic[i]
-            writer.writerow((i, info[0], info[1],
-                             info[2][1], info[2][2],
-                             info[3][1], info[3][2],
-                             info[4][1], info[4][2],
-                             info[5][1], info[5][2],
-                             info[6][1], info[6][2],
-                             info[7][1], info[7][2],))
+            print(info)
+            for j in range(len(info)):
+                if len(info[j]) > 1:
+                    for k in range(len(info[j])):
+                        if info[j][k] == None:
+                            info[j][k] = 'N/A'
+
+            info[3][1] = info[3][1].replace(',','')
+
+            writer.writerow((info[0], info[1] + ' [' + i + ']',
+                             info[2][1] + ' [' + info[2][2] + ']',
+                             info[3][1] + ' [' + info[3][2] + ']',
+                             info[4][1] + ' [' + info[4][2] + ']',
+                             info[5][1] + ' [' + info[5][2] + ']',
+                             info[6][1] + ' [' + info[6][2] + ']',
+                             info[7][1] + ' [' + info[7][2] + ']'))
 
 # Main Function
 if __name__ == '__main__':
