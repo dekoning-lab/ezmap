@@ -22,7 +22,6 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     script.write('## BLASTN PARAMETERS ##\n')
 
-    print(configOptions)
     optionsString = ''
     for x in configOptions:
         if 'blastn-' in x:
@@ -55,9 +54,9 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
                  configOptions['python3-path'] + ' ' +
                  cwd + 'Scripts/BLASTWithHitFilter.py ' +
                  cwd + 'tools/BLAST/ncbi-blast-2.2.30+/bin/blastn ' +
-                 configOptions['blastn-db-path'] + ' '+
+                 configOptions['blastn-db-path'] + ' ' +
                  projdir + '3-UnmappedCollection/${FILENAME}.fasta'
-                 ' ${optionString} ' +
+                           ' ${optionString} ' +
                  configOptions['blastn-min-alignment-length'] +
                  ' ${FILENAMEOUTPUT}"')
 
@@ -66,8 +65,9 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 def processAllFiles(projDir, configOptions, dataSets):
     print('Queueing step 4...')
     numOfFiles = len(dataSets)
-    proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '4-OrganismMapping/blastnScript.sh'],
-                            stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        ['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '4-OrganismMapping/blastnScript.sh'],
+        stdout=subprocess.PIPE)
 
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
