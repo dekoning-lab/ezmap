@@ -31,6 +31,8 @@ if __name__ == "__main__":
     filterLen = int(sys.argv[6])
     outputName = sys.argv[7]
 
+    # print(sys.argv)
+
     command = blastnPath
     command += ' -db ' + databasePath
     command += ' -query ' + queryPath

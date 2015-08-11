@@ -7,7 +7,7 @@ allInformation = {}
 numOfDataChunks = 0
 currentChunk = 0
 
-outputFile = open('combinedGenomeData.csv', 'w+')
+outputPath = ""
 outputString = ""
 
 # This function retrieves both the Genbank IDs as well as the genome lenghts
@@ -70,7 +70,7 @@ def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueu
 
 
 # Reads in the file information and parses the taxonomy file in sections so that it can be processed in parallel
-def readInTaxonInformation(fileName, cpu_count, currentChunk):
+def readInTaxonInformation(fileName, cpu_count, currentChunk, outputFile):
     # get file size and set chuck size
     filesize = os.path.getsize(fileName)
     split_size = 100 * 1024 * 1024
@@ -127,7 +127,13 @@ def readInTaxonInformation(fileName, cpu_count, currentChunk):
 if __name__ == '__main__':
     blastGenomeDBPath = sys.argv[1]
     gitaxiddmpPath = sys.argv[2]
-    maxThreads = sys.argv[3]
+    maxThreads = int(sys.argv[3])
+    outputPath = str(sys.argv[4])
+
+    if not outputPath.endswith('/'):
+        outputPath = outputPath + '/'
+
+    outputFile = open(outputPath + 'combinedGenomeData.csv', 'w+')
 
     outputInfo = []
 
@@ -135,6 +141,6 @@ if __name__ == '__main__':
     getNucleotideIDs(blastGenomeDBPath)
 
     print('Gather relavent taxon IDs.....')
-    readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
+    readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk, outputFile)
 
     print('Information has been written to file... exiting')

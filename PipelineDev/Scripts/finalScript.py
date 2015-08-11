@@ -3,7 +3,7 @@ import subprocess, os
 import Scripts.slurmScript as slurmScript
 
 
-def collectPipelineResult(projdir, configOptions, finalJobIDS):
+def collectPipelineResult(projName, projdir, configOptions, finalJobIDS):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     script = open(projdir + '6-FinalResult/resultsScript.sh', 'w+')
@@ -15,7 +15,8 @@ def collectPipelineResult(projdir, configOptions, finalJobIDS):
         IDList += ':' + str(i)
     script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
-    script.write('/cm/shared/apps/python3.4/bin/python3 ' + cwd + 'Scripts/gatherResults.py ' + projdir)
+    script.write(
+        '/cm/shared/apps/python3.4/bin/python3 ' + cwd + 'Scripts/gatherResults.py ' + projdir + ' ' + projName)
 
     proc = subprocess.Popen(
         ['sbatch', projdir + '6-FinalResult/resultsScript.sh'], stdout=subprocess.PIPE)

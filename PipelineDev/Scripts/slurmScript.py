@@ -13,6 +13,7 @@ def getSBATCHSettings(script, step, dir, configOptions):
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
                        '# Resources required\n',
                        # '#SBATCH --begin=now+10hour\n',
+                       '#SBATCH --exclude=node013,node014\n',
                        '#SBATCH --ntasks=1\n',
                        '#SBATCH --partition=' + configOptions['slurm-partition'] + '\n'])
 

@@ -1,7 +1,14 @@
 __author__ = 'patrickczeczko'
 
-import sys, os, csv
+import sys, os, csv, time
 from operator import itemgetter
+
+
+def createProjectInfoFile(projName, projDir):
+    outputfile = open(projDir + '6-FinalResult/information/projInfo.txt', 'w+')
+    outputfile.write('projectName=' + projName)
+    outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y"))
+    outputfile.close()
 
 
 def getPRINSEQResults(fileDir):
@@ -146,8 +153,20 @@ def writeEMALTable(list, outfile):
         csvfile.close()
 
 
+def writeEMALGraphInfo(infile, outfile):
+    outfile = open(outfile, 'w+')
+
+    with open(infile, newline='') as inputFile:
+        for line in inputFile:
+            reader = csv.reader(inputFile, delimiter=',', quotechar='"')
+            for row in reader:
+                outfile.write(row[2].split('[')[0] + '=' + row[3].split('[')[0] + '=' + row[4].split('[')[0] + '=' + row[5].split('[')[0] + '=' + row[6].split('[')[0] + '=' + row[7].split('[')[0] + '=' + row[1].split('[')[0] + ',' + row[0] + '\n')
+    outfile.close()
+
 if __name__ == "__main__":
     projDir = sys.argv[1]
+    projName = sys.argv[2]
+    createProjectInfoFile(projName, projDir)
     prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
     writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
     bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
@@ -158,3 +177,5 @@ if __name__ == "__main__":
     writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
     emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
     writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
+    writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
+                       projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')

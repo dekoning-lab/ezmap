@@ -26,9 +26,12 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     for x in configOptions:
         if 'blastn-' in x:
             if not 'db-path' in x:
-                param = x.replace('blastn-', '')
-                value = configOptions[x]
-                optionsString += param + ',' + str(value) + ','
+                if not 'min-alignment-length' in x:
+                    param = x.replace('blastn-', '')
+                    value = configOptions[x]
+                    optionsString += param + ',' + str(value) + ','
+    optionsString += 'outfmt,' + '6,'
+    optionsString += 'num_threads,' + configOptions['slurm-max-num-threads'] + ','
 
     filelist = ''
     fileOutputList = ''
@@ -37,7 +40,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
         fileOutputList += '' + dataSets[x].blastnOutputName + ' '
         filePath = dataSets[x].projDirectory + '4-OrganismMapping/'
 
-    script.write('fileArray=( ' + filelist + ')\n\n')
+    script.write('fileArray=( ' + filelist + ')\n')
     script.write('fileOutputArray=( ' + fileOutputList + ')\n\n')
 
     script.write('optionString=' + optionsString[:-1] + '\n\n')
@@ -50,15 +53,18 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'])
 
-    script.write('echo "' +
+    script.write('srun ' +
                  configOptions['python3-path'] + ' ' +
-                 cwd + 'Scripts/BLASTWithHitFilter.py ' +
+                 cwd + 'tools/BLAST/BLASTWithHitFilter.py ' +
                  cwd + 'tools/BLAST/ncbi-blast-2.2.30+/bin/blastn ' +
                  configOptions['blastn-db-path'] + ' ' +
-                 projdir + '3-UnmappedCollection/${FILENAME}.fasta'
-                           ' ${optionString} ' +
+                 projdir + '3-UnmappedCollection/${FILENAME}.fasta' +
+                 ' ${optionString} ' +
+                 projdir + '4-OrganismMapping/ ' +
                  configOptions['blastn-min-alignment-length'] +
-                 ' ${FILENAMEOUTPUT}"')
+                 ' ${FILENAMEOUTPUT}')
+    script.close()
+    os.chmod(projdir + '4-OrganismMapping/blastnScript.sh', 0o755)
 
 
 # Launch job to run within job manager

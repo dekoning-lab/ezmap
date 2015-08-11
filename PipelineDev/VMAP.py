@@ -22,11 +22,12 @@ import Scripts.finalScript as final
 
 def outputFileList(files, projDir):
     outputfile = open(projdir + '6-FinalResult/information/' + 'filelist.txt', 'w+')
-    outputfile.write('<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td>Path</td></tr></thead>')
+    outputfile.write(
+        '<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td>Path</td></tr></thead>')
 
     outputfile.write('<tbody>')
     for x in files:
-        outputfile.write('<tr><td>' + files[x].origFileName + '</td>' + files[x].origFilePath + '</tr>')
+        outputfile.write('<tr><td>' + files[x].origFileName + '</td><td>' + files[x].origFilePath.replace('/','&#47;') + '</td></tr>')
     outputfile.write('</tbody></table>')
 
 # Main Function
@@ -80,6 +81,6 @@ if __name__ == "__main__":
     emalPostJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 3, emalPost)
 
     outputFileList(origFiles, projdir)
-    final.collectPipelineResult(projdir, configOptions, emalPostJobIDS)
+    final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
 
     print('EXITING...')

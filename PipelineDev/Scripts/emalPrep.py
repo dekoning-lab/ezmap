@@ -28,6 +28,9 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
         '1' + ' ' +
         projdir + '5-RelativeAbundanceEstimation/')
 
+    script.close()
+    os.chmod(projdir + '5-RelativeAbundanceEstimation/emalPreScript.sh', 0o755)
+
     return 'emalPreScript.sh'
 
 
@@ -51,7 +54,11 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
         '-v -t ' + configOptions['slurm-max-num-threads'] + ' ' +
         '-c ' + projdir.split('/')[-2] + '.gra ' +
         '-a ' + configOptions['emal-acceptance-value'] + ' ' +
-        '-o ' + projdir + '5-RelativeAbundanceEstimation/')
+        '-o ' + projdir + '5-RelativeAbundanceEstimation/ ' +
+        '-e .tsv ')
+
+    script.close()
+    os.chmod(projdir + '5-RelativeAbundanceEstimation/emalScript.sh', 0o755)
 
     return 'emalScript.sh'
 
@@ -73,9 +80,12 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
         'srun ' +
         configOptions['python3-path'] + ' ' + cwd + 'tools/EMAL/EMAL-Post.py ' +
         '-f ' + projdir + '5-RelativeAbundanceEstimation/' + projdir.split('/')[-2] + '.gra ' +
-        '-v -t ' + configOptions['slurm-max-num-threads'] + ' ' +
-        '-c ' + projdir.split('/')[-2] + '-finalResult.csv ' +
+        '-t ' + configOptions['slurm-max-num-threads'] + ' ' +
+        '-c ' + projdir.split('/')[-2] + '-emal.csv ' +
         '-o ' + projdir + '5-RelativeAbundanceEstimation/')
+
+    script.close()
+    os.chmod(projdir + '5-RelativeAbundanceEstimation/emalPostScript.sh', 0o755)
 
     return 'emalPostScript.sh'
 

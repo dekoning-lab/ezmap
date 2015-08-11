@@ -12,9 +12,9 @@ BLASTFileDir = ""
 BLASTFileArray = []
 
 outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
-
-logfile = open('EMALLog-' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt',
-               'w+')
+fileExtension = None
+logfile = ''
+outputDir = os.getcwd() + '/'
 
 information = {}
 pi = []
@@ -35,6 +35,7 @@ def parseCommandLineArguments():
     global numberOfThreads
     global outputFileName
     global acceptanceValue
+    global fileExtension
 
     parser = argparse.ArgumentParser()
 
@@ -51,6 +52,10 @@ def parseCommandLineArguments():
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
     parser.add_argument("-a", "--acceptanceCutoff", type=float,
                         help="Indicate the acceptable difference with range of this numebr. Default: 0.1")
+    parser.add_argument("-o", "--outputdir", type=str,
+                        help="Path to a directory where output should be placed")
+    parser.add_argument("-e", "--fileext", type=str,
+                        help="file extension of blast results")
     args = parser.parse_args()
 
     # Set arguments
@@ -65,12 +70,23 @@ def parseCommandLineArguments():
         verbose = True
     if args.acceptanceCutoff is not None:
         acceptanceValue = args.acceptanceCutoff
+    if args.outputdir is not None:
+        outputDir = args.outputdir
+        if not outputDir.endswith('/'):
+            outputDir += '/'
+    if args.fileext is not None:
+        fileExtension = args.fileext
 
 
 # Generate a list of all files within the BLASTFileDir to be processed
 def getBlastFileList(fileDir):
+    global fileExtension
     for file in os.listdir(fileDir):
-        BLASTFileArray.append(fileDir + file)
+        if fileExtension is not None:
+            if file.endswith(fileExtension):
+                BLASTFileArray.append(fileDir + file)
+        else:
+            BLASTFileArray.append(fileDir + file)
 
 
 # Gathers initial information about genomes to be evaluated
@@ -367,7 +383,7 @@ def mStep(pi2, outputQ, cpu_count):
 def outputCSV(information, pi):
     global outputFileName
 
-    outputFile = open(os.getcwd() + '/' + outputFileName, 'w+')
+    outputFile = open(outputDir + outputFileName, 'w+')
 
     genomeIDs = ["GenomeID"]
     taxonIDs = ["TaxonID"]
@@ -417,6 +433,9 @@ if __name__ == '__main__':
     print("\nEMAL 0.2b \n")
     # Parse command line arguments to ensure correct process occurs
     parseCommandLineArguments()
+    logfile = open(outputDir + 'EMALLog-' + ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt', 'w+')
+
     if verbose:
         print("Number of Threads: " + str(numberOfThreads))
         print("Acceptance Value: " + str(acceptanceValue))
