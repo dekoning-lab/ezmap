@@ -17,14 +17,28 @@ Because VMAP was designed to limit the number dependencies it runs using only Py
 #### Programs Used by VMAP
 VMAP uses and number of pieces of free open source software to allow for it to generate all that it does.
 
-- PRINSEQ
-- Bowtie 2
-- SAMTools
-- NCBI Blast
+- [PRINSEQ](http://prinseq.sourceforge.net)
+- [Bowtie 2](http://bowtie-bio.sourceforge.net)
+- [SAMTools](http://samtools.sourceforge.net)
+- [NCBI Blast](http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) 
 - EMAL
 
 
 ----------
 
+
 ## Setup
  
+
+ 1. Download the current release of VMAP
+ 2. Unzip it.
+ 3. Place the entire VMAP folder somewhere accessible on your computer
+ 4. Make sure to have installed Numpy, Scipy, & Biopython.
+	 - To tes this run the following in the command line.
+
+```python
+python3
+import numpy
+import scipy
+import Bio
+```
