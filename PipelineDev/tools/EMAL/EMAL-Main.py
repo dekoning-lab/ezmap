@@ -220,7 +220,7 @@ def initializePDictionary(fileList, information, genomeTaxon):
                     list.append([taxonID, (1 / genomeLength)])
                     pDiction[readID] = list
             except:
-                num = taxonID
+                num = genomeID
 
     return pDiction
 
