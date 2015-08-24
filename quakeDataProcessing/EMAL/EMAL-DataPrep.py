@@ -10,8 +10,8 @@ currentChunk = 0
 outputFile = open('combinedGenomeData.csv', 'w+')
 outputString = ""
 
-# This function retrieves both the Genbank IDs as well as the genome lenghts
-# from a .fna file containg all the genomes used in the previous BLAST step
+# This function retrieves both the Genbank IDs as well as the genome lengths
+# from a .fna file containing all the genomes used in the previous BLAST step
 def getNucleotideIDs(fileName):
     with open(fileName) as input_file:
         genomeLength = 0
