@@ -1,15 +1,30 @@
-# Viral Metagenomics Abundance Pipleine
-NGS pipeline for viral metagenomics analysis
+# Viral Metagenomics Abunadnacne Pipeline (V0.9b)
 
-## Parameters
+VMAP is a pipeline designed to allow for the estimation community structure from DNA sequence data. VMAP has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities.
 
-All parameters can be changed within the param.config file
+## Features
+  - Broad number of use cases
+  - Graphic HTML report generated at end of processing
+  - Small number of dependecies 
 
-Default PRINSEQ parameters:
+### Dependecies
+Because VMAP was designed to limit the number dependencies it runs using only Python3 and a select few required modules.
 
-```
-out_format=3 (FATSQ Files)
-min_qual_score=33
-lc_method="dust"
-lc_threshold=7
-```
+- Python3 
+- NumPy & SciPy (http://docs.scipy.org/doc/)
+- Biopython (http://biopython.org)
+
+#### Programs Used by VMAP
+VMAP uses and number of pieces of free open source software to allow for it to generate all that it does.
+
+- PRINSEQ
+- Bowtie 2
+- SAMTools
+- NCBI Blast
+- EMAL
+
+
+----------
+
+## Setup
+ 
