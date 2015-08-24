@@ -13,7 +13,6 @@ FDic = {}
 SBFDic = {}
 GDic = {}
 
-numberOfThreads = 1
 inputFile = ''
 outputFileName = 'output.csv'
 outputDir = ''
@@ -21,7 +20,6 @@ outputDir = ''
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
     global inputFile
-    global numberOfThreads
     global outputFileName
     global outputDir
 
@@ -31,9 +29,6 @@ def parseCommandLineArguments():
     parser.add_argument("-f", "--file", type=str, required=True,
                         help="Provide a complete path to a file containing the output from EMAL")
 
-    # Optional Arguments
-    parser.add_argument("-t", "--threads", type=int,
-                        help="Number of concurrent threads to run. Default value is 1")
     parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv"
                              "Warning: if file already exists it will be over written")
@@ -44,8 +39,6 @@ def parseCommandLineArguments():
 
     # Set arguments
     inputFile = args.file
-    if args.threads is not None:
-        numberOfThreads = args.threads
     if args.csvname is not None:
         root, ext = os.path.splitext(args.csvname)
         if ext == '.csv':
@@ -58,8 +51,6 @@ def parseCommandLineArguments():
 
 # Read in information from EMAL-Main output CSV
 def processCSV(file):
-    global numberOfThreads
-
     m = mp.Manager()
     outputQ = m.Queue()
     results = []
@@ -85,9 +76,9 @@ def processCSV(file):
             dataDic[info[0]] = info[1]
 
 
-# Retreive record from NCBI Entrez Database
+# Retrieve record from NCBI Entrez Database
 def grabEntrezRecord(TaxID):
-    Entrez.email = "pkczeczk@ucalgary.ca"
+    Entrez.email = ""
     handle = Entrez.efetch(db='taxonomy', id=TaxID)
     record = Entrez.read(handle)
     handle.close()
@@ -95,7 +86,7 @@ def grabEntrezRecord(TaxID):
     return record[0]['LineageEx'], record[0]['ScientificName']
 
 
-# Gather require information from Entrez Record
+# Gather required information from Entrez Record
 def processOneLine(line, outputQ):
     parse = line.split(',')
     TaxID = parse[1]
@@ -155,7 +146,7 @@ def createNewCSV(dataDic, outputFilename):
                         if info[j][k] == None:
                             info[j][k] = 'N/A'
 
-            info[3][1] = info[3][1].replace(',','')
+            info[3][1] = info[3][1].replace(',', '')
 
             writer.writerow((info[0], info[1] + ' [' + i + ']',
                              info[2][1] + ' [' + info[2][2] + ']',
