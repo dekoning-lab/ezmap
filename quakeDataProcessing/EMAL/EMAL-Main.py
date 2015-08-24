@@ -12,9 +12,9 @@ BLASTFileDir = ""
 BLASTFileArray = []
 
 outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
-
-logfile = open('EMALLog-' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt',
-               'w+')
+fileExtension = None
+logfile = ''
+outputDir = os.getcwd() + '/'
 
 information = {}
 pi = []
@@ -35,6 +35,7 @@ def parseCommandLineArguments():
     global numberOfThreads
     global outputFileName
     global acceptanceValue
+    global fileExtension
 
     parser = argparse.ArgumentParser()
 
@@ -51,6 +52,10 @@ def parseCommandLineArguments():
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
     parser.add_argument("-a", "--acceptanceCutoff", type=float,
                         help="Indicate the acceptable difference with range of this numebr. Default: 0.1")
+    parser.add_argument("-o", "--outputdir", type=str,
+                        help="Path to a directory where output should be placed")
+    parser.add_argument("-e", "--fileext", type=str,
+                        help="file extension of blast results")
     args = parser.parse_args()
 
     # Set arguments
@@ -65,13 +70,32 @@ def parseCommandLineArguments():
         verbose = True
     if args.acceptanceCutoff is not None:
         acceptanceValue = args.acceptanceCutoff
+    if args.outputdir is not None:
+        outputDir = args.outputdir
+        if not outputDir.endswith('/'):
+            outputDir += '/'
+    if args.fileext is not None:
+        fileExtension = args.fileext
 
 
 # Generate a list of all files within the BLASTFileDir to be processed
 def getBlastFileList(fileDir):
+    global fileExtension
     for file in os.listdir(fileDir):
-        BLASTFileArray.append(fileDir + file)
+        if fileExtension is not None:
+            if file.endswith(fileExtension):
+                if checkForEmptyFile(fileDir+file):
+                    BLASTFileArray.append(fileDir + file)
+        else:
+            BLASTFileArray.append(fileDir + file)
 
+def checkForEmptyFile (path):
+    openFile = open(path,'r')
+    firstLine = openFile.readline()
+    if '\t' in firstLine:
+        return True
+    else:
+        return False
 
 # Gathers initial information about genomes to be evaluated
 def gatherInformation(fileList):
@@ -204,7 +228,7 @@ def initializePDictionary(fileList, information, genomeTaxon):
                     list.append([taxonID, (1 / genomeLength)])
                     pDiction[readID] = list
             except:
-                num = taxonID
+                num = genomeID
 
     return pDiction
 
@@ -367,7 +391,7 @@ def mStep(pi2, outputQ, cpu_count):
 def outputCSV(information, pi):
     global outputFileName
 
-    outputFile = open(os.getcwd() + '/' + outputFileName, 'w+')
+    outputFile = open(outputDir + outputFileName, 'w+')
 
     genomeIDs = ["GenomeID"]
     taxonIDs = ["TaxonID"]
@@ -417,6 +441,9 @@ if __name__ == '__main__':
     print("\nEMAL 0.2b \n")
     # Parse command line arguments to ensure correct process occurs
     parseCommandLineArguments()
+    logfile = open(outputDir + 'EMALLog-' + ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt', 'w+')
+
     if verbose:
         print("Number of Threads: " + str(numberOfThreads))
         print("Acceptance Value: " + str(acceptanceValue))
@@ -428,76 +455,81 @@ if __name__ == '__main__':
         for x in BLASTFileArray:
             print(x)
 
-        print("Preparing to run...")
-        information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
+        if len(BLASTFileArray) > 0:
+            print("Preparing to run...")
+            information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
 
-        print("Starting run...")
-        print("1. Calulating PiVector...")
-        information, pi = makePiVectorIndicies(information)
-        pi = initializePiVector(BLASTFileArray, genomeTaxon)
-        pi = standardizeVector(pi)
-        print(pi)
+            print("Starting run...")
+            print("1. Calulating PiVector...")
+            information, pi = makePiVectorIndicies(information)
+            pi = initializePiVector(BLASTFileArray, genomeTaxon)
+            pi = standardizeVector(pi)
+            print(pi)
 
-        print("3.Initialzing MLEs...")
-        pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
-        pDiction = standardizePDictionary(pDiction)
+            print("3.Initialzing MLEs...")
+            pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
+            pDiction = standardizePDictionary(pDiction)
 
-        print("4.Starting Abundance Calculation...")
-        print("This could take a while perhaps you would like to grab a beverage...")
-        start = time.time()  # Grab the start time
+            print("4.Starting Abundance Calculation...")
+            print("This could take a while perhaps you would like to grab a beverage...")
+            start = time.time()  # Grab the start time
 
-        count = 0
+            count = 0
 
-        oldPi = pi
-        outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        newPi = mStep(pi, outputQ, numberOfThreads)
+            oldPi = pi
+            outputQ = eStep(pDiction, pi, numberOfThreads, information)
+            newPi = mStep(pi, outputQ, numberOfThreads)
 
-        count += 1
-
-        logfile.write(str(count) + ' Cycles completed\n')
-        accept = compareLists(oldPi, newPi, acceptanceValue)
-
-        while accept == False:
-            oldPi = newPi
-            outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-            newPi = mStep(newPi, outputQ, numberOfThreads)
             count += 1
+
             logfile.write(str(count) + ' Cycles completed\n')
             accept = compareLists(oldPi, newPi, acceptanceValue)
-            print(str(count) + ' Cycles completed')
 
-        newPi = standardizeVector(newPi)
-        end = time.time()  # Grab the end time
+            while accept == False:
+                oldPi = newPi
+                outputQ = eStep(pDiction, newPi, numberOfThreads, information)
+                newPi = mStep(newPi, outputQ, numberOfThreads)
+                count += 1
+                logfile.write(str(count) + ' Cycles completed\n')
+                accept = compareLists(oldPi, newPi, acceptanceValue)
+                print(str(count) + ' Cycles completed')
 
-        print("Abundance Calculations took: " + str(end - start))
-        print("5. Calculation Complete! Took " + str(count) + " cycles")
-        print("6. Printing results in CSV format!")
-        outputCSV(information, newPi)
+            newPi = standardizeVector(newPi)
+            end = time.time()  # Grab the end time
+
+            print("Abundance Calculations took: " + str(end - start))
+            print("5. Calculation Complete! Took " + str(count) + " cycles")
+            print("6. Printing results in CSV format!")
+            outputCSV(information, newPi)
+        else:
+            print('No files found to process')
         print("Exiting...")
     else:
         getBlastFileList(BLASTFileDir)
+        if len(BLASTFileArray) > 0:
+            information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
 
-        information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
+            information, pi = makePiVectorIndicies(information)
+            pi = initializePiVector(BLASTFileArray, genomeTaxon)
+            pi = standardizeVector(pi)
 
-        information, pi = makePiVectorIndicies(information)
-        pi = initializePiVector(BLASTFileArray, genomeTaxon)
-        pi = standardizeVector(pi)
+            pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
+            pDiction = standardizePDictionary(pDiction)
 
-        pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
-        pDiction = standardizePDictionary(pDiction)
+            oldPi = pi
+            outputQ = eStep(pDiction, pi, numberOfThreads, information)
+            newPi = mStep(pi, outputQ, numberOfThreads)
 
-        oldPi = pi
-        outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        newPi = mStep(pi, outputQ, numberOfThreads)
-
-        accept = compareLists(oldPi, newPi, acceptanceValue)
-        while accept == False:
-            oldPi = newPi
-            outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-            newPi = mStep(newPi, outputQ, numberOfThreads)
             accept = compareLists(oldPi, newPi, acceptanceValue)
+            while accept == False:
+                oldPi = newPi
+                outputQ = eStep(pDiction, newPi, numberOfThreads, information)
+                newPi = mStep(newPi, outputQ, numberOfThreads)
+                accept = compareLists(oldPi, newPi, acceptanceValue)
 
-        newPi = standardizeVector(newPi)
+            newPi = standardizeVector(newPi)
 
-        outputCSV(information, newPi)
+            outputCSV(information, newPi)
+        else:
+            print('No files found to process')
         print("Exiting...")
