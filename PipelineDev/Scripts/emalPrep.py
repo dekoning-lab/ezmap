@@ -80,7 +80,7 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
         'srun ' +
         configOptions['python3-path'] + ' ' + cwd + 'tools/EMAL/EMAL-Post.py ' +
         '-f ' + projdir + '5-RelativeAbundanceEstimation/' + projdir.split('/')[-2] + '.gra ' +
-        '-t ' + configOptions['slurm-max-num-threads'] + ' ' +
+        '-t 1 ' +
         '-c ' + projdir.split('/')[-2] + '-emal.csv ' +
         '-o ' + projdir + '5-RelativeAbundanceEstimation/')
 
