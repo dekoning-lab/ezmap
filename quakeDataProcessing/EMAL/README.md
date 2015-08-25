@@ -66,10 +66,13 @@ EMAL-DataPrep is now running and will finish by providing a new cvs file with yo
 EMAL-Main is the main step of the program that performs the estimation of community structure. It has a number of different command line arguments.
 
 ####Required Command Line Options
+
 | Option     | Description   | Possible Values|
 |---|---|---|
 |-d or --directory| The full path to the folder containing all the tabular blast results to be used in the analysis. | Full file path |
+
 ####Optional Command Line Options
+
 | Option     | Description   | Possible Values| Default Value|
 |---|---|---|
 |-v or --verbose|Terminal will output statements ot indicate the stage of the process | -v | None |
@@ -78,5 +81,6 @@ EMAL-Main is the main step of the program that performs the estimation of commun
 |-m or --maximumLikelihoodConvergenceCriterion| The value by which the difference between estimate steps are checked. If the difference between each value between steps is < the value then the estimation ends | Decimal Numbers| 0.0001|
 |-o or --outputdir| The directory where the output file is to be placed.| Full file path | The current working directory |
 |-e or --fileext|The file extension of all files contain tabular BLAST results to be processed |.tsv| .tsv|
+
 
 ###3. EMAL - Post
