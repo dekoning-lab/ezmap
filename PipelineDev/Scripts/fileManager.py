@@ -2,6 +2,7 @@ __author__ = 'patrickczeczko'
 
 import os
 from Scripts.dataset import Dataset
+from distutils.dir_util import copy_tree
 
 # Create Subdirectories for all the intermediate files
 def createSubFolders(projDir):
@@ -24,11 +25,18 @@ def createSubFolders(projDir):
         return True
     return False
 
+
 # return a dictionary of dataset objects corressponding to each file
-def getListOfOriginalFiles(fileDir,projDir):
+def getListOfOriginalFiles(fileDir, projDir):
     origfiles = {}
     for file in os.listdir(fileDir):
         if file.endswith('.fq') or file.endswith('.fastq'):
             root, ext = os.path.splitext(file)
-            origfiles[root] = (Dataset(file, fileDir,projDir))
+            origfiles[root] = (Dataset(file, fileDir, projDir))
     return origfiles
+
+
+def copyReportFiles(projDir):
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    copy_tree(cwd + 'ReportFiles', projDir + '6-FinalResult')
+
