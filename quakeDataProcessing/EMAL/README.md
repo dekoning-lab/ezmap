@@ -43,7 +43,7 @@ The user may again provide their own dump file if working with a custom dataset 
 
 ####Required Command Line Options
 | Option     | Position   | Possible Values| Example |
-|---|---|---|
+|----|----|----|
 |Path to all.fna| 1| Full file path| */path/to/all.fna*|
 |Path to gi_taxid_nucl.dmp|2 |Full file path| */path/to/gi_taxid_nucl.dmp*|
 |Number of threads to run|3|1 - 32| *4*|
@@ -68,13 +68,13 @@ EMAL-Main is the main step of the program that performs the estimation of commun
 ####Required Command Line Options
 
 | Option     | Description   | Possible Values|
-|---|---|---|
+|----|----|----|
 |-d or --directory| The full path to the folder containing all the tabular blast results to be used in the analysis. | Full file path |
 
 ####Optional Command Line Options
 
 | Option     | Description   | Possible Values| Default Value|
-|---|---|---|
+|----|----|----|
 |-v or --verbose|Terminal will output statements ot indicate the stage of the process | -v | None |
 |-t or --threads|How many threads EMAL can run simultaneously to process information faster. *Only parts of EMAL are multithreaded thus all threads will not always be used.* | 1-32 | 1 |
 |-c or --csvname| The output name of the file where results will be placed. | *Any String* | output-ADJK.csv |
