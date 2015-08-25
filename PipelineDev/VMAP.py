@@ -54,6 +54,8 @@ if __name__ == "__main__":
     # Get the project directory to pass to functions that follow
     projdir = list(origFiles.values())[0].projDirectory
 
+    fileman.copyReportFiles(projdir)
+
     # Generate Job script for step 1 and run all jobs
     prinseq.generateSLURMScript(origFiles, projdir, configOptions)
     prinseqJobIDS = prinseq.processAllFiles(projdir, configOptions, origFiles)
