@@ -50,8 +50,8 @@ Once that is done you have VMAP correctly setup on your computer.
 Before running VMAP it is important to have a few things setup.
 
  1. Create a new folder where all of the results will be placed.
- 2. Make sure that you have moved all the original FASTA files into a folder that contains only those files.
- 3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section below to see what can be modified to suit your needs.*
+ 2. Make sure that you have moved all the original FASTQ files into a folder that contains only those files.
+ 3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section bellow to see what can be modified to suit your needs.*
 
 ## Running VMAP
 
@@ -66,6 +66,18 @@ To run VMAP make sure you have installed it correctly and have configured the fi
 python3 VMAP.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/ -mt 4
 ```
 The above command will start sumbitting the different VMAP steps to the SLURM job manager. 
+
+##Parameters
+
+####Command  Line Options
+| Parameter     | Description   | Possible Values|
+| ---|---|---|
+|-d or --directory| The full system path to the folder containing only the original FASTQ files| `/path/to/dir` |
+|--projDir| The full system path to the folder where all output will be placed|`/path/to/dir`|
+|-mt or --maxThreads| Maximum number of simultaneous threads VMAP can run. *Note VMAP can only run as many threads as there are on a single node.*| 1 to 32|
+
+####param.config Options
+
 
 
     
