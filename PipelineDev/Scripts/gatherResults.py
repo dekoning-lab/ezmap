@@ -11,6 +11,16 @@ def createProjectInfoFile(projName, projDir):
     outputfile.close()
 
 
+def checkForExtraOptions(file):
+    configFile = open(file, 'r')
+    configOptions = {}
+    for line in configFile:
+        if '#extraTableSummedOver' in line:
+            key, value = line.strip('#').split('=')
+            configOptions[key] = value
+    return configOptions
+
+
 def getPRINSEQResults(fileDir):
     prinseqInfo = {}
 
@@ -18,19 +28,23 @@ def getPRINSEQResults(fileDir):
         if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
 
-            output = open(fileDir + os.path.splitext(file)[0] + '.out')
-            fileID = output.readline().split(' ')[0]
+            # output = open(fileDir + os.path.splitext(file)[0] + '.out')
+            # fileID = output.readline().split(' ')[0]
+
+            fileID = file.split('.')[0]
 
             for line in inFile:
+                # print(line.split(':'))
                 if 'Input sequences:' in line:
-                    numReads = int(line.split(':')[1].strip().replace(',', ''))
+                    numReads = int(line.split(']')[2].split(':')[1].strip().replace(',', ''))
                 elif 'Input mean length:' in line:
-                    avgReadLen = float(line.split(':')[1].strip().replace(',', ''))
+                    avgReadLen = float(line.split(']')[2].split(':')[1].strip().replace(',', ''))
                 elif 'Good sequences:' in line:
-                    numGood = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
+                    numGood = int(line.split(']')[2].split('(')[0].split(':')[1].strip().replace(',', ''))
                 elif 'Bad sequences:' in line:
-                    numBad = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
-
+                    numBad = int(line.split(']')[2].split('(')[0].split(':')[1].strip().replace(',', ''))
+            # print([fileID, numReads, avgReadLen, numGood, numBad])
+            # if :
             percentGood = format((float(numGood) / numReads) * 100, '.3f')
             percentBad = format((float(numBad) / numReads) * 100, '.3f')
             prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, percentGood, numBad, percentBad]
@@ -53,11 +67,14 @@ def writePrinseqTableFile(dict, outfile):
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        if file.endswith('.err'):
+        if file.endswith('.errs'):
+            # if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
 
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
-            fileID = output.readline().split(': ')[1].split('-')[0]
+            # fileID = output.readline().split(': ')[1].split('-')[0]
+            fileID = output.readline()
+            fileID = output.readline().split(': ')[1].split('_')[0]
             zeroAlign, oneAlign, multiAlign = -1, -1, -1
             for line in inFile:
                 if 'reads; of these:' in line:
@@ -87,12 +104,28 @@ def writeBowtieTableFile(dict, outfile):
         csvfile.close()
 
 
+def writeFileMappingDistribution(dict, outfile):
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+
+        writer.writerow(['File', 'Human', 'Bacteria/Viruses'])
+        for x in dict:
+            if not isinstance(dict[x][1], str):
+                totalNumReads = float(dict[x][1])
+                totalHumanReads = float(dict[x][3]) + float(dict[x][4])
+                totalNonHumanReads = float(dict[x][2])
+                percentBacVir = (float(totalNonHumanReads / totalNumReads) * 100)
+                percentHuman = (float(totalHumanReads / totalNumReads) * 100)
+                writer.writerow([x, "%.10f" % percentHuman, "%.10f" % percentBacVir])
+
+
 def getSamtoolsResults(fileDir):
     samtoolsInfo = {}
     for file in os.listdir(fileDir):
         if file.endswith('.fasta'):
             num_lines = int(sum(1 for line in open(fileDir + file)) / 2)
-            filename = file.replace('-samtool.fasta', '')
+            filename = file.replace('.fasta', '')
+            # filename = file.replace('-samtool.fasta', '')
             samtoolsInfo[filename] = [filename, num_lines]
     return samtoolsInfo
 
@@ -112,8 +145,10 @@ def gatherBlastResults(fileDir):
     blastInfo = {}
 
     for file in os.listdir(fileDir):
-        if file.endswith('-blastn.tsv'):
-            fileName = file.replace('-blastn.tsv', '')
+        if file.endswith('.tsv'):
+            fileName = file.replace('.tsv', '')
+            # if file.endswith('-blastn.tsv'):
+            #     fileName = file.replace('-blastn.tsv', '')
             num_lines = int(sum(1 for line in open(fileDir + file)))
             blastInfo[fileName] = [fileName, num_lines]
 
@@ -147,9 +182,8 @@ def gatherEMALResults(fileDir):
 def writeEMALTable(list, outfile):
     with open(outfile, 'w+') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-
-        for x in list:
-            writer.writerow(x)
+        for row in list:
+            writer.writerow(row)
         csvfile.close()
 
 
@@ -160,22 +194,65 @@ def writeEMALGraphInfo(infile, outfile):
         for line in inputFile:
             reader = csv.reader(inputFile, delimiter=',', quotechar='"')
             for row in reader:
-                outfile.write(row[2].split('[')[0] + '=' + row[3].split('[')[0] + '=' + row[4].split('[')[0] + '=' + row[5].split('[')[0] + '=' + row[6].split('[')[0] + '=' + row[7].split('[')[0] + '=' + row[1].split('[')[0] + ',' + row[0] + '\n')
+                outfile.write(row[2].split('[')[0] + '=' + row[3].split('[')[0] + '=' + row[4].split('[')[0] + '=' +
+                              row[5].split('[')[0] + '=' + row[6].split('[')[0] + '=' + row[7].split('[')[0] + '=' +
+                              row[1].split('[')[0] + ',' + row[0] + '\n')
     outfile.close()
+
+
+def gatherSummedOverInfo(list, category):
+    # name[taxonID] = GRA
+    dict = {}
+
+    for i, item in enumerate(list[0]):
+        if category == item:
+            index = i
+
+    list.pop(0)
+    for x in list:
+        key = x[index]
+        if key in dict:
+            GRA = dict[key]
+            GRA += float(x[0])
+            dict[key] = GRA
+        else:
+            dict[key] = float(x[0])
+    return dict
+
+
+def writeSummedOverInfo(category, dict, outfile):
+    with open(outfile, 'w+') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerow(['GRA',category])
+        for key in dict:
+            writer.writerow([dict[key],key])
+        csvfile.close()
+
 
 if __name__ == "__main__":
     projDir = sys.argv[1]
     projName = sys.argv[2]
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    configOptions = checkForExtraOptions(cwd + 'param.config')
     createProjectInfoFile(projName, projDir)
+    print('Gathering Step 1 Results...')
     prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
     writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
+    print('Gathering Step 2 Results...')
     bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
     writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
+    writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.csv')
+    print('Gathering Step 3 Results...')
     samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
     writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult/information/' + 'samtools-tbl-1.csv')
+    print('Gathering Step 4 Results...')
     blastInfo = gatherBlastResults(projDir + '4-OrganismMapping/')
     writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
+    print('Gathering Step 5 Results...')
     emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
     writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
     writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
                        projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
+    summedOver = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'])
+    writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOver, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+    print('Complete!')
