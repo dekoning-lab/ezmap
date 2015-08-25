@@ -51,7 +51,7 @@ Before running VMAP it is important to have a few things setup.
 
  1. Create a new folder where all of the results will be placed.
  2. Make sure that you have moved all the original FASTA files into a folder that contains only those files.
- 3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section bellow to see what can be modified to suit your needs.*
+ 3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section below to see what can be modified to suit your needs.*
 
 ## Running VMAP
 
