@@ -11,8 +11,8 @@ VMAP is a pipeline designed to allow for the estimation community structure from
 Because VMAP was designed to limit the number dependencies it runs using only Python3 and a select few required modules.
 
 - Python3 
-- NumPy & SciPy (http://docs.scipy.org/doc/)
-- Biopython (http://biopython.org)
+- [NumPy & SciPy](http://docs.scipy.org/doc/)
+- [Biopython](http://biopython.org)
 
 #### Programs Used by VMAP
 VMAP uses and number of pieces of free open source software to allow for it to generate all that it does.
@@ -34,7 +34,7 @@ VMAP uses and number of pieces of free open source software to allow for it to g
  2. Unzip it.
  3. Place the entire VMAP folder somewhere accessible on your computer
  4. Make sure to have installed Numpy, Scipy, & Biopython.
-	 - To tes this run the following in the command line.
+	 - To test this run the following in the command line.
 
 ```python
 python3
