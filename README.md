@@ -135,18 +135,19 @@ The config file is designed to allow a number of parameters to be set as hardcod
 
 #####BLAST Parameters
 Descriptions for the BLAST parameters can be found at http://www.ncbi.nlm.nih.gov/books/NBK279675/
-| Parameter     | Possible Values| Default |
+
+| Parameter| Possible Values| Default |
 |---|---|---|
 |```#blastn-db-path```| ```<string>```| NONE|
-|```#blastn-dust```| no| no|
+|```#blastn-dust```| no| no
 |```#blastn-reward```| ```<int>```| 1|
 |```#blastn-penalty```| ```<int>```| 3|
 |```#blastn-word_size```| ```<int>```| 12|
 |```#blastn-gapopen```| ```<int>```| 5|
-|```#blastn-gapextend```| ```<int>```|2 |
-|```#blastn-evalue```| ```<float>```|0.0001 |
+|```#blastn-gapextend```| ```<int>```| 2 |
+|```#blastn-evalue```| ```<float>```| 0.0001 |
 |```#blastn-culling_limit```| ```<int>```| 2|
-|```#blastn-perc_identity```|```<int>``` |90 |
+|```#blastn-perc_identity```|```<int>``` | 90 |
 |```#blastn-min-alignment-length```| ```<int>```| 45|
 
 #####EMAL Parameters
