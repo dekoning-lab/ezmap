@@ -20,7 +20,7 @@ currentChunk = 0
 outputFile = None
 outputString = ""
 
-# This function retrieves both the Genbank IDs as well as the genome lengths
+# This function retrieves both the Nucleotide IDs as well as the genome lengths
 # from a .fna file containing all the genomes used in the previous BLAST step
 def getNucleotideIDs(fileName):
     with open(fileName) as input_file:
@@ -40,7 +40,7 @@ def getNucleotideIDs(fileName):
                 genomeLength += len(line) - 1
 
 
-# Process a section in the file to obtain a NCBI Taxonomy ID corresponding to the relative Genbank IDs
+# Process a section in the file to obtain a NCBI Taxonomy ID corresponding to the relative Nucleotide IDs
 def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueue):
     outputArray = []
 
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         try:
             outputFile = open(outputPrefix + '-combinedGenomeData.csv', 'w+')
         except:
-            print('Unable to open output file please check that the prefix has been provided')
+            print('Unable to open output file, please check that the prefix has been provided')
             runEMAL = False
 
         # Check to see if the maximum number of threads was correctly specified
@@ -169,10 +169,10 @@ if __name__ == '__main__':
 
         # If all commmandline options pass screening then start run
         if runEMAL == True:
-            print('Determining Genebank ID and Caluclating Genome Lengths.....')
+            print('Determining Genebank ID and Calculating Genome Lengths.....')
             getNucleotideIDs(blastGenomeDBPath)
 
-            print('Gather relavent taxon IDs.....')
+            print('Gather relevant taxonomic IDs.....')
             readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
 
             print('Information has been written to file... exiting')
