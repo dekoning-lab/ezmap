@@ -18,6 +18,7 @@ BLASTFileArray = []
 outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
 logfile = ''
 outputDir = os.getcwd() + '/'
+combinedGenomeDataFile = ''
 
 information = {}
 pi = []
@@ -30,7 +31,7 @@ genomeTaxon = {}
 numberOfThreads = 4
 acceptanceValue = 0.0001
 verbose = False
-fileExtension = None
+fileExtension = '.tsv'
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -40,6 +41,7 @@ def parseCommandLineArguments():
     global outputFileName
     global acceptanceValue
     global fileExtension
+    global combinedGenomeDataFile
 
     # Creates argument parser instance
     parser = argparse.ArgumentParser()
@@ -47,6 +49,8 @@ def parseCommandLineArguments():
     # Required Arguments
     parser.add_argument("-d", "--directory", type=str, required=True,
                         help="Provide a complete path to a directory containing the files of interest")
+    parser.add_argument("-i", "--combinedGenomeData", type=str, required=True,
+                        help="Full path to the result file from EMAL-DataPrep")
 
     # Optional Arguments
     parser.add_argument("-v", "--verbose", action="store_true",
@@ -55,16 +59,19 @@ def parseCommandLineArguments():
                         help="Number of concurrent threads to run. Default value is 1")
     parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
-    parser.add_argument("-a", "--acceptanceCutoff", type=float,
+    parser.add_argument("-m", "--maximumLikelihoodConvergenceCriterion", type=float,
                         help="Indicate the acceptable difference with range of this numebr. Default: 0.1")
     parser.add_argument("-o", "--outputdir", type=str,
                         help="Path to a directory where output should be placed")
     parser.add_argument("-e", "--fileext", type=str,
                         help="file extension of blast results")
+
     args = parser.parse_args()
 
     # Set arguments
     BLASTFileDir = args.directory
+    combinedGenomeDataFile = args.combinedGenomeData
+
     if not BLASTFileDir.endswith("/"):
         BLASTFileDir += '/'
     if args.threads is not None:
@@ -73,8 +80,8 @@ def parseCommandLineArguments():
         outputFileName = args.csvname
     if args.verbose:
         verbose = True
-    if args.acceptanceCutoff is not None:
-        acceptanceValue = args.acceptanceCutoff
+    if args.maximumLikelihoodConvergenceCriterion is not None:
+        acceptanceValue = args.maximumLikelihoodConvergenceCriterion
     if args.outputdir is not None:
         outputDir = args.outputdir
         if not outputDir.endswith('/'):
@@ -111,6 +118,7 @@ def checkForEmptyFile(path):
 # Gathers initial information about genomes to be evaluated
 def gatherInformation(fileList):
     global totalGenomeSizes
+    global combinedGenomeDataFile
     totalNumberOfReads = 0
     # Dictionary that contains direct associations between genome and taxon ID's
     genomeTaxon = {}
@@ -120,7 +128,7 @@ def gatherInformation(fileList):
     information = {}
 
     # Create Nucleotide ID and Taxonomy ID associations
-    inputFile = open("combinedGenomeData.csv", "r")
+    inputFile = open(combinedGenomeDataFile, "r")
     for line in inputFile:
         genomeID, taxonID, genomeLen = line.split(',')
         genomeTaxon[int(genomeID)] = [int(taxonID), int(genomeLen)]
@@ -461,107 +469,82 @@ if __name__ == '__main__':
         random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + '.txt', 'w+')
     logfile.write('Analysis on files within:' + BLASTFileDir)
 
-    # Determines if EMAL should use verbose mode
     if verbose:
         print("Number of Threads: " + str(numberOfThreads))
         print("Acceptance Value: " + str(acceptanceValue))
-
-        # Get all files in the directory specified
         print("Grabbing list of files to process from:\n" + BLASTFileDir)
-        getBlastFileList(BLASTFileDir)
+
+    # Get all files in the directory specified
+    getBlastFileList(BLASTFileDir)
+
+    if verbose:
         print(str(len(BLASTFileArray)) + " files found to process:")
         for x in BLASTFileArray:
             print(x)
 
-        # If data is present begin analysis
-        if len(BLASTFileArray) > 0:
-            # Determine necessary initial information
+    if len(BLASTFileArray) > 0:
+        if verbose:
             print("Preparing to run...")
-            information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
 
-            # Calculate initial values for Pi Vector
+        # Determine necessary initial information
+        information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
+
+        if verbose:
             print("Starting run...")
             print("1. Calulating PiVector...")
-            information, pi = makePiVectorIndicies(information)
-            pi = initializePiVector(BLASTFileArray, genomeTaxon)
-            pi = standardizeVector(pi)
+
+        # Calculate initial values for Pi Vector
+        information, pi = makePiVectorIndicies(information)
+        pi = initializePiVector(BLASTFileArray, genomeTaxon)
+        pi = standardizeVector(pi)
+
+        if verbose:
             print(pi)
-
-            # Calculate dictionary of maximum likelihood estimates
             print("3.Initialzing MLEs...")
-            pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
-            pDiction = standardizePDictionary(pDiction)
 
-            # Starting the calculation of EM algorithm steps
+        # Calculate dictionary of maximum likelihood estimates
+        pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
+        pDiction = standardizePDictionary(pDiction)
+
+        if verbose:
             print("4.Starting Abundance Calculation...")
             print("This could take a while perhaps you would like to grab a beverage...")
-            start = time.time()  # Grab the start time
 
-            count = 0  # number of cycles
+        start = time.time()  # Grab the start time
+        # Starting the calculation of EM algorithm steps
+        count = 0  # number of cycles
 
-            # Completes one set of E & M step calculations and retain previous Pi Vector for comparison purposes
-            oldPi = pi
-            outputQ = eStep(pDiction, pi, numberOfThreads, information)
-            newPi = mStep(pi, outputQ, numberOfThreads)
+        # Completes one set of E & M step calculations and retain previous Pi Vector for comparison purposes
+        oldPi = pi
+        outputQ = eStep(pDiction, pi, numberOfThreads, information)
+        newPi = mStep(pi, outputQ, numberOfThreads)
+        count += 1
+        accept = compareLists(oldPi, newPi, acceptanceValue)
+        logfile.write(str(count) + ' Cycles completed\n')
+
+        # If acceptance criteria are not met E & M caluclations continue
+        while accept == False:
+            oldPi = newPi
+            outputQ = eStep(pDiction, newPi, numberOfThreads, information)
+            newPi = mStep(newPi, outputQ, numberOfThreads)
             count += 1
-            accept = compareLists(oldPi, newPi, acceptanceValue)
             logfile.write(str(count) + ' Cycles completed\n')
+            accept = compareLists(oldPi, newPi, acceptanceValue)
 
-            # If acceptance criteria are not met E & M caluclations continue
-            while accept == False:
-                oldPi = newPi
-                outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-                newPi = mStep(newPi, outputQ, numberOfThreads)
-                count += 1
-                logfile.write(str(count) + ' Cycles completed\n')
-                accept = compareLists(oldPi, newPi, acceptanceValue)
+            if verbose:
                 print(str(count) + ' Cycles completed')
 
-            newPi = standardizeVector(newPi)
-            end = time.time()  # Grab the end time
-
-            # Complete process and output relevant information to CSV file
+        newPi = standardizeVector(newPi)
+        end = time.time()  # Grab the end time
+        if verbose:
             print("Abundance Calculations took: " + str(end - start))
             print("5. Calculation Complete! Took " + str(count) + " cycles")
-            print("6. Printing results in CSV format!")
-            outputCSV(information, newPi)
-        else:
-            print('No files found to process')
-        print("Exiting...")
+            print("6. Outputing results to CSV file!")
+
+        # Complete process and output relevant information to CSV file
+        outputCSV(information, newPi)
     else:
-        # Get all files in the directory specified
-        getBlastFileList(BLASTFileDir)
-        if len(BLASTFileArray) > 0:
-            # Get all files in the directory specified
-            information, genomeTaxon, totalNumberOfReads = gatherInformation(BLASTFileArray)
+        print('No files found to process')
 
-            # Calculate initial values for Pi Vector
-            information, pi = makePiVectorIndicies(information)
-            pi = initializePiVector(BLASTFileArray, genomeTaxon)
-            pi = standardizeVector(pi)
-
-            # Calculate dictionary of maximum likelihood estimates
-            pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
-            pDiction = standardizePDictionary(pDiction)
-
-            # Starting the calculation of EM algorithm steps
-            # Completes one set of E & M step calculations and retain previous Pi Vector for comparison purposes
-            oldPi = pi
-            outputQ = eStep(pDiction, pi, numberOfThreads, information)
-            newPi = mStep(pi, outputQ, numberOfThreads)
-            accept = compareLists(oldPi, newPi, acceptanceValue)
-
-            # If acceptance criteria are not met E & M caluclations continue
-            while accept == False:
-                oldPi = newPi
-                outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-                newPi = mStep(newPi, outputQ, numberOfThreads)
-                accept = compareLists(oldPi, newPi, acceptanceValue)
-
-            newPi = standardizeVector(newPi)
-
-            # Complete process and output relevant information to CSV file
-            outputCSV(information, newPi)
-        else:
-            print('No files found to process')
-        print("Exiting...")
+    print("Calculations completed sucessfully!")
+    print("Exiting...")
