@@ -5,7 +5,7 @@ import time
 
 allInformation = {}
 fileName = "/hyperion/work/patrick/quakeDataProcessing/EMAL/new.xml"
-SRRFileDirPath = "/hyperion/work/patrick/quakeData/BLASTResults/fasta/"
+SRRFileDirPath = "/hyperion/work/patrick/quakeData/BLASTResults/fasta2/LEN50/"
 outputFile = open('new.csv', 'w+')
 
 MPTList = []
