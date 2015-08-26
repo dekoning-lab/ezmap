@@ -1,4 +1,14 @@
-__author__ = 'patrickczeczko'
+# =================================================
+# EMAL-DataPrep
+# Version: 1.0
+#
+# Author: Patrick Czeczko
+# Made at: de Koning Lab
+# Link: http://lab.jasondk.io
+# Github:
+#
+# Documentation can be found on the github page.
+# =================================================
 
 import multiprocessing as mp
 import os, sys
@@ -7,11 +17,11 @@ allInformation = {}
 numOfDataChunks = 0
 currentChunk = 0
 
-outputPath = ""
+outputFile = None
 outputString = ""
 
-# This function retrieves both the Genbank IDs as well as the genome lenghts
-# from a .fna file containg all the genomes used in the previous BLAST step
+# This function retrieves both the Nucleotide IDs as well as the genome lengths
+# from a .fna file containing all the genomes used in the previous BLAST step
 def getNucleotideIDs(fileName):
     with open(fileName) as input_file:
         genomeLength = 0
@@ -30,7 +40,7 @@ def getNucleotideIDs(fileName):
                 genomeLength += len(line) - 1
 
 
-# Process a section in the file to obtain a NCBI Taxonomy ID corresponding to the relative Genbank IDs
+# Process a section in the file to obtain a NCBI Taxonomy ID corresponding to the relative Nucleotide IDs
 def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueue):
     outputArray = []
 
@@ -70,7 +80,7 @@ def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueu
 
 
 # Reads in the file information and parses the taxonomy file in sections so that it can be processed in parallel
-def readInTaxonInformation(fileName, cpu_count, currentChunk, outputFile):
+def readInTaxonInformation(fileName, cpu_count, currentChunk):
     # get file size and set chuck size
     filesize = os.path.getsize(fileName)
     split_size = 100 * 1024 * 1024
@@ -125,22 +135,46 @@ def readInTaxonInformation(fileName, cpu_count, currentChunk, outputFile):
 
 
 if __name__ == '__main__':
-    blastGenomeDBPath = sys.argv[1]
-    gitaxiddmpPath = sys.argv[2]
-    maxThreads = int(sys.argv[3])
-    outputPath = str(sys.argv[4])
+    if len(sys.argv) == 5:
+        blastGenomeDBPath = sys.argv[1]
+        gitaxiddmpPath = sys.argv[2]
+        maxThreads = sys.argv[3]
+        outputPrefix = sys.argv[4]
 
-    if not outputPath.endswith('/'):
-        outputPath = outputPath + '/'
+        runEMAL = True
 
-    outputFile = open(outputPath + 'combinedGenomeData.csv', 'w+')
+        # Check to see if outfile can be created
+        try:
+            outputFile = open(outputPrefix + '-combinedGenomeData.csv', 'w+')
+        except:
+            print('Unable to open output file, please check that the prefix has been provided')
+            runEMAL = False
 
-    outputInfo = []
+        # Check to see if the maximum number of threads was correctly specified
+        try:
+            maxThreads = int(maxThreads)
+        except:
+            print('Maximum number of threads was not provided as an integer. Please check command line options')
+            runEMAL = False
 
-    print('Determining Genebank ID and Caluclating Genome Lengths.....')
-    getNucleotideIDs(blastGenomeDBPath)
+        # Check to see if blast db directory exists
+        if not os.path.isfile(blastGenomeDBPath):
+            print('The path to the BLAST database does not exist.')
+            runEMAL = False
 
-    print('Gather relavent taxon IDs.....')
-    readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk, outputFile)
+        # Check to see if path to gi_taxid_nucl.dmp exists
+        if not os.path.isfile(gitaxiddmpPath):
+            print('The path to the gi_taxid_nucl.dmp file does not exist.')
+            runEMAL = False
 
-    print('Information has been written to file... exiting')
+        # If all commmandline options pass screening then start run
+        if runEMAL == True:
+            print('Determining Genebank ID and Calculating Genome Lengths.....')
+            getNucleotideIDs(blastGenomeDBPath)
+
+            print('Gather relevant taxonomic IDs.....')
+            readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
+
+            print('Information has been written to file... exiting')
+    else:
+        print('Missing Arguments... Exiting...')
