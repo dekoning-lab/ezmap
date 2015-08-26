@@ -1,4 +1,14 @@
-__author__ = 'patrickczeczko'
+# =================================================
+# EMAL-Main
+# Version: 1.0
+#
+# Author: Patrick Czeczko
+# Made at: de Koning Lab
+# Link: http://lab.jasondk.io
+# Github:
+#
+# Documentation can be found on the github page.
+# =================================================
 
 # Required Modules
 import os

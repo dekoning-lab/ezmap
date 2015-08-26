@@ -1,12 +1,14 @@
-# ===================================================================
-# EMAL
+# =================================================
+# EMAL-DataPrep
+# Version: 1.0
 #
-# Author: Patrick Czeczko @ de Koning Lab
-# Version: 0.1a
+# Author: Patrick Czeczko
+# Made at: de Koning Lab
 # Link: http://lab.jasondk.io
 # Github:
 #
-# ===================================================================
+# Documentation can be found on the github page.
+# =================================================
 
 import multiprocessing as mp
 import os, sys

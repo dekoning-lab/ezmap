@@ -1,4 +1,14 @@
-__author__ = 'patrickczeczko'
+# =================================================
+# EMAL-Post
+# Version: 1.0
+#
+# Author: Patrick Czeczko
+# Made at: de Koning Lab
+# Link: http://lab.jasondk.io
+# Github:
+#
+# Documentation can be found on the github page.
+# =================================================
 
 from Bio import Entrez
 import csv, os, sys
@@ -28,7 +38,6 @@ def parseCommandLineArguments():
     # Required Arguments
     parser.add_argument("-f", "--file", type=str, required=True,
                         help="Provide a complete path to a file containing the output from EMAL")
-
     parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv"
                              "Warning: if file already exists it will be over written")
