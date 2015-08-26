@@ -8,14 +8,14 @@ VMAP is a pipeline designed to allow for the estimation community structure from
   - Small number of dependecies 
 
 ### Dependecies
-Because VMAP was designed to limit the number dependencies it runs using only Python3 and a select few required modules.
+VMAP was designed to limit the number dependencies, it runs using only Python3 and a select few required modules.
 
 - Python3 
 - [NumPy & SciPy](http://docs.scipy.org/doc/)
 - [Biopython](http://biopython.org)
 
 #### Programs Used by VMAP
-VMAP uses and number of pieces of free open source software to allow for it to generate all that it does.
+VMAP uses a number of free open source software to allow to generate results.
 
 - [PRINSEQ](http://prinseq.sourceforge.net)
 - [Bowtie 2](http://bowtie-bio.sourceforge.net)
@@ -34,7 +34,14 @@ VMAP uses and number of pieces of free open source software to allow for it to g
  2. Unzip it.
  3. Place the entire VMAP folder somewhere accessible on your computer.
  4. Make sure to have installed Numpy, Scipy, & Biopython.
-	 - To test this run the following in the command line editor.
+
+Biopython can be installed using a simple terminal command.  This command requires that your system has pip3 installed (pip3 is a python package manager that can be installed through the command line). Installing Biopython using pip3 will also automatically install numpy and scipy.
+
+```
+pip3 install biopython
+```
+
+To test that biopython is installed run the following in the command line editor.
 
 ```python
 python3
@@ -43,13 +50,13 @@ import scipy
 import Bio
 ```
 
-Once that is done you have VMAP correctly setup on your computer.
+Once that is done you have all the VMAP prerequisites correctly setup on your computer.
 
 ##Configuration
 
 Before running VMAP it is important to have a few things setup.
 
- 1. Create a new folder where all of the results will be placed.
+ 1. Create a **new folder** where all of the results will be placed.
  2. Make sure that you have moved all the original FASTQ files into a folder that contains only those files.
  3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section bellow to see what can be modified to suit your needs.*
 
@@ -77,8 +84,51 @@ The above command will start sumbitting the different VMAP steps to the SLURM jo
 |-mt or --maxThreads| Maximum number of simultaneous threads VMAP can run. *Note VMAP can only run as many threads as there are on a single node.*| 1 to 32|
 
 ####param.config Options
+The config file is designed to allow a number of parameters to be set as hardcoded values rather then command line options. Each option occupies a single line within the file. The option always starts with a # and has a = between the option name and its value. When modifying these paramters please ensure there are no space before or after the =.
 
+#####General Parameters (Required)
+| Parameter     | Description   | Possible Values|
+|---|---|---|---|
+|```#project-name```|The name of the project. This will be displayed exactly as spelled in the final report | ```<string>```|
+|```#python3-path```|The full file path to python3 within the system. If python3 is installed across the system then enter only ```python3```| /path/python3 |
 
+#####SLURM Parameters
+| Parameter     | Description   | Possible Values| Default |
+|---|---|---|---|
+|```#slurm-account```| The account on the SLURM job manager| ```<string>``` | NONE |
+|```#slurm-share```|Where the job will share multiple jobs on the same node| yes or no | yes|
+|```#slurm-partition```|The partition that the job will be run on|  ```<string>```|NONE |
+|```#slurm-max-num-threads```|The maximum number of threads that can be assigned to tasks that are multithreaded | 1-32| 1|
 
-    
+#####PRINSEQ Parameters
+| Parameter     | Description   | Possible Values| Default |
+|---|---|---|---|
+|```#prinseq-min_qual_score```|Filter sequence with at least one quality score below min_qual_score.|```<int>```|21|
+|```#prinseq-lc_method```| Method to filter low complexity sequences| dust or entropy|dust |
+|```#prinseq-lc_threshold```| The threshold value used to filter sequences by sequence complexity. *The dust method uses this as maximum allowed score and the entropy method as minimum allowed value.*|```<int>``` | 7|
 
+#####BLAST Parameters
+| Parameter     | Description   | Possible Values| Default |
+|---|---|---|---|
+|```#blastn-db-path```| | | |
+|```#blastn-dust```| | | |
+|```#blastn-reward```| | | |
+|```#blastn-penalty```| | | |
+|```#blastn-word_size```| | | |
+|```#blastn-gapopen```| | | |
+|```#blastn-gapextend```| | | |
+|```#blastn-evalue```| | | |
+|```#blastn-culling_limit```| | | |
+|```#blastn-perc_identity```| | | |
+|```#blastn-min-alignment-length```| | | |
+
+#####EMAL Parameters
+| Parameter     | Description   | Possible Values| Default |
+|---|---|---|---|
+|```#emal-gi-taxid-nucldmp-path```|The full file path to the gi-taxid-nucldmp file.|```<string>``` |NONE |
+|```#emal-acceptance-value```| The value by which the difference between estimate steps are checked. *If the difference between each value between steps is < the value then the estimation ends.*| ```<float>``` |0.0001 |
+
+#####Output Parameters
+| Parameter     | Description   | Possible Values| Default |
+|---|---|---|---|
+|```#extraTableSummedOver```|An additonal table is generated for the final report which shows  the caluaclated genome relative abundances summed by a different category then just the species. *Note: The chosen value must be spelled exactly as shown for this to function.*|SuperKingdom, Q1, Order, Family, SubFamily, Genus |Family|
