@@ -24,7 +24,7 @@ from functools import reduce
 BLASTFileDir = ""
 BLASTFileArray = []
 
-# Output Filenames
+# Output file names
 outputFileName = "output-" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)) + ".csv"
 logfile = ''
 outputDir = os.getcwd() + '/'
@@ -70,7 +70,7 @@ def parseCommandLineArguments():
     parser.add_argument("-c", "--csvname", type=str,
                         help="Indicate a filename for the file output csv to be written to. Default: output.csv")
     parser.add_argument("-m", "--maximumLikelihoodConvergenceCriterion", type=float,
-                        help="Indicate the acceptable difference with range of this numebr. Default: 0.1")
+                        help="Indicate the acceptable difference within the range of this number. Default: 0.0001")
     parser.add_argument("-o", "--outputdir", type=str,
                         help="Path to a directory where output should be placed")
     parser.add_argument("-e", "--fileext", type=str,
@@ -179,7 +179,7 @@ def makePiVectorIndicies(information):
     return information, vector
 
 
-# Processes one file to initalize the Pi vector
+# Processes one file to initialize the Pi vector
 # Returns a list which is placed into the output queue
 def processOnefile(info):
     piRow = [0.0 for col in range(len(pi))]
@@ -430,7 +430,7 @@ def outputCSV(information, pi):
     taxonIDs = ["TaxonID"]
     abundances = ["Relative Abundancies"]
 
-    # Places all abundancies in the correct locations
+    # Places all abundances in the correct locations
     for x in pi:
         abundances.append(x)
         genomeIDs.append(0)
@@ -501,7 +501,7 @@ if __name__ == '__main__':
 
         if verbose:
             print("Starting run...")
-            print("1. Calulating PiVector...")
+            print("1. Calculating PiVector...")
 
         # Calculate initial values for Pi Vector
         information, pi = makePiVectorIndicies(information)
@@ -510,7 +510,7 @@ if __name__ == '__main__':
 
         if verbose:
             print(pi)
-            print("3.Initialzing MLEs...")
+            print("3.Initializing MLEs...")
 
         # Calculate dictionary of maximum likelihood estimates
         pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
@@ -532,7 +532,7 @@ if __name__ == '__main__':
         accept = compareLists(oldPi, newPi, acceptanceValue)
         logfile.write(str(count) + ' Cycles completed\n')
 
-        # If acceptance criteria are not met E & M caluclations continue
+        # If acceptance criteria are not met E & M calculations continue
         while accept == False:
             oldPi = newPi
             outputQ = eStep(pDiction, newPi, numberOfThreads, information)
@@ -549,12 +549,12 @@ if __name__ == '__main__':
         if verbose:
             print("Abundance Calculations took: " + str(end - start))
             print("5. Calculation Complete! Took " + str(count) + " cycles")
-            print("6. Outputing results to CSV file!")
+            print("6. Outputting results to CSV file!")
 
         # Complete process and output relevant information to CSV file
         outputCSV(information, newPi)
     else:
         print('No files found to process')
 
-    print("Calculations completed sucessfully!")
+    print("Calculations completed successfully!")
     print("Exiting...")
