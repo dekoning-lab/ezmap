@@ -74,6 +74,32 @@ python3 VMAP.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/ -mt 4
 ```
 The above command will start sumbitting the different VMAP steps to the SLURM job manager. 
 
+## Viewing Results
+
+VMAP provides 2 different methods for viewing results. The program will generate an interactive html report as well as number of csv files containing the results. 
+
+When running the program the project folder that is initially specified will contain the following items:
+
+ - Folders with results
+ - HTML Report
+ - csv result files
+
+The folder structure will be inside of the project directory:
+```
+->projectDir
+	->1-Cleaning
+	->2-HumanMapping
+	->3-UnmappedCollection
+	->4-OrganismMapping
+	->5-RelativeAbundanceEstimation
+	->6-FinalResult
+		->information
+			csv files
+		->WEB
+		report.html
+```
+All of the csv files containing results will be found within projectDirecotry/6-FinalResult/information/
+
 ##Parameters
 
 ####Command  Line Options
@@ -108,19 +134,20 @@ The config file is designed to allow a number of parameters to be set as hardcod
 |```#prinseq-lc_threshold```| The threshold value used to filter sequences by sequence complexity. *The dust method uses this as maximum allowed score and the entropy method as minimum allowed value.*|```<int>``` | 7|
 
 #####BLAST Parameters
-| Parameter     | Description   | Possible Values| Default |
-|---|---|---|---|
-|```#blastn-db-path```| | | |
-|```#blastn-dust```| | | |
-|```#blastn-reward```| | | |
-|```#blastn-penalty```| | | |
-|```#blastn-word_size```| | | |
-|```#blastn-gapopen```| | | |
-|```#blastn-gapextend```| | | |
-|```#blastn-evalue```| | | |
-|```#blastn-culling_limit```| | | |
-|```#blastn-perc_identity```| | | |
-|```#blastn-min-alignment-length```| | | |
+Descriptions for the BLAST parameters can be found at http://www.ncbi.nlm.nih.gov/books/NBK279675/
+| Parameter     | Possible Values| Default |
+|---|---|---|
+|```#blastn-db-path```| ```<string>```| NONE|
+|```#blastn-dust```| no| no|
+|```#blastn-reward```| ```<int>```| 1|
+|```#blastn-penalty```| ```<int>```| 3|
+|```#blastn-word_size```| ```<int>```| 12|
+|```#blastn-gapopen```| ```<int>```| 5|
+|```#blastn-gapextend```| ```<int>```|2 |
+|```#blastn-evalue```| ```<float>```|0.0001 |
+|```#blastn-culling_limit```| ```<int>```| 2|
+|```#blastn-perc_identity```|```<int>``` |90 |
+|```#blastn-min-alignment-length```| ```<int>```| 45|
 
 #####EMAL Parameters
 | Parameter     | Description   | Possible Values| Default |
@@ -132,3 +159,4 @@ The config file is designed to allow a number of parameters to be set as hardcod
 | Parameter     | Description   | Possible Values| Default |
 |---|---|---|---|
 |```#extraTableSummedOver```|An additonal table is generated for the final report which shows  the caluaclated genome relative abundances summed by a different category then just the species. *Note: The chosen value must be spelled exactly as shown for this to function.*|SuperKingdom, Q1, Order, Family, SubFamily, Genus |Family|
+
