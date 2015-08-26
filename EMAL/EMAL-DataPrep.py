@@ -135,17 +135,21 @@ def readInTaxonInformation(fileName, cpu_count, currentChunk):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         blastGenomeDBPath = sys.argv[1]
         gitaxiddmpPath = sys.argv[2]
         maxThreads = sys.argv[3]
-        outputPrefix = sys.argv[4]
+        outputDir = sys.argv[4]
+        outputPrefix = sys.argv[5]
 
         runEMAL = True
 
+        if not outputDir.endswith('/'):
+            outputDir += '/'
+
         # Check to see if outfile can be created
         try:
-            outputFile = open(outputPrefix + '-combinedGenomeData.csv', 'w+')
+            outputFile = open(outputDir + outputPrefix + '-combinedGenomeData.csv', 'w+')
         except:
             print('Unable to open output file, please check that the prefix has been provided')
             runEMAL = False
