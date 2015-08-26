@@ -47,20 +47,24 @@ The user may again provide their own dump file if working with a custom dataset 
 |Path to all.fna| 1| Full file path| */path/to/all.fna*|
 |Path to gi_taxid_nucl.dmp|2 |Full file path| */path/to/gi_taxid_nucl.dmp*|
 |Number of threads to run|3|1 - 32| *4*|
-|Output file name|4|String|*genomeDataOutput.csv*|
+|Output file prefix|4|String|*prefix*|
 
 ####Running EMAL-DataPrep
+
+**NOTE: if the same prefix is used with multiple runs of EMAL-DataPrep the output file will be overwritten**
 
 To run EMAL-DataPrep ensure that the file format guidelines above have been followed. 
 
 
  1. Open a new terminal window.
- 2. Naviagte to the folder containing EMAL-DataPrep.py
+ 2. Navigate to the folder containing EMAL-DataPrep.py
  3. Run the following command:
 ```
-python3 EMAL-DataPrep.py /path/to/all.fna /path/to/gi_taxid_nucl.dmp 4 genomeDataOutput.csv
+python3 EMAL-DataPrep.py /path/to/all.fna /path/to/gi_taxid_nucl.dmp 4 project127
 ```
-EMAL-DataPrep is now running and will finish by providing a new cvs file with your choosen output name. 
+EMAL-DataPrep is now running and will finish by providing a new cvs file with your choosen output name.
+
+This run of the program would give us the output file of ***project127-combinedGenomeData.csv*** when complete.
 
 ###2. EMAL - Main
 EMAL-Main is the main step of the program that performs the estimation of community structure. It has a number of different command line arguments.
@@ -70,6 +74,7 @@ EMAL-Main is the main step of the program that performs the estimation of commun
 | Option     | Description   | Possible Values|
 |----|----|----|
 |-d or --directory| The full path to the folder containing all the tabular blast results to be used in the analysis. | Full file path |
+|-i or --combinedGenomeData| The full path to the cvs file containing the output EMAL-DataPrep | Full file path |
 
 ####Optional Command Line Options
 
@@ -82,5 +87,60 @@ EMAL-Main is the main step of the program that performs the estimation of commun
 |-o or --outputdir| The directory where the output file is to be placed.| Full file path | The current working directory |
 |-e or --fileext|The file extension of all files contain tabular BLAST results to be processed | .tsv| .tsv|
 
+####Running EMAL-Main
+
+1. Open a new terminal window.
+2. Navigate to the folder containing EMAL-Main.py
+3. Run the following command:
+```
+python3 EMAL-Main.py -d /path/to/blast/results/ -i /path/to/prefix-combinedGenomeData.csv
+```
+Above is the most basic command that will allow EMAL-Main to compute results. The command line options documented above can be used to fine tune the expected results. 
+
+The result of EMAL-Main will be a cvs file with three columns. An example is presented below:
+```
+GenomeID,TaxonID,Relative Abundancies,
+9633069,32604,0.3333333333333333,
+548558394,166122,0.6666666666666666,
+```
 
 ###3. EMAL - Post
+
+EMAL-Post is the final stage in the EMAL process, it functions to convert the results of EMAL-Main into a file containing related NCBI taxonomy information.  It does this by contacting the Entrez database and requesting the information about each taxonomy. 
+
+*Note: if you have chosen to use your own data where taxonomy identifiers are not the same as this present within the NCBI Taxonomy database EMAL-Post will not work with your dataset.*
+
+####Requirements
+EMAL-Post requires an active internet connection.
+
+Prior to runnning EMAL-Post we must ensure that our system has **Biopython** installed. This can be done using a simple terminal command.  This command requires that your system has pip3 installed. (pip3 is a package manager that can be installed through the command line)
+
+```
+pip3 install biopython
+```
+
+Once this completes python now has the required Biopython package installed to run EMAL-Post.
+
+####Required Command Line Options
+
+| Option     | Description   | Possible Values|
+|----|----|----|
+|-f or --file| The full path to the file containing the output from EMAL-Main | Full file path |
+
+
+####Optional Command Line Options
+
+| Option     | Description   | Possible Values| Default Value|
+|----|----|----|---|
+|-c or --csvname|A file name for the output file containing the final results. ***Note: if another file exists within the output directory with the same name it will be overwritten*** |```<string>``` | output.csv |
+|-o or --outputdir|A full path to a existing directory foe the output file to be placed.| Fule file path| None|
+
+#### Running EMAL-Post
+
+1. Open a new terminal window.
+2. Navigate to the folder containing EMAL-Post.py
+3. Run the following command:
+```
+python3 EMAL-Post.py -f /path/to/emal-main-output.csv
+```
+The above command is the most basic EMAL-Post command that can be run. It will take the result from EMAL main and convert them into a cvs file that contains all of the taxonomic information for each species calculated genome relative abundance. 
