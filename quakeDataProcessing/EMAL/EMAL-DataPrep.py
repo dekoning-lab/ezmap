@@ -1,4 +1,12 @@
-__author__ = 'patrickczeczko'
+# ===================================================================
+# EMAL
+#
+# Author: Patrick Czeczko @ de Koning Lab
+# Version: 0.1a
+# Link: http://lab.jasondk.io
+# Github:
+#
+# ===================================================================
 
 import multiprocessing as mp
 import os, sys
@@ -157,6 +165,7 @@ if __name__ == '__main__':
             print('The path to the gi_taxid_nucl.dmp file does not exist.')
             runEMAL = False
 
+        # If all commmandline options pass screening then start run
         if runEMAL == True:
             print('Determining Genebank ID and Caluclating Genome Lengths.....')
             getNucleotideIDs(blastGenomeDBPath)
