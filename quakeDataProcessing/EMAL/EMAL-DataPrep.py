@@ -7,7 +7,7 @@ allInformation = {}
 numOfDataChunks = 0
 currentChunk = 0
 
-outputFile = open('combinedGenomeData.csv', 'w+')
+outputFile = None
 outputString = ""
 
 # This function retrieves both the Genbank IDs as well as the genome lengths
@@ -125,16 +125,45 @@ def readInTaxonInformation(fileName, cpu_count, currentChunk):
 
 
 if __name__ == '__main__':
-    blastGenomeDBPath = sys.argv[1]
-    gitaxiddmpPath = sys.argv[2]
-    maxThreads = sys.argv[3]
+    if len(sys.argv) == 5:
+        blastGenomeDBPath = sys.argv[1]
+        gitaxiddmpPath = sys.argv[2]
+        maxThreads = sys.argv[3]
+        outputPrefix = sys.argv[4]
 
-    outputInfo = []
+        runEMAL = True
 
-    print('Determining Genebank ID and Caluclating Genome Lengths.....')
-    getNucleotideIDs(blastGenomeDBPath)
+        # Check to see if outfile can be created
+        try:
+            outputFile = open(outputPrefix + '-combinedGenomeData.csv', 'w+')
+        except:
+            print('Unable to open output file please check that the prefix has been provided')
+            runEMAL = False
 
-    print('Gather relavent taxon IDs.....')
-    readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
+        # Check to see if the maximum number of threads was correctly specified
+        try:
+            maxThreads = int(maxThreads)
+        except:
+            print('Maximum number of threads was not provided as an integer. Please check command line options')
+            runEMAL = False
 
-    print('Information has been written to file... exiting')
+        # Check to see if blast db directory exists
+        if not os.path.isfile(blastGenomeDBPath):
+            print('The path to the BLAST database does not exist.')
+            runEMAL = False
+
+        # Check to see if path to gi_taxid_nucl.dmp exists
+        if not os.path.isfile(gitaxiddmpPath):
+            print('The path to the gi_taxid_nucl.dmp file does not exist.')
+            runEMAL = False
+
+        if runEMAL == True:
+            print('Determining Genebank ID and Caluclating Genome Lengths.....')
+            getNucleotideIDs(blastGenomeDBPath)
+
+            print('Gather relavent taxon IDs.....')
+            readInTaxonInformation(gitaxiddmpPath, maxThreads, currentChunk)
+
+            print('Information has been written to file... exiting')
+    else:
+        print('Missing Arguments... Exiting...')
