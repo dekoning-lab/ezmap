@@ -28,28 +28,23 @@ def getPRINSEQResults(fileDir):
         if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
 
-            # output = open(fileDir + os.path.splitext(file)[0] + '.out')
-            # fileID = output.readline().split(' ')[0]
-
-            fileID = file.split('.')[0]
+            output = open(fileDir + os.path.splitext(file)[0] + '.out')
+            fileID = output.readline().split(' ')[0]
 
             for line in inFile:
-                # print(line.split(':'))
                 if 'Input sequences:' in line:
-                    numReads = int(line.split(']')[2].split(':')[1].strip().replace(',', ''))
+                    numReads = int(line.split(':')[1].strip().replace(',', ''))
                 elif 'Input mean length:' in line:
-                    avgReadLen = float(line.split(']')[2].split(':')[1].strip().replace(',', ''))
+                    avgReadLen = float(line.split(':')[1].strip().replace(',', ''))
                 elif 'Good sequences:' in line:
-                    numGood = int(line.split(']')[2].split('(')[0].split(':')[1].strip().replace(',', ''))
+                    numGood = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
                 elif 'Bad sequences:' in line:
-                    numBad = int(line.split(']')[2].split('(')[0].split(':')[1].strip().replace(',', ''))
-            # print([fileID, numReads, avgReadLen, numGood, numBad])
-            # if :
+                    numBad = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
+
             percentGood = format((float(numGood) / numReads) * 100, '.3f')
             percentBad = format((float(numBad) / numReads) * 100, '.3f')
             prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, percentGood, numBad, percentBad]
     return prinseqInfo
-
 
 def writePrinseqTableFile(dict, outfile):
     with open(outfile, 'w+') as csvfile:
