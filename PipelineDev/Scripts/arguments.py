@@ -12,8 +12,6 @@ def parseCommandLineArguments():
     parser.add_argument("--projDir", type=str, required=True,
                         help="Provide a complete path to a directory where all intermediate files and folders will "
                              "be placed")
-    parser.add_argument("-mt", "--maxThreads", type=str, required=True,
-                        help="The maximum number of threads allowed to run concurrently at any point. Default: 1")
 
     args = parser.parse_args()
 
@@ -23,6 +21,5 @@ def parseCommandLineArguments():
         allArgs['projDir'] = args.projDir
     else:
         allArgs['projDir'] = args.projDir + '/'
-    allArgs['maxThreads'] = args.maxThreads
 
     return allArgs
