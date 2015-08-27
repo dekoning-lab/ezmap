@@ -1,21 +1,21 @@
-# Viral Metagenomics Abunadnacne Pipeline (V0.9b)
+# Ez Metagenomic Abundance Pipeline
 
-VMAP is a pipeline designed to allow for the estimation community structure from DNA sequence data. VMAP has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities.
+EzMap is a pipeline designed to allow for the estimation community structure from DNA sequence data. EzMap has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities.
 
 ## Features
-  - Broad number of use cases
-  - Graphic HTML report generation
-  - Small number of dependecies 
+  - Support for Viral, Bacterial and Fungal community structure estimation
+  - Graphical HTML report generation
+  - Limited number of dependencies 
 
 ### Dependecies
-VMAP was designed to limit the number dependencies, it runs using only Python3 and a select few required modules.
+EzMap was designed to limit the number dependencies, it runs using only Python3 and a select few required modules.
 
 - Python3 
 - [NumPy & SciPy](http://docs.scipy.org/doc/)
 - [Biopython](http://biopython.org)
 
-#### Programs Used by VMAP
-VMAP uses a number of free open source software to allow to generate results.
+#### Programs Used by EzMap
+EzMap uses a number of free open source programs to generate results. They are listed here with links to their webpages.  
 
 - [PRINSEQ](http://prinseq.sourceforge.net)
 - [Bowtie 2](http://bowtie-bio.sourceforge.net)
@@ -30,9 +30,9 @@ VMAP uses a number of free open source software to allow to generate results.
 ## Setup
  
 
- 1. Download the current release of VMAP.
+ 1. Download the current release of EzMap.
  2. Unzip it.
- 3. Place the entire VMAP folder somewhere accessible on your computer.
+ 3. Place the entire EzMap folder somewhere accessible on your computer.
  4. Make sure to have installed Numpy, Scipy, & Biopython.
 
 Biopython can be installed using a simple terminal command.  This command requires that your system has pip3 installed (pip3 is a python package manager that can be installed through the command line). Installing Biopython using pip3 will also automatically install numpy and scipy.
@@ -50,33 +50,33 @@ import scipy
 import Bio
 ```
 
-Once that is done you have all the VMAP prerequisites correctly setup on your computer.
+Once that is done you have all the EzMap prerequisites correctly setup on your computer.
 
 ##Configuration
 
-Before running VMAP it is important to have a few things setup.
+Before running EzMap it is important to have a few things setup.
 
  1. Create a **new folder** where all of the results will be placed.
  2. Make sure that you have moved all the original FASTQ files into a folder that contains only those files.
- 3. Configure the parameters within the param.config file that can be found in the main VMAP folder. *See the parameters section bellow to see what can be modified to suit your needs.*
+ 3. Configure the parameters within the param.config file that can be found in the main EzMap folder. *See the parameters section bellow to see what can be modified to suit your needs.*
 
-## Running VMAP
+## Running EzMap
 
-To run VMAP make sure you have installed it correctly and have configured the files and parameters correctly.
+To run EzMap make sure you have installed it correctly and have configured the files and parameters correctly.
 
 1. Open up a new terminal window.
-2. Navigate to the VMAP folder.
-3. The following is the most basic command that VMAP will run.
+2. Navigate to the EzMap folder.
+3. The following is the most basic command that EzMap will run.
 
 
 ```
-python3 VMAP.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/ -mt 4
+python3 EzMap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/ -mt 4
 ```
-The above command will start sumbitting the different VMAP steps to the SLURM job manager. 
+The above command will start sumbitting the different EzMap steps to the SLURM job manager. 
 
 ## Viewing Results
 
-VMAP provides 2 different methods for viewing results. The program will generate an interactive html report as well as number of csv files containing the results. 
+EzMap provides 2 different methods for viewing results. The program will generate an interactive html report as well as number of csv files containing the results. 
 
 When running the program the project folder that is initially specified will contain the following items:
 
@@ -107,7 +107,7 @@ All of the csv files containing results will be found within projectDirecotry/6-
 | ---|---|---|
 |-d or --directory| The full system path to the folder containing only the original FASTQ files| `/path/to/dir` |
 |--projDir| The full system path to the folder where all output will be placed|`/path/to/dir`|
-|-mt or --maxThreads| Maximum number of simultaneous threads VMAP can run. *Note VMAP can only run as many threads as there are on a single node.*| 1 to 32|
+|-mt or --maxThreads| Maximum number of simultaneous threads EzMap can run. *Note EzMap can only run as many threads as there are on a single node.*| 1 to 32|
 
 ####param.config Options
 The config file is designed to allow a number of parameters to be set as hardcoded values rather then command line options. Each option occupies a single line within the file. The option always starts with a # and has a = between the option name and its value. When modifying these paramters please ensure there are no space before or after the =.
@@ -136,7 +136,7 @@ The config file is designed to allow a number of parameters to be set as hardcod
 #####BLAST Parameters
 Descriptions for the BLAST parameters can be found at http://www.ncbi.nlm.nih.gov/books/NBK279675/
 
-| Parameter| Possible Values| Default |
+| Parameter| Possible Values| Default
 |---|---|---|
 |```#blastn-db-path```| ```<string>```| NONE|
 |```#blastn-dust```| no| no
@@ -144,10 +144,10 @@ Descriptions for the BLAST parameters can be found at http://www.ncbi.nlm.nih.go
 |```#blastn-penalty```| ```<int>```| 3|
 |```#blastn-word_size```| ```<int>```| 12|
 |```#blastn-gapopen```| ```<int>```| 5|
-|```#blastn-gapextend```| ```<int>```| 2 |
-|```#blastn-evalue```| ```<float>```| 0.0001 |
+|```#blastn-gapextend```| ```<int>```|2 |
+|```#blastn-evalue```| ```<float>```|0.0001 |
 |```#blastn-culling_limit```| ```<int>```| 2|
-|```#blastn-perc_identity```|```<int>``` | 90 |
+|```#blastn-perc_identity```|```<int>``` |90 |
 |```#blastn-min-alignment-length```| ```<int>```| 45|
 
 #####EMAL Parameters
