@@ -1,0 +1,61 @@
+body {
+    padding-top: 45px;
+}
+
+.tableTitle{
+    padding-left: 5px;
+}
+
+.navbar-brand
+{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    text-align: center;
+    margin: auto;
+}
+
+.panelIcon{
+    float: right;
+    color: grey;
+}
+#summedPieChart{
+    text-align:center;
+}
+
+.accordianBtns {
+    margin: 10px 0 10px 0;
+}
+
+.panel-heading{
+    color: #fff;
+    background-color: #333333;
+}
+
+.navbar-right{
+    padding-right: 15px;
+}
+
+.dataTables_length{
+    padding-left: 8px;
+}
+
+.infoTable{
+    padding-top: 15px;
+}
+
+label{
+    padding-right: 8px;
+}
+
+caption{
+    padding-left: 5px;
+}
+
+#credit{
+    text-align: center;
+}
+
+.highlight{
+    background-color: red;
+}
