@@ -1,13 +1,13 @@
 # Ez Metagenomic Abundance Pipeline
 
-EzMap is a pipeline designed to allow for the estimation community structure from DNA sequence data. EzMap has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities.
+EzMap is a pipeline designed to allow for the estimation community structure from raw DNA sequence data. EzMap has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities. 
 
 ## Features
   - Support for Viral, Bacterial and Fungal community structure estimation
   - Graphical HTML report generation
   - Limited number of dependencies 
 
-### Dependecies
+### Dependencies
 EzMap was designed to limit the number dependencies, it runs using only Python3 and a select few required modules.
 
 - Python3 
@@ -56,9 +56,9 @@ Once that is done you have all the EzMap prerequisites correctly setup on your c
 
 Before running EzMap it is important to have a few things setup.
 
- 1. Create a **new folder** where all of the results will be placed.
+ 1. Create a **new folder** where all of the results will be placed (referred to as the project directory).
  2. Make sure that you have moved all the original FASTQ files into a folder that contains only those files.
- 3. Configure the parameters within the param.config file that can be found in the main EzMap folder. *See the parameters section bellow to see what can be modified to suit your needs.*
+ 3. Configure the parameters within the param.config file that can be found in the main EzMap folder. *See the parameters section bellow to see what can be modified.*
 
 ## Running EzMap
 
@@ -70,21 +70,17 @@ To run EzMap make sure you have installed it correctly and have configured the f
 
 
 ```
-python3 EzMap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/ -mt 4
+python3 EzMap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/
 ```
 The above command will start sumbitting the different EzMap steps to the SLURM job manager. 
 
 ## Viewing Results
 
-EzMap provides 2 different methods for viewing results. The program will generate an interactive html report as well as number of csv files containing the results. 
+EzMap provides 2 different methods for viewing results. The program will generate an interactive HTML report as well as number of csv files containing the results. 
 
-When running the program the project folder that is initially specified will contain the following items:
+#### Finding 
 
- - Folders with results
- - HTML Report
- - csv result files
-
-The folder structure will be inside of the project directory:
+The project directory specified prior to running the pipeline will contain 6 folders once all of the steps have complete. Each folder will contain the output files as well as standard output and error files from the SLURM task manager. The folder structure will be inside of the project directory will be:
 ```
 ->projectDir
 	->1-Cleaning
@@ -97,8 +93,21 @@ The folder structure will be inside of the project directory:
 			csv files
 		->WEB
 		report.html
+		viewResults.py
 ```
 All of the csv files containing results will be found within projectDirecotry/6-FinalResult/information/
+
+####Viewing the HTML Report
+
+The final results an also be viewed as part of an HTML report:
+
+ 1. Open a new terminal window and navigate to the ```6-FinalResult``` folder.
+ 2. Run the following command.
+ 
+```
+python viewResults.py
+```
+A new browser window will now open displaying the results of your pipeline run. 
 
 ##Parameters
 
@@ -107,7 +116,7 @@ All of the csv files containing results will be found within projectDirecotry/6-
 | ---|---|---|
 |-d or --directory| The full system path to the folder containing only the original FASTQ files| `/path/to/dir` |
 |--projDir| The full system path to the folder where all output will be placed|`/path/to/dir`|
-|-mt or --maxThreads| Maximum number of simultaneous threads EzMap can run. *Note EzMap can only run as many threads as there are on a single node.*| 1 to 32|
+
 
 ####param.config Options
 The config file is designed to allow a number of parameters to be set as hardcoded values rather then command line options. Each option occupies a single line within the file. The option always starts with a # and has a = between the option name and its value. When modifying these paramters please ensure there are no space before or after the =.
