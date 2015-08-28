@@ -10,6 +10,16 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    blastPath = configOptions['blast-path']
+
+    # Checks to see if path ends in / character
+    if not blastPath.endswith('/'):
+        blastPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/BLAST/' in blastPath:
+        blastPath = blastPath.replace('cwd', cwd)
+
     script = open(projdir + '4-OrganismMapping/blastnScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 4, projdir + '4-OrganismMapping/', configOptions)
@@ -56,7 +66,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     script.write('srun ' +
                  configOptions['python3-path'] + ' ' +
                  cwd + 'tools/BLAST/BLASTWithHitFilter.py ' +
-                 cwd + 'tools/BLAST/ncbi-blast-2.2.30+/bin/blastn ' +
+                 blastPath +'blastn ' +
                  configOptions['blastn-db-path'] + ' ' +
                  projdir + '3-UnmappedCollection/${FILENAME}.fasta' +
                  ' ${optionString} ' +

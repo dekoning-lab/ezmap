@@ -4,12 +4,23 @@ import os, subprocess
 import Scripts.slurmScript as slurmScript
 
 # Generates bash script to launch all required jobs within job manager
-def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJobIDS):
+def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
+    maxThreads = configOptions['slurm-max-num-threads']
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     os.environ["BOWTIE2_INDEXES"] = cwd + '/tools/BOWTIE2/'
+
+    bowtie2Path = configOptions['bowtie2-path']
+
+    # Checks to see if path ends in / character
+    if not bowtie2Path.endswith('/'):
+        bowtie2Path += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/BOWTIE2/' in bowtie2Path:
+        bowtie2Path = bowtie2Path.replace('cwd',cwd)
 
     script = open(projdir + '2-HumanMapping/bowtie2Script.sh', 'w+')
 
@@ -41,7 +52,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, maxThreads, prinseqJob
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
                        'echo "Input file: ${FILENAME}"\n',
-                       'COMMAND="' + cwd + '/tools/BOWTIE2/bowtie2-2.2.5/bowtie2 --sensitive ' +
+                       'COMMAND="' + bowtie2Path + 'bowtie2 --sensitive ' +
                        '-x ' + cwd + '/tools/BOWTIE2/hg19/hg19 ' +
                        '-U ' + projdir + '1-Cleaning/${FILENAME}.fastq ' +
                        '-S ' + projdir + '2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',

@@ -10,6 +10,16 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    emalPath = configOptions['emal-path']
+
+    # Checks to see if path ends in / character
+    if not emalPath.endswith('/'):
+        emalPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/EMAL/' in emalPath:
+        emalPath = emalPath.replace('cwd', cwd)
+
     script = open(projdir + '5-RelativeAbundanceEstimation/emalPreScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
@@ -22,7 +32,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
     script.write(
         'srun ' +
-        configOptions['python3-path'] + ' ' + cwd + 'tools/EMAL/EMAL-DataPrep.py ' +
+        configOptions['python3-path'] + ' ' + emalPath + 'EMAL-DataPrep.py ' +
         configOptions['blastn-db-path'] + ' ' +
         configOptions['emal-gi-taxid-nucldmp-path'] + ' ' +
         '1' + ' ' +
@@ -38,6 +48,16 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    emalPath = configOptions['emal-path']
+
+    # Checks to see if path ends in / character
+    if not emalPath.endswith('/'):
+        emalPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/EMAL/' in emalPath:
+        emalPath = emalPath.replace('cwd', cwd)
+
     script = open(projdir + '5-RelativeAbundanceEstimation/emalScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
@@ -50,7 +70,7 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
 
     script.write(
         'srun ' +
-        configOptions['python3-path'] + ' ' + cwd + 'tools/EMAL/EMAL-Main.py ' +
+        configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Main.py ' +
         '-d ' + projdir + '4-OrganismMapping/ ' +
         '-v -t ' + configOptions['slurm-max-num-threads'] + ' ' +
         '-c ' + projdir.split('/')[-2] + '.gra ' +
@@ -68,6 +88,16 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
 def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    emalPath = configOptions['emal-path']
+
+    # Checks to see if path ends in / character
+    if not emalPath.endswith('/'):
+        emalPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/EMAL/' in emalPath:
+        emalPath = emalPath.replace('cwd', cwd)
+
     script = open(projdir + '5-RelativeAbundanceEstimation/emalPostScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
@@ -80,7 +110,7 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
 
     script.write(
         'srun ' +
-        configOptions['python3-path'] + ' ' + cwd + 'tools/EMAL/EMAL-Post.py ' +
+        configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Post.py ' +
         '-f ' + projdir + '5-RelativeAbundanceEstimation/' + projdir.split('/')[-2] + '.gra ' +
         '-c ' + projdir.split('/')[-2] + '-emal.csv ' +
         '-o ' + projdir + '5-RelativeAbundanceEstimation/')

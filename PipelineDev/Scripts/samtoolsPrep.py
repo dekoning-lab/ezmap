@@ -10,6 +10,16 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    samtoolsPath = configOptions['samtools-path']
+
+    # Checks to see if path ends in / character
+    if not samtoolsPath.endswith('/'):
+        samtoolsPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/SAMTOOLS/' in samtoolsPath:
+        samtoolsPath = samtoolsPath.replace('cwd', cwd)
+
     script = open(projdir + '3-UnmappedCollection/samtoolsScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 3, projdir + '3-UnmappedCollection/', configOptions)
@@ -23,7 +33,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     script.write('## SAMTOOLS PARAMETERS\n')
     script.writelines(['inFileDir=' + projdir + '2-HumanMapping/\n',
                        'outFileDir=' + projdir + '3-UnmappedCollection/\n',
-                       'samtoolsPath=' + cwd + '/tools/SAMTOOLS/samtools\n\n'])
+                       'samtoolsPath=' + samtoolsPath + 'samtools\n\n'])
 
     filelist = ''
     fileOutputList = ''

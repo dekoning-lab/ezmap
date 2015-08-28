@@ -10,6 +10,16 @@ def generateSLURMScript(dataSets, projdir, configOptions):
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
+    prinseqPath = configOptions['prinseq-path']
+
+    # Checks to see if path ends in / character
+    if not prinseqPath.endswith('/'):
+        prinseqPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/PRINSEQ/' in prinseqPath:
+        prinseqPath = prinseqPath.replace('cwd', cwd)
+
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 1, projdir + '1-Cleaning/', configOptions)
@@ -38,15 +48,14 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
                        'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'
-                       'perl -w ' + cwd + '/tools/PRINSEQ/' + 'prinseq-lite.pl '
-                                                              '-fastq ' + origFilePath + '${TEMP2} '
-                                                                                         '-out_format $out_format '
-                                                                                         '-min_qual_score $min_qual_score '
-                                                                                         '-lc_method $lc_method '
-                                                                                         '-lc_threshold $lc_threshold '
-                                                                                         '-out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
-                       '-out_bad null '
-                       '-log '
+                       'perl -w ' + prinseqPath + 'prinseq-lite.pl '
+                                                  '-fastq ' + origFilePath + '${TEMP2} '
+                                                                             '-out_format $out_format '
+                                                                             '-min_qual_score $min_qual_score '
+                                                                             '-lc_method $lc_method '
+                                                                             '-lc_threshold $lc_threshold '
+                                                                             '-out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
+                       '-out_bad null ' +
                        '\n'])
     script.close()
 
