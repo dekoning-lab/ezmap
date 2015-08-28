@@ -1,10 +1,14 @@
-# ===================================================================
-# Viral Metagenomics Abundance Pipeline (VMAP)
+# =================================================
+# EzMAP
+# Version: 1.0
 #
-# Author: Patrick Czeczko @ de Koning Lab
-# Version: 0.1a
+# Author: Patrick Czeczko
+# Made at: de Koning Lab
+# Link: http://lab.jasondk.io
+# Github:
 #
-# ===================================================================
+# Documentation can be found on the github page.
+# =================================================
 
 __author__ = 'patrickczeczko'
 import sys
@@ -61,7 +65,7 @@ if __name__ == "__main__":
     prinseqJobIDS = prinseq.processAllFiles(projdir, configOptions, origFiles)
 
     # Generate Job script for step 2 and run all jobs
-    bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, allArgs['maxThreads'], prinseqJobIDS)
+    bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
     bowtie2JobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
 
     # Generate Job script for step 3 and run all jobs
