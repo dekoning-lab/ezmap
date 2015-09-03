@@ -70,7 +70,7 @@ To run EzMap make sure you have installed it correctly and have configured the f
 
 
 ```
-python3 EzMap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/
+python3 ezmap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/
 ```
 The above command will start sumbitting the different EzMap steps to the SLURM job manager. 
 
