@@ -78,7 +78,7 @@ The above command will start sumbitting the different EzMap steps to the SLURM j
 
 EzMap provides 2 different methods for viewing results. The program will generate an interactive HTML report as well as number of csv files containing the results. 
 
-#### Finding 
+#### Finding Result Files
 
 The project directory specified prior to running the pipeline will contain 6 folders once all of the steps have complete. Each folder will contain the output files as well as standard output and error files from the SLURM task manager. The folder structure will be inside of the project directory will be:
 ```
@@ -107,7 +107,13 @@ The final results an also be viewed as part of an HTML report:
 ```
 python viewResults.py
 ```
-A new browser window will now open displaying the results of your pipeline run. 
+A new browser window will now open displaying the results of your pipeline run.
+
+Note: if a browser window does not open, open the browser window on the machine and naviagte to:
+
+```
+http://localhost:8000
+```
 
 ##Parameters
 
