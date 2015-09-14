@@ -27,10 +27,8 @@ def getPRINSEQResults(fileDir):
     for file in os.listdir(fileDir):
         if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
-
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
             fileID = output.readline().split(' ')[0]
-
             for line in inFile:
                 if 'Input sequences:' in line:
                     numReads = int(line.split(':')[1].strip().replace(',', ''))
@@ -62,14 +60,12 @@ def writePrinseqTableFile(dict, outfile):
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        if file.endswith('.errs'):
-            # if file.endswith('.err'):
+        if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
-
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
-            # fileID = output.readline().split(': ')[1].split('-')[0]
-            fileID = output.readline()
-            fileID = output.readline().split(': ')[1].split('_')[0]
+
+            fileID = output.readline().split(': ')[1].split('-')[0]
+
             zeroAlign, oneAlign, multiAlign = -1, -1, -1
             for line in inFile:
                 if 'reads; of these:' in line:
