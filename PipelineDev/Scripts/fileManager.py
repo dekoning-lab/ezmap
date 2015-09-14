@@ -6,6 +6,9 @@ from distutils.dir_util import copy_tree
 
 # Create Subdirectories for all the intermediate files
 def createSubFolders(projDir):
+    if not os.path.exists(projDir):
+        os.mkdir(projDir, 0o777)
+
     if os.path.exists(projDir):
         print('Creating Sub directories in ' + projDir)
         if not os.path.exists(projDir + '/1-Cleaning/'):
@@ -39,4 +42,3 @@ def getListOfOriginalFiles(fileDir, projDir):
 def copyReportFiles(projDir):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     copy_tree(cwd + 'ReportFiles', projDir + '6-FinalResult')
-
