@@ -54,7 +54,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                                                                              '-min_qual_score $min_qual_score '
                                                                              '-lc_method $lc_method '
                                                                              '-lc_threshold $lc_threshold '
-                                                                             '-out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
+                                                                             '-log -out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
                        '-out_bad null ' +
                        '\n'])
     script.close()
