@@ -59,3 +59,13 @@ caption{
 .highlight{
     background-color: red;
 }
+
+#explanation{
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 300;
+    line-height: 1.8;
+}
+
+#percentageString {
+    font-size: 1.5em;
+}

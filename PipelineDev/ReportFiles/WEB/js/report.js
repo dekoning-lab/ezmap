@@ -35,6 +35,7 @@ $(document).ready(function(){
         clearTimeout(resizeId);
         resizeId = setTimeout(doneResizing, 250);
     });
+    
     initializeGRAGraph();
     
     $('.panel').on('show.bs.collapse', function (e) {
@@ -53,11 +54,13 @@ $(document).ready(function(){
     
     $('#downloadFileMappingDist').on("click", saveFileMappingSVG);
     $('#downloadGRA').on("click", saveGRASVG);
-    $.getScript( "WEB/js/piechart.js", function( data, textStatus, jqxhr ) {});
+    
 });
 
 function initializeGRAGraph (){
-    $.getScript( "WEB/js/sequences.js", function( data, textStatus, jqxhr ) {});
+    $.getScript( "WEB/js/sequences.js", function( data, textStatus, jqxhr ) {
+        $.getScript( "WEB/js/piechart.js", function( data, textStatus, jqxhr ) {});
+    });
 }
 
 function initializeFileDistGraph(){
@@ -87,7 +90,7 @@ function saveGRASVG (){
 
     $('#chart').find("svg").attr("title", "test2").attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg");
     var innerHTML = '<svg'+$('#chart').html().split('<svg').pop();
-    console.log(innerHTML)
+    
     var blob = new Blob([innerHTML], {type: "image/svg+xml"});
     saveAs(blob, "fileMappingDistribution.svg");
 }
@@ -109,8 +112,8 @@ function getProjectInformation(){
 }
 
 function doneResizing(){
-    var chartString = '<div id="explanation" style="visibility: hidden;"><span id="organism"></span><br/><span id="percentage"></span><br/>Relative abundance</div>';
-    $('#chart').html(chartString);
+    $('#chart').html('');
+    $('#summedPieChart').html('');
     initializeGRAGraph ();
     $('#mappedTo-graph').html('');
     initializeFileDistGraph();

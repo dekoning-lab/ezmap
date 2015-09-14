@@ -1,6 +1,7 @@
 import SimpleHTTPServer
 import SocketServer
 import webbrowser
+import atexit
 
 PORT = 8000
 
@@ -12,3 +13,7 @@ print "serving at port", PORT
 webbrowser.open('http://localhost:8000/report.html')
 httpd.serve_forever()
 
+atexit.register(exit_handler(httpd))
+
+def exit_handler(httpd):
+    httpd.shutdown()

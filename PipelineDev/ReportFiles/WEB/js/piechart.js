@@ -26,7 +26,7 @@ d3.csv("../../information/emal-tbl-2.csv", function(error, data) {
     .attr('id',function(d, i) { return 'test-'+data[i].Family; })
     .on("mouseover", mouseover)
     .on("mouseleave", mouseleave);//allow us to style things in the slices (like text)
-
+    
     arcs.append("svg:path")
         .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
         .attr("d", arc)
@@ -35,18 +35,22 @@ d3.csv("../../information/emal-tbl-2.csv", function(error, data) {
 });
 
 function mouseover(d) {
-    var name = this.getAttribute('id');
-    name = name.substring(0,name.indexOf('['));
+    if (this.nodeName == 'g'){
+        var name = this.getAttribute('id');
+        name = name.substring(0,name.indexOf('['));
 
-    var row = document.getElementById(name);
-    row.style.backgroundColor = '#ADD8E6'
+        var row = document.getElementById(name);
+        row.style.backgroundColor = '#ADD8E6'
+    }
 }
 
 function mouseleave(d) {
-    var name = this.getAttribute('id');
-    name = name.substring(0,name.indexOf('['));
+    if (this.nodeName == 'g'){
+        var name = this.getAttribute('id');
+        name = name.substring(0,name.indexOf('['));
 
-    var row = document.getElementById(name);
-    row.style.backgroundColor = '#ffffff'
+        var row = document.getElementById(name);
+        row.style.backgroundColor = '#ffffff'
+    }
 }
 
