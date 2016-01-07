@@ -33,24 +33,12 @@ EzMap uses a number of free open source programs to generate results. They are l
  1. Download the current release of EzMap.
  2. Unzip it.
  3. Place the entire EzMap folder somewhere accessible on your computer.
- 4. Make sure to have installed Numpy, Scipy, & Biopython.
-
-Biopython can be installed using a simple terminal command.  This command requires that your system has pip3 installed (pip3 is a python package manager that can be installed through the command line). Installing Biopython using pip3 will also automatically install numpy and scipy.
+ 4. To install Numpy, Scipy, & Biopython run the setup bash script inside of the EzMap folder.
 
 ```
-pip3 install biopython
+sh setup.sh
 ```
-
-To test that biopython is installed run the following in the command line editor.
-
-```python
-python3
-import numpy
-import scipy
-import Bio
-```
-
-Once that is done you have all the EzMap prerequisites correctly setup on your computer.
+Once the script completes you have all the EzMap prerequisites correctly setup on your computer.
 
 ##Configuration
 
