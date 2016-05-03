@@ -36,7 +36,7 @@ EzMap uses a number of free open source programs to generate results. They are l
  4. To install Numpy, Scipy, & Biopython run the setup bash script inside of the EzMap folder.
 
 ```
-sh setup.sh
+sudo sh setup.sh
 ```
 Once the script completes you have all the EzMap prerequisites correctly setup on your computer.
 
