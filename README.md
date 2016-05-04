@@ -21,7 +21,7 @@ EzMap uses a number of free open source programs to generate results. They are l
 - [Bowtie 2](http://bowtie-bio.sourceforge.net)
 - [SAMTools](http://samtools.sourceforge.net)
 - [NCBI Blast](http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) 
-- EMAL
+- EMAL (Custom script written by the de Koning Lab *included with installation files)
 
 
 ----------
