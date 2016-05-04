@@ -65,13 +65,14 @@ The above command will start submitting the different EzMap steps to the SLURM j
 #### Starting the pipeline at a different step
 
 The EzMap pipeline has 7 steps that it uses to process through the original FASTQ files. They are :
-1. PRINSEQ - Cleans the FASTQ to remove bad or low qaulity reads.
+
+1. PRINSEQ - Cleans the FASTQ to remove bad or low quality reads.
 2. Bowtie2 - Maps the reads to a genome to remove all reads related to the host organism (ex. Human, mouse, etc.).
 3. SAMTools - Gathers all the reads that were not mapped to the host organism.
-4. BLAST - BLAST the remaining reads against a specific set of organism genomes (Viral, Bacterial, Fungal, etc.)
-5. EMAL Pre - Completes all preprocessing steps required for EMAL
-6. EMAL Main - Using the EM algorithm, estimate the relative amount of reads for each of the organisms BLASTed against
-7. EMAL Post - Generates readable output files in a csv format
+4. BLAST - BLAST the remaining reads against a specific set of organism genomes (Viral, Bacterial, Fungal, etc.).
+5. EMAL Pre - Completes all preprocessing steps required for EMAL.
+6. EMAL Main - Using the EM algorithm, estimate the relative amount of reads for each of the organisms BLASTed against.
+7. EMAL Post - Generates readable output files in a csv format.
 
 If the pipeline should stop or fail to run at any step the #start-at-step option in the param.config file can be set to any of the steps and then have the pipeline rerun to skip previosuly completed steps.
 If #start-at-step is set to 8 or greater then the pipeline will only reprocess the results and generate a updated results webpage.
