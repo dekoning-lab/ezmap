@@ -60,7 +60,21 @@ To run EzMap make sure you have installed it correctly and have configured the f
 ```
 python3 ezmap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/
 ```
-The above command will start sumbitting the different EzMap steps to the SLURM job manager. 
+The above command will start submitting the different EzMap steps to the SLURM job manager.
+
+#### Starting the pipeline at a different step
+
+The EzMap pipeline has 7 steps that it uses to process through the original FASTQ files. They are :
+1. PRINSEQ - Cleans the FASTQ to remove bad or low qaulity reads.
+2. Bowtie2 - Maps the reads to a genome to remove all reads related to the host organism (ex. Human, mouse, etc.).
+3. SAMTools - Gathers all the reads that were not mapped to the host organism.
+4. BLAST - BLAST the remaining reads against a specific set of organism genomes (Viral, Bacterial, Fungal, etc.)
+5. EMAL Pre - Completes all preprocessing steps required for EMAL
+6. EMAL Main - Using the EM algorithm, estimate the relative amount of reads for each of the organisms BLASTed against
+7. EMAL Post - Generates readable output files in a csv format
+
+If the pipeline should stop or fail to run at any step the #start-at-step option in the param.config file can be set to any of the steps and then have the pipeline rerun to skip previosuly completed steps.
+If #start-at-step is set to 8 or greater then the pipeline will only reprocess the results and generate a updated results webpage.
 
 ## Viewing Results
 
@@ -120,6 +134,8 @@ The config file is designed to allow a number of parameters to be set as hardcod
 |---|---|---|---|
 |```#project-name```|The name of the project. This will be displayed exactly as spelled in the final report | ```<string>```|
 |```#python3-path```|The full file path to python3 within the system. If python3 is installed across the system then enter only ```python3```| /path/python3 |
+|```#start-at-step```|Use this parameter to start the pipeline at a different step in case of previous data processing or pipeline failure at a different step | 1 |
+
 
 #####SLURM Parameters
 | Parameter     | Description   | Possible Values| Default |

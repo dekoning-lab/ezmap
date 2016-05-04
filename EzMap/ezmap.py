@@ -39,6 +39,7 @@ def outputFileList(files, projDir):
 # Main Function
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline
+    print ("Starting EzMap \n\nParsing config file...")
     allArgs = arguments.parseCommandLineArguments()
     configOptions = config.parseConfigOptions()
     startStep = int(configOptions['start-at-step'])
@@ -56,6 +57,7 @@ if __name__ == "__main__":
     # Check if there is at least one file to process
     if len(origFiles) < 1:
         print('No files found to process!')
+        print('Exiting...')
         sys.exit()
 
     # Get the project directory to pass to functions that follow
