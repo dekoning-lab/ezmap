@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     print('Setting up jobs for Step 3...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
 
     samtoolsPath = configOptions['samtools-path']
 

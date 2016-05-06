@@ -8,9 +8,9 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
     maxThreads = configOptions['slurm-max-num-threads']
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
 
-    os.environ["BOWTIE2_INDEXES"] = cwd + '/tools/BOWTIE2/'
+    os.environ["BOWTIE2_INDEXES"] = cwd + 'tools/BOWTIE2/'
 
     bowtie2Path = configOptions['bowtie2-path']
 

@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     print('Setting up jobs for Step 4...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
 
     blastPath = configOptions['blast-path']
 

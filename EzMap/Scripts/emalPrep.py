@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generatePreScript(dataSets, projdir, configOptions, blastjobids):
     print('Setting up jobs for Step 5...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
 
     emalPath = configOptions['emal-path']
 
