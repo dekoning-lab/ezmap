@@ -195,21 +195,26 @@ def gatherSummedOverInfo(list, category):
     # name[taxonID] = GRA
     dict = {}
 
+    index = -1
     for i, item in enumerate(list[0]):
+        # Remove possible newline characters that could break the comparison
+        category = category.strip()
+        item = item.strip()
         if category == item:
             index = i
 
-    list.pop(0)
-    for x in list:
-        key = x[index]
-        if key in dict:
-            GRA = dict[key]
-            GRA += float(x[0])
-            dict[key] = GRA
-        else:
-            dict[key] = float(x[0])
-    return dict
+    if (index != -1):
+        list.pop(0)
+        for x in list:
+            key = x[index]
+            if key in dict:
+                GRA = dict[key]
+                GRA += float(x[0])
+                dict[key] = GRA
+            else:
+                dict[key] = float(x[0])
 
+    return dict
 
 def writeSummedOverInfo(category, dict, outfile):
     with open(outfile, 'w+') as csvfile:
@@ -225,26 +230,27 @@ if __name__ == "__main__":
     projName = sys.argv[2]
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     configOptions = checkForExtraOptions(cwd + 'param.config')
-    # createProjectInfoFile(projName, projDir)
-    # print('Gathering Step 1 Results...')
-    # prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
-    # writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
-    # print('Gathering Step 2 Results...')
-    # bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
-    # writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
-    # writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.csv')
-    # print('Gathering Step 3 Results...')
-    # samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
-    # writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult/information/' + 'samtools-tbl-1.csv')
-    # print('Gathering Step 4 Results...')
-    # blastInfo = gatherBlastResults(projDir + '4-OrganismMapping/')
-    # writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
-    # print('Gathering Step 5 Results...')
+    createProjectInfoFile(projName, projDir)
+    print('Gathering Step 1 Results...')
+    prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
+    writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
+    print('Gathering Step 2 Results...')
+    bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
+    writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
+    writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.csv')
+    print('Gathering Step 3 Results...')
+    samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
+    writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult/information/' + 'samtools-tbl-1.csv')
+    print('Gathering Step 4 Results...')
+    blastInfo = gatherBlastResults(projDir + '4-OrganismMapping/')
+    writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
+    print('Gathering Step 5 Results...')
     emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
     print(emalInfo)
-    # writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
-    # writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
-    #                    projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
+    writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
+    writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
+                       projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
     summedOver = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'])
     writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOver, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+
     print('Complete!')
