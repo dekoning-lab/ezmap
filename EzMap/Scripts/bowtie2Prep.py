@@ -8,7 +8,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
     maxThreads = configOptions['slurm-max-num-threads']
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     os.environ["BOWTIE2_INDEXES"] = cwd + 'tools/BOWTIE2/'
 
@@ -20,7 +20,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
 
     # Checks to see if default path should be used
     if 'cwd/tools/BOWTIE2/' in bowtie2Path:
-        bowtie2Path = bowtie2Path.replace('cwd',cwd)
+        bowtie2Path = bowtie2Path.replace('cwd', cwd)
 
     script = open(projdir + '2-HumanMapping/bowtie2Script.sh', 'w+')
 
@@ -37,7 +37,8 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
     for i in prinseqJobIDS:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
+    if prinseqJobIDS:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
 
     script.write('numCores=' + maxThreads + '\n\n')
 

@@ -6,15 +6,15 @@ def getSBATCHSettings(script, step, dir, configOptions):
                        '#!/usr/bin/perl\n',
                        '#---------------------------------\n',
                        '# Mandatory settings\n',
-                       '#SBATCH --job-name=VMAP-' + str(step) + '\n',
+                       '#SBATCH --job-name=EZMAP-' + str(step) + '\n',
                        '#SBATCH --workdir=' + dir + '\n',
                        '#SBATCH --output=VMAP-' + str(step) + '-%j' + '.out\n',
                        '#SBATCH --error=VMAP-' + str(step) + '-%j' + '.err\n',
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
                        '# Resources required\n',
-                       # '#SBATCH --begin=now+10hour\n',
-                       '#SBATCH --exclude=node013,node014\n',
                        '#SBATCH --ntasks=1\n',
+                       '#SBATCH --nodes=1\n',
+                       '#SBATCH --ntasks-per-node=2\n',
                        '#SBATCH --partition=' + configOptions['slurm-partition'] + '\n'])
 
     if configOptions['slurm-share'] == 'yes':

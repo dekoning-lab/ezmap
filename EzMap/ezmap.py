@@ -65,41 +65,48 @@ if __name__ == "__main__":
 
     fileman.copyReportFiles(projdir)
 
+    prinseqJobIDS = []
     if (startStep == 1):
         # Generate Job script for step 1 and run all jobs
         prinseq.generateSLURMScript(origFiles, projdir, configOptions)
         prinseqJobIDS = prinseq.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
+    bowtie2JobIDS = []
     if (startStep == 2):
         # Generate Job script for step 2 and run all jobs
         bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
         bowtie2JobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
+    samtoolsJobIDS = []
     if (startStep == 3):
         # Generate Job script for step 3 and run all jobs
         samtools.generateSLURMScript(origFiles, projdir, configOptions, bowtie2JobIDS)
         samtoolsJobIDS = samtools.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
+    blastJobIDS = []
     if (startStep == 4):
         # Generate Job script for step 4 and run all jobs
         blast.generateSLURMScript(origFiles, projdir, configOptions, samtoolsJobIDS)
         blastJobIDS = blast.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
+    emalPreJobIDS = []
     if (startStep == 5):
         # Generate Job script for step 5 and run all jobs
         emalPre = emal.generatePreScript(origFiles, projdir, configOptions, blastJobIDS)
         emalPreJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 1, emalPre)
         startStep += 1
 
+    emalMainJobIDS = []
     if (startStep == 6):
         emalMain = emal.generateMainScript(origFiles, projdir, configOptions, emalPreJobIDS)
         emalMainJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 2, emalMain)
         startStep += 1
 
+    emalPostJobIDS = []
     if (startStep == 7):
         emalPost = emal.generatePostScript(origFiles, projdir, configOptions, emalMainJobIDS)
         emalPostJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 3, emalPost)

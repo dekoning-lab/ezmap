@@ -13,7 +13,9 @@ def collectPipelineResult(projName, projdir, configOptions, finalJobIDS):
     IDList = ''
     for i in finalJobIDS:
         IDList += ':' + str(i)
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
+
+    if finalJobIDS:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write(
         '/cm/shared/apps/python3.4/bin/python3 ' + cwd + 'Scripts/gatherResults.py ' + projdir + ' ' + projName)

@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="hyperion" promptOnLocalOverwrite="false" compareModeInSync="SIZE" />
+  <component name="PublishConfigData" serverName="hyperion" promptOnLocalOverwrite="false" compareModeInSync="SIZE">
+    <serverData>
+      <paths name="hyperion">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/GreenWaySamples/viral-metagen-master" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
 </project>

@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     print('Setting up jobs for Step 4...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     blastPath = configOptions['blast-path']
 
@@ -28,7 +28,8 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     for i in samtoolsJobIDS:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
+    if samtoolsJobIDS:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write('## BLASTN PARAMETERS ##\n')
 
@@ -65,7 +66,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     script.write('srun ' +
                  configOptions['python3-path'] + ' ' +
-                 cwd + 'tools/BLAST/BLASTWithHitFilter.py ' +
+                 cwd + '/tools/BLAST/BLASTWithHitFilter.py ' +
                  blastPath +'blastn ' +
                  configOptions['blastn-db-path'] + ' ' +
                  projdir + '3-UnmappedCollection/${FILENAME}.fasta' +

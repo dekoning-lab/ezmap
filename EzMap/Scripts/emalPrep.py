@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generatePreScript(dataSets, projdir, configOptions, blastjobids):
     print('Setting up jobs for Step 5...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     emalPath = configOptions['emal-path']
 
@@ -28,7 +28,8 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
     for i in blastjobids:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
+    if blastjobids:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write(
         'srun ' +
@@ -46,7 +47,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
 
 def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     emalPath = configOptions['emal-path']
 
@@ -66,7 +67,8 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
     for i in emalPrejobids:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
+    if emalPrejobids:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write(
         'srun ' +
@@ -86,7 +88,7 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
 
 
 def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     emalPath = configOptions['emal-path']
 
@@ -106,7 +108,8 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
     for i in emalJobIDS:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
+    if emalJobIDS:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write(
         'srun ' +

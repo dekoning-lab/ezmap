@@ -8,7 +8,7 @@ import Scripts.slurmScript as slurmScript
 def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     print('Setting up jobs for Step 3...')
 
-    cwd = os.path.dirname(os.path.abspath(__file__)).strip('/Scripts')
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     samtoolsPath = configOptions['samtools-path']
 
@@ -28,7 +28,8 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     for i in bowtie2JobIDS:
         IDList += ':' + str(i)
 
-    script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
+    if bowtie2JobIDS:
+        script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
 
     script.write('## SAMTOOLS PARAMETERS\n')
     script.writelines(['inFileDir=' + projdir + '2-HumanMapping/\n',
@@ -75,6 +76,7 @@ def processAllFiles(projDir, configOptions, dataSets):
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')
 
+    print(outs)
     jobIDS = []
     for x in range(numOfFiles):
         jobIDS.append(int(outs) + x)
