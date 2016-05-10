@@ -130,6 +130,7 @@ http://localhost:8000
 ####param.config Options
 The config file is designed to allow a number of parameters to be set as hardcoded values rather then command line options. Each option occupies a single line within the file. The option always starts with a # and has a = between the option name and its value. When modifying these paramters please ensure there are no space before or after the =.
 
+*Note: in the param.config file if you wish to use the default libraries packaged with EzMap then leave all lines with cwd/ in place.
 #####General Parameters (Required)
 | Parameter     | Description   | Possible Values|
 |---|---|---|---|
