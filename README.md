@@ -1,3 +1,5 @@
+![alt tag](EzMap/EzMapLogo.png)
+
 # Ez Metagenomic Abundance Pipeline
 
 EzMap is a pipeline designed to allow for the estimation community structure from raw DNA sequence data. EzMap has been designed to work with viral sequence data however it can also be used with other information sources such as bacterial and fungal communities. 
