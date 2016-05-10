@@ -2,7 +2,7 @@ __author__ = 'patrickczeczko'
 
 import argparse
 
-
+# Parses the command line arguments to determine where the input and output files are located
 def parseCommandLineArguments():
     parser = argparse.ArgumentParser()
 

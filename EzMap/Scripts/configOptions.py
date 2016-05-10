@@ -2,7 +2,7 @@ __author__ = 'patrickczeczko'
 
 import os
 
-
+# Parses the param.config file to obtain all of the options for each of the pipeline steps
 def parseConfigOptions():
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     configFile = open(cwd + 'param.config', 'r')

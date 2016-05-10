@@ -28,6 +28,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     for i in samtoolsJobIDS:
         IDList += ':' + str(i)
 
+    # Add job dependencies so new jobs wont start until previous ones have been completed
     if samtoolsJobIDS:
         script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
