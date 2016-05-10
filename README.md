@@ -1,4 +1,4 @@
-![alt tag](EzMap/EzMapLogo.png)
+![alt tag](EzMap/EzMapLogo.jpg)
 
 # Ez Metagenomic Abundance Pipeline
 
