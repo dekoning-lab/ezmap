@@ -28,6 +28,7 @@ Darwin) echo Darwin
 
 *)      echo other;;
 esac
+rm hg19.zip
 
 
 
