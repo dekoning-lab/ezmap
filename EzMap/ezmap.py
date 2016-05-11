@@ -40,8 +40,14 @@ def outputFileList(files, projdir):
 def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
     startStep = startAtStep
 
-    startStep += 1
-    print(startStep)
+    print(inputFileDir)
+    print(projdir)
+
+    if not inputFileDir.endswith("/"):
+        inputFileDir = inputFileDir + '/'
+
+    if not projdir.endswith("/"):
+        projdir = projdir + '/'
 
     # Get list of FASTQ files to process
     origFiles = fileman.getListOfOriginalFiles(inputFileDir, projdir)
@@ -118,6 +124,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
     outputFileList(origFiles, projdir)
     final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
 
+    print('All required jobs have been created and queued for '+ inputFileDir +'...\nEXITING...')
 
 # Main Function
 if __name__ == "__main__":
