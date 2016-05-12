@@ -1,5 +1,3 @@
-
-
 $(document).ready(function(){
     getProjectInformation();
     
@@ -160,7 +158,8 @@ function csvToTable(file, $table, id, caption) {
         $table.html('<table class="table" id="'+id+'"></table>');
         $table = $('#'+id);
         if (id == 'emalTblTwo'){
-            $('#summedOverTitle').text('Genome Relative Abundance Summed Over '+header[1].title)
+            $('#summedOverTitle').text('Genome Relative Abundance Summed Over '+header[1].title);
+            console.log(header[1]);
         }
         if (id == 'emalTblOne' || id == 'emalTblTwo'){
             $table.DataTable( {
