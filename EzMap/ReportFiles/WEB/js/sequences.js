@@ -127,6 +127,7 @@ function updateTable(array){
     while (array.length < 7){
         array.push({name:''})
     }
+    
     tableString += '<tr><td>Super Kingdom</td><td>'+array[0].name+'</td></tr>';
     tableString += '<tr><td>Q1</td><td>'+array[1].name+'</td></tr>';
     tableString += '<tr><td>Order</td><td>'+array[2].name+'</td></tr>';

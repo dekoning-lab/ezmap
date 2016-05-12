@@ -1,3 +1,5 @@
+
+
 $(document).ready(function(){
     getProjectInformation();
     
@@ -31,12 +33,11 @@ $(document).ready(function(){
     });
 
     var resizeId;
+    
     $(window).resize(function() {
         clearTimeout(resizeId);
         resizeId = setTimeout(doneResizing, 250);
     });
-    
-    initializeGRAGraph();
     
     $('.panel').on('show.bs.collapse', function (e) {
         $('#'+e.currentTarget.id+'Icon').removeClass('fa-chevron-righ').addClass('fa-chevron-down');
@@ -55,6 +56,7 @@ $(document).ready(function(){
     $('#downloadFileMappingDist').on("click", saveFileMappingSVG);
     $('#downloadGRA').on("click", saveGRASVG);
     
+    doneResizing();
 });
 
 function initializeGRAGraph (){

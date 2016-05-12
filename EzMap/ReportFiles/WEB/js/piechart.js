@@ -3,7 +3,7 @@ var h = 444;
 var r = h/2;                           //radius
 color = d3.scale.category20c();     //builtin range of colors
 
-d3.csv("../../information/emal-tbl-2.csv", function(error, data) {
+d3.csv("../../information/emal-tbl-2.csv", function(error, data, taxLevel) {
     var vis = d3.select("#summedPieChart")
     .append("svg:svg")              //create the SVG element inside the <body>
     .data([data])                   //associate our data with the document
@@ -12,6 +12,8 @@ d3.csv("../../information/emal-tbl-2.csv", function(error, data) {
     .append("svg:g")                //make a group to hold our pie chart
     .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
+    var taxLevel = Object.getOwnPropertyNames(data[0])[1] //Get the summed over taxonomic level
+    
     var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
     .outerRadius(r);
 
@@ -23,7 +25,7 @@ d3.csv("../../information/emal-tbl-2.csv", function(error, data) {
     .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
     .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
     .attr("class", "slice")
-    .attr('id',function(d, i) { return 'test-'+data[i].Family; })
+    .attr('id',function(d, i) { return 'test-'+data[i][taxLevel]; })
     .on("mouseover", mouseover)
     .on("mouseleave", mouseleave);//allow us to style things in the slices (like text)
     
