@@ -110,15 +110,9 @@ The final results an also be viewed as part of an HTML report:
  2. Run the following command.
  
 ```
-python viewResults.py
+python3 viewResults.py
 ```
 A new browser window will now open displaying the results of your pipeline run.
-
-Note: if a browser window does not open, open the browser window on the machine and naviagte to:
-
-```
-http://localhost:8000
-```
 
 ##Parameters
 
