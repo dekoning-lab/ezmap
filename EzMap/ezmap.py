@@ -122,7 +122,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
 
     # Output file list and gather all results throughout the pipeline run and compile into final report
     outputFileList(origFiles, projdir)
-    final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
+    final.collectPipelineResult(configOptions['project-name']+'-'+os.path.basename(inputFileDir), projdir, configOptions, emalPostJobIDS)
 
     print('All required jobs have been created and queued for '+ inputFileDir +'...\nEXITING...')
 

@@ -32,8 +32,8 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
         script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n')
 
     script.write('## SAMTOOLS PARAMETERS\n')
-    script.writelines(['inFileDir=' + projdir + '2-HumanMapping/\n',
-                       'outFileDir=' + projdir + '3-UnmappedCollection/\n',
+    script.writelines(['inFileDir=' + os.path.abspath(projdir) + '/2-HumanMapping/\n',
+                       'outFileDir=' + os.path.abspath(projdir) + '/3-UnmappedCollection/\n',
                        'samtoolsPath=' + samtoolsPath + 'samtools\n\n'])
 
     filelist = ''
@@ -59,10 +59,11 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
                        '${samtoolsPath} view -f4 ${inFileDir}${FILENAME} | '
                        '${samtoolsPath} view -Sb - | '
                        '${samtoolsPath} view - | '
-                       'awk \'{OFS="\\t"; print ">"$1"\\n"$10}\' - > ' + filePath + '${FILENAMEOUTPUT}.fasta',
+                       'awk \'{OFS="\\t"; print ">"$1"\\n"$10}\' - > ' + os.path.abspath(filePath) + '/${FILENAMEOUTPUT}.fasta',
                        '\n'])
     script.close()
 
+    os.chmod(projdir + '3-UnmappedCollection/samtoolsScript.sh', 0o755)
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):

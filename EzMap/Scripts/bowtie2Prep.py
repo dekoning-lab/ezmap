@@ -55,11 +55,12 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
                        'echo "Input file: ${FILENAME}"\n',
                        'COMMAND="' + bowtie2Path + 'bowtie2 --sensitive ' +
                        '-x ' + cwd + '/tools/BOWTIE2/hg19/hg19 ' +
-                       '-U ' + projdir + '1-Cleaning/${FILENAME}.fastq ' +
-                       '-S ' + projdir + '2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
+                       '-U ' + os.path.abspath(projdir) + '/1-Cleaning/${FILENAME}.fastq ' +
+                       '-S ' + os.path.abspath(projdir) + '/2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
                        'srun $COMMAND'])
     script.close()
 
+    os.chmod(projdir + '2-HumanMapping/bowtie2Script.sh', 0o755)
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):

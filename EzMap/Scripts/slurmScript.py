@@ -1,5 +1,5 @@
 __author__ = 'patrickczeczko'
-
+import os
 
 def getSBATCHSettings(script, step, dir, configOptions):
     script.writelines(['#!/bin/bash\n',
@@ -7,9 +7,9 @@ def getSBATCHSettings(script, step, dir, configOptions):
                        '#---------------------------------\n',
                        '# Mandatory settings\n',
                        '#SBATCH --job-name=EZMAP-' + str(step) + '\n',
-                       '#SBATCH --workdir=' + dir + '\n',
-                       '#SBATCH --output=VMAP-' + str(step) + '-%j' + '.out\n',
-                       '#SBATCH --error=VMAP-' + str(step) + '-%j' + '.err\n',
+                       '#SBATCH --workdir=' + os.path.abspath(dir) + '\n',
+                       '#SBATCH --output=EZMAP-' + str(step) + '-%j' + '.out\n',
+                       '#SBATCH --error=EZMAP-' + str(step) + '-%j' + '.err\n',
                        '#SBATCH --account=' + configOptions['slurm-account'] + '\n\n',
                        '# Resources required\n',
                        '#SBATCH --ntasks=1\n',
@@ -21,3 +21,5 @@ def getSBATCHSettings(script, step, dir, configOptions):
         script.write('#SBATCH --share\n')
     if configOptions['slurm-test-only'] == 'yes':
         script.write('#SBATCH --test-only\n')
+
+

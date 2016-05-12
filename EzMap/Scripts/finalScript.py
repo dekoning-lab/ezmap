@@ -18,7 +18,7 @@ def collectPipelineResult(projName, projdir, configOptions, finalJobIDS):
         script.write('#SBATCH --dependency=afterany:' + IDList[1:] + '\n\n')
 
     script.write(
-        configOptions['python3-path'] + cwd + 'Scripts/gatherResults.py ' + projdir + ' ' + projName)
+        configOptions['python3-path'] + ' ' + cwd + 'Scripts/gatherResults.py ' + projdir + ' ' + projName)
 
     proc = subprocess.Popen(
         ['sbatch', projdir + '6-FinalResult/resultsScript.sh'], stdout=subprocess.PIPE)

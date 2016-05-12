@@ -10,6 +10,8 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
     cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    projdir = os.path.abspath(projdir) + '/'
+
     emalPath = configOptions['emal-path']
 
     # Checks to see if path ends in / character
@@ -48,7 +50,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
 def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
     cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+    projdir = os.path.abspath(projdir) + '/'
     emalPath = configOptions['emal-path']
 
     # Checks to see if path ends in / character
@@ -89,7 +91,7 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
 
 def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
     cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+    projdir = os.path.abspath(projdir) + '/'
     emalPath = configOptions['emal-path']
 
     # Checks to see if path ends in / character

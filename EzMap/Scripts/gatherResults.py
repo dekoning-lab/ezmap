@@ -224,12 +224,13 @@ def writeSummedOverInfo(category, dict, outfile):
             writer.writerow([dict[key],key])
         csvfile.close()
 
-
 if __name__ == "__main__":
     projDir = sys.argv[1]
     projName = sys.argv[2]
+
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     configOptions = checkForExtraOptions(cwd + 'param.config')
+
     createProjectInfoFile(projName, projDir)
     print('Gathering Step 1 Results...')
     prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
@@ -250,7 +251,7 @@ if __name__ == "__main__":
     writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
     writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
                        projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
-    summedOver = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'])
+    summedOver = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
     writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOver, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
 
     print('Complete!')

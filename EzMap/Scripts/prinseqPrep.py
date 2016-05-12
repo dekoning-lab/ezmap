@@ -18,7 +18,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
 
     # Checks to see if default path should be used
     if 'cwd/tools/PRINSEQ/' in prinseqPath:
-        prinseqPath = prinseqPath.replace('cwd', cwd)
+        prinseqPath = prinseqPath.replace('cwd/', cwd)
 
     script = open(projdir + '1-Cleaning/prinseqScript.sh', 'w+')
 
@@ -48,25 +48,25 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
                        'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'
-                       'perl -w ' + prinseqPath + 'prinseq-lite.pl '
-                                                  '-fastq ' + origFilePath + '${TEMP2} '
+                       'perl ' + prinseqPath + 'prinseq-lite.pl '
+                                                  '-fastq ' + os.path.abspath(origFilePath) + '/${TEMP2} '
                                                                              '-out_format $out_format '
                                                                              '-min_qual_score $min_qual_score '
                                                                              '-lc_method $lc_method '
                                                                              '-lc_threshold $lc_threshold '
-                                                                             '-log -out_good ' + projdir + '1-Cleaning/${FILENAMEOUTPUT} ' +
+                                                                             '-log -out_good ' + os.path.abspath(projdir) + '/1-Cleaning/${FILENAMEOUTPUT} ' +
                        '-out_bad null ' +
                        '\n'])
     script.close()
 
+    os.chmod(projdir + '1-Cleaning/prinseqScript.sh', 0o755)
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')
     numOfFiles = len(dataSets)
 
-    proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
-                            stdout=subprocess.PIPE)
+    proc = subprocess.Popen(['sbatch','--array=0-' + str(numOfFiles-1), projDir + '1-Cleaning/prinseqScript.sh'],stdout=subprocess.PIPE)
 
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')

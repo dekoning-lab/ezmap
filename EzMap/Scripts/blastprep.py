@@ -10,6 +10,8 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    projdir = os.path.abspath(projdir)+'/'
+
     blastPath = configOptions['blast-path']
 
     # Checks to see if path ends in / character
@@ -76,8 +78,8 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
                  configOptions['blastn-min-alignment-length'] +
                  ' ${FILENAMEOUTPUT}')
     script.close()
-    os.chmod(projdir + '4-OrganismMapping/blastnScript.sh', 0o755)
 
+    os.chmod(projdir + '4-OrganismMapping/blastnScript.sh', 0o755)
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):
