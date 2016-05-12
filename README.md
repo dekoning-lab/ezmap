@@ -119,8 +119,9 @@ A new browser window will now open displaying the results of your pipeline run.
 ####Command  Line Options
 | Parameter     | Description   | Possible Values|
 | ---|---|---|
-|-d or --directory| The full system path to the folder containing only the original FASTQ files| `/path/to/dir` |
-|--projDir| The full system path to the folder where all output will be placed|`/path/to/dir`|
+|-d or --directory| The full system path to the folder containing only the original FASTQ files. **Specify the full file path**| `/path/to/dir` |
+|-p or --projDir| The full system path to the folder where all output will be placed. **Specify the full file path.**|`/path/to/dir`|
+|-s | This option is to enable the pipeline to run across a set of serial samples. If this is present it will use the directory specified by -d as the top level directory and each of its children will be considered a individual set of samples| -s |
 
 
 ####param.config Options
