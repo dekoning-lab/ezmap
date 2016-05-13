@@ -3,14 +3,14 @@ __author__ = 'patrickczeczko'
 import sys, os, csv, time
 from operator import itemgetter
 
-
+# Generate a file with the required project info to display pipeline results
 def createProjectInfoFile(projName, projDir):
     outputfile = open(projDir + '6-FinalResult/information/projInfo.txt', 'w+')
     outputfile.write('projectName=' + projName)
     outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y"))
     outputfile.close()
 
-
+# Check to see a additional summary graph should be generated based on a specific taxonomic level
 def checkForExtraOptions(file):
     configFile = open(file, 'r')
     configOptions = {}
@@ -21,6 +21,7 @@ def checkForExtraOptions(file):
     return configOptions
 
 
+# Gather all of the results related to PRINSEQ
 def getPRINSEQResults(fileDir):
     prinseqInfo = {}
 
@@ -55,7 +56,6 @@ def writePrinseqTableFile(dict, outfile):
             writer.writerow(dict[x])
         del writer
         csvfile.close()
-
 
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
@@ -190,9 +190,8 @@ def writeEMALGraphInfo(infile, outfile):
                               row[1].split('[')[0] + ',' + row[0] + '\n')
     outfile.close()
 
-
+# Will determine which data is related to the category that should be summed over
 def gatherSummedOverInfo(list, category):
-    # name[taxonID] = GRA
     dict = {}
 
     index = -1
@@ -225,8 +224,13 @@ def writeSummedOverInfo(category, dict, outfile):
         csvfile.close()
 
 if __name__ == "__main__":
+    # Get the name of the project directory containing all of the results files
     projDir = sys.argv[1]
     projName = sys.argv[2]
+
+    #Ensure the project directory ends with '/'
+    if not projDir.endswith('/'):
+        projDir += '/'
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     configOptions = checkForExtraOptions(cwd + 'param.config')
@@ -247,11 +251,23 @@ if __name__ == "__main__":
     writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
     print('Gathering Step 5 Results...')
     emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
-    print(emalInfo)
+
+    # Get list of all taxonomic levels considered
+    taxonomyLevels = emalInfo[0]
+
     writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
     writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
                        projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
-    summedOver = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
-    writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOver, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
 
+    # Generate single summed over table
+    summedOverResults = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
+    writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOverResults, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+
+    # Generate extra files that sum over each taxonomic level
+    for x in taxonomyLevels:
+        emalInfo.insert(0, taxonomyLevels)
+        summedOverResults = gatherSummedOverInfo(emalInfo, x.rstrip())
+        writeSummedOverInfo(x, summedOverResults,projDir + '6-FinalResult/information/' +'summedOver-'+x+'.csv')
+
+    print('Saving all csv files...')
     print('Complete!')
