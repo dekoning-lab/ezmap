@@ -59,6 +59,7 @@ function createVisualization(json) {
     .attr("fill-rule", "evenodd")
     .style("fill", function(d) { return colors(d.name); })
     .style("opacity", 1)
+    .attr("class", "ringSlice")
     .on("mouseover", mouseover);
 
     var svgWidth = d3.select('#chart').select("svg").style('height').replace('px','');
@@ -74,53 +75,53 @@ function createVisualization(json) {
     totalSize = path.node().__data__.value;
 };
 
-// Fade all but the current sequence, and show it in the breadcrumb trail.
-function mouseover(d) {
-    if (this.nodeName == 'path'){
-        var percentage = (100 * d.value / totalSize).toPrecision(3);
-        var percentageString = percentage + "%";
-        if (percentage < 0.01) {
-            percentageString = "< 0.1%";
-        }
-
-        var sequenceArray = getAncestors(d);
-
-        var last_element = sequenceArray[sequenceArray.length - 1];
-
-        d3.select('#explanation')
-        .html('');
-
-        d3.select('#explanation')
-            .attr('class', '')
-            .append('svg:tspan')
-            .attr('x', 0)
-            .attr('dy', 5)
-            .text(last_element.name);
-        d3.select('#explanation')
-            .append('svg:tspan')
-            .attr('x', 0)
-            .attr('dy', 30)
-            .attr('id','percentageString')
-            .text(percentageString);
-        d3.select('#explanation')
-            .append('svg:tspan')
-            .attr('x', 0)
-            .attr('dy', 20)
-            .text('Relative abundance');
-
-        updateTable(sequenceArray);
-        // Fade all the segments.
-        d3.selectAll("#chart path")
-            .style("opacity", 0.25);
-
-        // Then highlight only those that are an ancestor of the current segment.
-        vis.selectAll("path")
-            .filter(function(node) {
-            return (sequenceArray.indexOf(node) >= 0);
-        })
-            .style("opacity", 1);
-    }
-}
+//// Fade all but the current sequence, and show it in the breadcrumb trail.
+//function mouseover(d) {
+//    if (this.nodeName == 'path' && this.className['baseVal'] == 'ringSlice'){
+//        var percentage = (100 * d.value / totalSize).toPrecision(3);
+//        var percentageString = percentage + "%";
+//        if (percentage < 0.01) {
+//            percentageString = "< 0.1%";
+//        }
+//
+//        var sequenceArray = getAncestors(d);
+//
+//        var last_element = sequenceArray[sequenceArray.length - 1];
+//
+//        d3.select('#explanation')
+//        .html('');
+//
+//        d3.select('#explanation')
+//            .attr('class', '')
+//            .append('svg:tspan')
+//            .attr('x', 0)
+//            .attr('dy', 5)
+//            .text(last_element.name);
+//        d3.select('#explanation')
+//            .append('svg:tspan')
+//            .attr('x', 0)
+//            .attr('dy', 30)
+//            .attr('id','percentageString')
+//            .text(percentageString);
+//        d3.select('#explanation')
+//            .append('svg:tspan')
+//            .attr('x', 0)
+//            .attr('dy', 20)
+//            .text('Relative abundance');
+//
+//        updateTable(sequenceArray);
+//        // Fade all the segments.
+//        d3.selectAll("#chart path")
+//            .style("opacity", 0.25);
+//
+//        // Then highlight only those that are an ancestor of the current segment.
+//        vis.selectAll("path")
+//            .filter(function(node) {
+//            return (sequenceArray.indexOf(node) >= 0);
+//        })
+//            .style("opacity", 1);
+//    }
+//}
 
 function updateTable(array){
     var tableString = "<thead><tr><th>Classifier</th><th>Name</th></tr></thead><tbody id='emal-grph-1-tbl-tbody'>";

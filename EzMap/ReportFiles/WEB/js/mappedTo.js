@@ -1,4 +1,3 @@
-
 var margin = {top: 20, right: 60, bottom: 30, left: 60},
     width = $('#finalResult-panelBody').width() - margin.left - margin.right,
     height = ($(window).height()/12*7) - margin.top - margin.bottom;

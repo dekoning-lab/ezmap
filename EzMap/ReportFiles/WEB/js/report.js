@@ -1,3 +1,5 @@
+
+
 $(document).ready(function(){
     getProjectInformation();
     
@@ -34,7 +36,7 @@ $(document).ready(function(){
     
     $(window).resize(function() {
         clearTimeout(resizeId);
-        resizeId = setTimeout(doneResizing, 250);
+        resizeId = setTimeout(doneResizing, 300);
     });
     
     $('.panel').on('show.bs.collapse', function (e) {
@@ -44,23 +46,23 @@ $(document).ready(function(){
         $('#'+e.currentTarget.id+'Icon').removeClass('fa-chevron-down').addClass('fa-chevron-right');
     })
     $('#panel7').on('show.bs.collapse', function (e) {
-        initializeFileDistGraph();
-    })
-    $('#panel7').on('hide.bs.collapse', function (e) {
         $('#mappedTo-graph').html('');
-        //initializeFileDistGraph();
+        initializeFileDistGraph();
     })
     
     $('#downloadFileMappingDist').on("click", saveFileMappingSVG);
     $('#downloadGRA').on("click", saveGRASVG);
     
-    doneResizing();
+    initializePieChart();
+    initializeGRAGraph();
 });
 
 function initializeGRAGraph (){
-    $.getScript( "WEB/js/sequences.js", function( data, textStatus, jqxhr ) {
-        $.getScript( "WEB/js/piechart.js", function( data, textStatus, jqxhr ) {});
-    });
+    $.getScript( "WEB/js/sequences.js", function( data, textStatus, jqxhr ) {});
+}
+
+function initializePieChart (){
+    $.getScript( "WEB/js/piechart.js", function( data, textStatus, jqxhr ) {});
 }
 
 function initializeFileDistGraph(){
@@ -102,7 +104,7 @@ function getProjectInformation(){
         for (i=0; i < rows.length;i++){
             var row = rows[i].split('=');
             if (i==0){
-                $('#projTitle').text(row[1]);
+                $('#projTitle').text('Project: '+row[1]);
             }
             else if (i==1){
                 $('#date').text(row[1]);
@@ -117,6 +119,8 @@ function doneResizing(){
     initializeGRAGraph ();
     $('#mappedTo-graph').html('');
     initializeFileDistGraph();
+    initializePieChart(); 
+    console.log('Resize done!');
 }
 
 function csvToTable(file, $table, id, caption) {
@@ -158,8 +162,7 @@ function csvToTable(file, $table, id, caption) {
         $table.html('<table class="table" id="'+id+'"></table>');
         $table = $('#'+id);
         if (id == 'emalTblTwo'){
-            $('#summedOverTitle').text('Genome Relative Abundance Summed Over '+header[1].title);
-            console.log(header[1]);
+            $('#summedOverTitle').text('Genome Relative Abundance Summed Over '+header[1].title)
         }
         if (id == 'emalTblOne' || id == 'emalTblTwo'){
             $table.DataTable( {
