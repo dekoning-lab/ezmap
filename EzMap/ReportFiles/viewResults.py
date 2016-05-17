@@ -5,30 +5,32 @@ import webbrowser
 PORT = 8000
 httpd = "";
 
-def createrServer (PORT):
-	httpd = False
-	try:
-	    Handler = http.server.SimpleHTTPRequestHandler
 
-	    httpd = socketserver.TCPServer(("", PORT), Handler)
+def createrServer(PORT):
+    httpd = False
+    try:
+        Handler = http.server.SimpleHTTPRequestHandler
 
-	    print("serving at port", PORT)
-	    webbrowser.open('http://localhost:' + str(PORT) + '/report.html')
+        httpd = socketserver.TCPServer(("", PORT), Handler)
 
-	    httpd.serve_forever()
+        print("serving at port", PORT)
+        webbrowser.open('http://localhost:' + str(PORT) + '/report.html')
 
-	except KeyboardInterrupt:
-	    httpd.server_close()
-	    print("Server Stopped")
+        httpd.serve_forever()
 
-	except:
-	    print('Error')
-	    createrServer(PORT+1)
+    except KeyboardInterrupt:
+        httpd.server_close()
+        print("Server Stopped")
 
-	return httpd
+    except:
+        print('Error')
+        createrServer(PORT + 1)
+
+    return httpd
+
 
 httpd = createrServer(PORT)
 
 if (httpd != False):
-	httpd.server_close()
-	print("Server Stopped")
+    httpd.server_close()
+    print("Server Stopped")
