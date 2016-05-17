@@ -3,10 +3,14 @@ var width = (($( document ).width()-5)/12)*8;
 var height = $(window).height()/12*8;
 var radius = Math.min(width, height) / 2;
 
-var file = "../../information/emal-graph-1.csv"
+var file = "../../information/emal-graph-1.csv";
 
-// Mapping of step names to colors.
-var colors = d3.scale.category20c()
+var colorScale = ['#3182bd','#6baed6','#9ecae1','#c6dbef','#e6550d','#fd8d3c','#fdae6b','#fdd0a2','#31a354','#74c476','#a1d99b','#c7e9c0','#756bb1','#9e9ac8','#bcbddc','#dadaeb','#636363','#969696','#bdbdbd','#d9d9d9']
+
+function colorMaker (x){
+    var selectedColor = (((x.charCodeAt(0)+x.charCodeAt(1)+x.charCodeAt(2)))%colorScale.length)
+    return colorScale[selectedColor];
+}
 
 // Total size of all segments; we set this later, after loading the data.
 var totalSize = 0; 
@@ -44,24 +48,24 @@ function createVisualization(json) {
         .attr("r", radius)
         .style("opacity", 0);
 
-
     // For efficiency, filter nodes to keep only those large enough to see.
     var nodes = partition.nodes(json)
     .filter(function(d) {
         return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
     });
 
+//    console.log("nodes",JSON.stringify(nodes));
+    
     var path = vis.data([json]).selectAll("path")
     .data(nodes)
     .enter().append("svg:path")
     .attr("display", function(d) { return d.depth ? null : "none"; })
     .attr("d", arc)
     .attr("fill-rule", "evenodd")
-    .style("fill", function(d) { return colors(d.name); })
+    .style("fill", function(d) { return colorMaker(d.name); })
     .style("opacity", 1)
-    .attr("class", "ringSlice")
     .on("mouseover", mouseover);
-
+    
     var svgWidth = d3.select('#chart').select("svg").style('height').replace('px','');
     var textHeight = 60;
     var topValue = (textHeight/-2);
@@ -75,53 +79,53 @@ function createVisualization(json) {
     totalSize = path.node().__data__.value;
 };
 
-//// Fade all but the current sequence, and show it in the breadcrumb trail.
-//function mouseover(d) {
-//    if (this.nodeName == 'path' && this.className['baseVal'] == 'ringSlice'){
-//        var percentage = (100 * d.value / totalSize).toPrecision(3);
-//        var percentageString = percentage + "%";
-//        if (percentage < 0.01) {
-//            percentageString = "< 0.1%";
-//        }
-//
-//        var sequenceArray = getAncestors(d);
-//
-//        var last_element = sequenceArray[sequenceArray.length - 1];
-//
-//        d3.select('#explanation')
-//        .html('');
-//
-//        d3.select('#explanation')
-//            .attr('class', '')
-//            .append('svg:tspan')
-//            .attr('x', 0)
-//            .attr('dy', 5)
-//            .text(last_element.name);
-//        d3.select('#explanation')
-//            .append('svg:tspan')
-//            .attr('x', 0)
-//            .attr('dy', 30)
-//            .attr('id','percentageString')
-//            .text(percentageString);
-//        d3.select('#explanation')
-//            .append('svg:tspan')
-//            .attr('x', 0)
-//            .attr('dy', 20)
-//            .text('Relative abundance');
-//
-//        updateTable(sequenceArray);
-//        // Fade all the segments.
-//        d3.selectAll("#chart path")
-//            .style("opacity", 0.25);
-//
-//        // Then highlight only those that are an ancestor of the current segment.
-//        vis.selectAll("path")
-//            .filter(function(node) {
-//            return (sequenceArray.indexOf(node) >= 0);
-//        })
-//            .style("opacity", 1);
-//    }
-//}
+// Fade all but the current sequence, and show it in the breadcrumb trail.
+function mouseover(d) {
+    if (this.nodeName == 'path'){
+        var percentage = (100 * d.value / totalSize).toPrecision(3);
+        var percentageString = percentage + "%";
+        if (percentage < 0.01) {
+            percentageString = "< 0.1%";
+        }
+
+        var sequenceArray = getAncestors(d);
+
+        var last_element = sequenceArray[sequenceArray.length - 1];
+
+        d3.select('#explanation')
+        .html('');
+
+        d3.select('#explanation')
+            .attr('class', '')
+            .append('svg:tspan')
+            .attr('x', 0)
+            .attr('dy', 5)
+            .text(last_element.name);
+        d3.select('#explanation')
+            .append('svg:tspan')
+            .attr('x', 0)
+            .attr('dy', 30)
+            .attr('id','percentageString')
+            .text(percentageString);
+        d3.select('#explanation')
+            .append('svg:tspan')
+            .attr('x', 0)
+            .attr('dy', 20)
+            .text('Relative abundance');
+
+        updateTable(sequenceArray);
+        // Fade all the segments.
+        d3.selectAll("#chart path")
+            .style("opacity", 0.25);
+
+        // Then highlight only those that are an ancestor of the current segment.
+        vis.selectAll("path")
+            .filter(function(node) {
+            return (sequenceArray.indexOf(node) >= 0);
+        })
+            .style("opacity", 1);
+    }
+}
 
 function updateTable(array){
     var tableString = "<thead><tr><th>Classifier</th><th>Name</th></tr></thead><tbody id='emal-grph-1-tbl-tbody'>";
