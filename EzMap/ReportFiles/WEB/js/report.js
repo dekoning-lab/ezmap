@@ -44,17 +44,12 @@ $(document).ready(function(){
         $('#'+e.currentTarget.id+'Icon').removeClass('fa-chevron-down').addClass('fa-chevron-right');
     })
     $('#panel7').on('show.bs.collapse', function (e) {
+        initializeGRAGraph ();
         initializeFileDistGraph();
-    })
-    $('#panel7').on('hide.bs.collapse', function (e) {
-        $('#mappedTo-graph').html('');
-        //initializeFileDistGraph();
     })
     
     $('#downloadFileMappingDist').on("click", saveFileMappingSVG);
     $('#downloadGRA').on("click", saveGRASVG);
-    
-    doneResizing();
 });
 
 function initializeGRAGraph (){
@@ -188,4 +183,3 @@ function csvToTable(file, $table, id, caption) {
     });
 
 }
-
