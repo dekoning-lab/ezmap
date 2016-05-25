@@ -145,12 +145,14 @@ if __name__ == "__main__":
         # Get list of directories within the sample directory
         for name in os.listdir(allArgs['directory']):
             if os.path.isdir(os.path.join(allArgs['directory'], name)):
-                print('\n' + allArgs['directory'] + '/' + name)
-                if not os.path.exists(allArgs['projDir'] + '/' + name):
+                if not allArgs['directory'].endswith('/'):
+                    allArgs['directory'] = allArgs['directory'] + '/'
+
+                if not os.path.exists(allArgs['projDir'] + name):
                     print(allArgs['projDir'] + name)
                     os.mkdir(allArgs['projDir'] + name, 0o777)
 
-                runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'] + '/' + name,allArgs['projDir'] + name)
+                runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'] + name, allArgs['projDir'] + name)
 
     else:
         runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
