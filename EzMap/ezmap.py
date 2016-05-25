@@ -23,6 +23,7 @@ import Scripts.blastprep as blast
 import Scripts.emalPrep as emal
 import Scripts.finalScript as final
 
+serialSample = False
 
 # Cretaes a txt file of all importnat output files for final report
 def outputFileList(files, projdir):
@@ -122,7 +123,12 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
 
     # Output file list and gather all results throughout the pipeline run and compile into final report
     outputFileList(origFiles, projdir)
-    final.collectPipelineResult(configOptions['project-name']+'-'+os.path.basename(inputFileDir), projdir, configOptions, emalPostJobIDS)
+
+    if not serialSample:
+        final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
+    else:
+        print(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)))
+        final.collectPipelineResult(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)), projdir, configOptions, emalPostJobIDS)
 
     print('All required jobs have been created and queued for '+ inputFileDir +'...\nEXITING...')
 
@@ -135,6 +141,7 @@ if __name__ == "__main__":
     startStep = int(configOptions['start-at-step'])
 
     if allArgs['serialSample'] == True:
+        serialSample = True
         # Get list of directories within the sample directory
         for name in os.listdir(allArgs['directory']):
             if os.path.isdir(os.path.join(allArgs['directory'], name)):
@@ -143,8 +150,7 @@ if __name__ == "__main__":
                     print(allArgs['projDir'] + name)
                     os.mkdir(allArgs['projDir'] + name, 0o777)
 
-                runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'] + '/' + name,
-                                    allArgs['projDir'] + name)
+                runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'] + '/' + name,allArgs['projDir'] + name)
 
     else:
         runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'], allArgs['projDir'])

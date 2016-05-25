@@ -7,7 +7,7 @@ from operator import itemgetter
 def createProjectInfoFile(projName, projDir):
     outputfile = open(projDir + '6-FinalResult/information/projInfo.txt', 'w+')
     outputfile.write('projectName=' + projName)
-    outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y"))
+    outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y %X"))
     outputfile.close()
 
 # Check to see a additional summary graph should be generated based on a specific taxonomic level

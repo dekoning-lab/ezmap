@@ -52,6 +52,23 @@ $(document).ready(function(){
     $('#downloadGRA').on("click", saveGRASVG);
 });
 
+function getProjectInformation(){
+    var file = 'information/projInfo.txt'
+    $.get(file, function(data) {
+        var rows = data.split("\n");
+        for (i=0; i < rows.length;i++){
+            var row = rows[i].split('=');
+            if (i==0){
+                $('#projTitle').text(row[1]);
+                document.title = row[1];
+            }
+            else if (i==1){
+                $('#date').text("Date Run: "+row[1]);
+            }
+        }
+    });
+}
+
 function initializeGRAGraph (){
     $.getScript( "WEB/js/sequences.js", function( data, textStatus, jqxhr ) {
         $.getScript( "WEB/js/piechart.js", function( data, textStatus, jqxhr ) {});
@@ -88,22 +105,6 @@ function saveGRASVG (){
     
     var blob = new Blob([innerHTML], {type: "image/svg+xml"});
     saveAs(blob, "fileMappingDistribution.svg");
-}
-
-function getProjectInformation(){
-    var file = 'information/projInfo.txt'
-    $.get(file, function(data) {
-        var rows = data.split("\n");
-        for (i=0; i < rows.length;i++){
-            var row = rows[i].split('=');
-            if (i==0){
-                $('#projTitle').text(row[1]);
-            }
-            else if (i==1){
-                $('#date').text(row[1]);
-            }
-        }
-    });
 }
 
 function doneResizing(){
