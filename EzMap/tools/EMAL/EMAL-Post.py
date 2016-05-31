@@ -76,6 +76,7 @@ def processCSV(file):
     taxIDS.pop(0)
     getAllTaxInfo(taxIDS)
 
+    file = str(file)
     # Process through each result in the EMAL results
     inputFile = open(file, 'r')
     for i, line in enumerate(inputFile):
