@@ -23,9 +23,12 @@ FDic = {}
 SBFDic = {}
 GDic = {}
 
+allTaxInfo = {}
+
 inputFile = ''
 outputFileName = 'output.csv'
 outputDir = ''
+
 
 # Allow for command line arguments to be set and parsed
 def parseCommandLineArguments():
@@ -64,6 +67,16 @@ def processCSV(file):
     outputQ = m.Queue()
     results = []
 
+    # Get a list of all taxIDs found in the dataset
+    taxIDS = []
+    with open(file, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            taxIDS.append(row[1])
+    taxIDS.pop(0)
+    getAllTaxInfo(taxIDS)
+
+    # Process through each result in the EMAL results
     inputFile = open(file, 'r')
     for i, line in enumerate(inputFile):
         if i != 0:
@@ -85,14 +98,30 @@ def processCSV(file):
             dataDic[info[0]] = info[1]
 
 
-# Retrieve record from NCBI Entrez Database
-def grabEntrezRecord(TaxID):
-    Entrez.email = ""
-    handle = Entrez.efetch(db='taxonomy', id=TaxID)
-    record = Entrez.read(handle)
-    handle.close()
+def getAllTaxInfo(taxIDs):
+    Entrez.email = "pkczeczk@ucalgary.ca"
+    search_results = Entrez.read(Entrez.efetch("taxonomy", id=",".join(taxIDs)))
 
-    return record[0]['LineageEx'], record[0]['ScientificName']
+    print(search_results)
+
+    for i in range(0, len(search_results)):
+        taxonomicInfo = search_results[i]
+
+        # Pull relevant information about that virus
+        taxid = taxonomicInfo['TaxId']
+        lineage = taxonomicInfo['LineageEx']
+        species = taxonomicInfo['ScientificName']
+
+        lineage[1]['Rank'] = 'Q1'
+        for i in lineage:
+            print(i)
+
+        allTaxInfo[taxid] = {'LineageEx': lineage, 'ScientificName': species}
+
+
+# Retrieve record from NCBI Entrez Data
+def grabEntrezRecord(TaxID):
+    return allTaxInfo[TaxID]['LineageEx'], allTaxInfo[TaxID]['ScientificName']
 
 
 # Gather required information from Entrez Record
@@ -104,22 +133,21 @@ def processOneLine(line, outputQ):
 
     noRank = False
 
-    superKingdom = ['Superkingdom', None, None]
-    Q1 = ['Q1', None, None]
-    Order = ['Order', None, None]
-    Family = ['Family', None, None]
-    SubFamily = ['SubFamily', None, None]
-    Genus = ['Genus', None, None]
+    superKingdom = ['Superkingdom', 'N/A', 'N/A']
+    Q1 = ['Q1', 'N/A', 'N/A']
+    Order = ['Order', 'N/A', 'N/A']
+    Family = ['Family', 'N/A', 'N/A']
+    SubFamily = ['SubFamily', 'N/A', 'N/A']
+    Genus = ['Genus', 'N/A', 'N/A']
 
     for entry in lineage:
         if entry['Rank'] == 'superkingdom':
             superKingdom[1] = entry['ScientificName']
             superKingdom[2] = entry['TaxId']
             SKDic[superKingdom[2]] = superKingdom[1]
-        elif entry['Rank'] == 'no rank' and noRank == False:
+        elif entry['Rank'] == 'Q1':
             Q1[1] = entry['ScientificName']
             Q1[2] = entry['TaxId']
-            noRank = True
             Q1Dic[Q1[2]] = Q1[1]
         elif entry['Rank'] == 'order':
             Order[1] = entry['ScientificName']
@@ -129,7 +157,7 @@ def processOneLine(line, outputQ):
             Family[1] = entry['ScientificName']
             Family[2] = entry['TaxId']
             FDic[Family[2]] = Family[1]
-        elif entry['Rank'] == 'ubfamily':
+        elif entry['Rank'] == 'subfamily':
             SubFamily[1] = entry['ScientificName']
             SubFamily[2] = entry['TaxId']
             SBFDic[SubFamily[2]] = SubFamily[1]
@@ -164,6 +192,7 @@ def createNewCSV(dataDic, outputFilename):
                              info[5][1] + ' [' + info[5][2] + ']',
                              info[6][1] + ' [' + info[6][2] + ']',
                              info[7][1] + ' [' + info[7][2] + ']'))
+
 
 # Main Function
 if __name__ == '__main__':
