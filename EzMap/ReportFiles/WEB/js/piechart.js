@@ -2,7 +2,7 @@ var w = 444;
 var h = 444;
 var r = h/2;                           //radius
 
-d3.csv("../../information/emal-tbl-2.csv", function(error, data, taxLevel) {
+d3.json("information/emal-tbl-2.json", function(error, data, taxLevel) {
     var vis = d3.select("#summedPieChart")
     .append("svg:svg")              //create the SVG element inside the <body>
     .data([data])                   //associate our data with the document

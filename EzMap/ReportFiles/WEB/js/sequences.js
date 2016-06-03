@@ -32,13 +32,24 @@ var arc = d3.svg.arc()
 .innerRadius(function(d) { return Math.sqrt(d.y); })
 .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-// Use d3.text and d3.csv.parseRows so that we do not need to have a header
-// row, and can receive the csv as an array of arrays.
-d3.text(file, function(text) {
-    var csv = d3.csv.parseRows(text);
-    var json = buildHierarchy(csv);
+d3.json("information/emal-graph-1.json", function(data2) {
+    console.log(data2);
+    var newArray = []
+    for (key in data2){
+        console.log(data2[key]["Taxonomy"])
+        newArray.push([data2[key]["Taxonomy"],data2[key]["GRA"]]);
+    }
+    console.log(newArray)
+    var json = buildHierarchy(newArray);
     createVisualization(json);
 });
+
+// Use d3.text and d3.csv.parseRows so that we do not need to have a header
+// row, and can receive the csv as an array of arrays.
+//d3.text(file, function(text) {
+//    var json = buildHierarchy(newArray);
+//    createVisualization(json);
+//});
 
 // Main function to draw and set up the visualization, once we have the data.
 function createVisualization(json) {
