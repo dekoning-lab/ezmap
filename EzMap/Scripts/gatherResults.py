@@ -1,7 +1,8 @@
 __author__ = 'patrickczeczko'
 
-import sys, os, csv, time
+import sys, os, csv, time, json
 from operator import itemgetter
+
 
 # Generate a file with the required project info to display pipeline results
 def createProjectInfoFile(projName, projDir):
@@ -9,6 +10,7 @@ def createProjectInfoFile(projName, projDir):
     outputfile.write('projectName=' + projName)
     outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y %X"))
     outputfile.close()
+
 
 # Check to see a additional summary graph should be generated based on a specific taxonomic level
 def checkForExtraOptions(file):
@@ -26,24 +28,27 @@ def getPRINSEQResults(fileDir):
     prinseqInfo = {}
 
     for file in os.listdir(fileDir):
-        if file.endswith('.err'):
+        if file.endswith('.log'):
             inFile = open(fileDir + file, 'r')
-            output = open(fileDir + os.path.splitext(file)[0] + '.out')
-            fileID = output.readline().split(' ')[0]
+            # output = open(fileDir + os.path.splitext(file)[0] + '.out')
+            # fileID = output.readline().split(' ')[0]
             for line in inFile:
-                if 'Input sequences:' in line:
-                    numReads = int(line.split(':')[1].strip().replace(',', ''))
+                if 'Parsing and processing input data:' in line:
+                    fileID = line.split('Parsing and processing input data:')[1].rstrip("\n").replace(" ", "").replace(
+                        "\"", "")
+                elif 'Input sequences:' in line:
+                    numReads = int(line.split('Input sequences:')[1].strip().replace(',', ''))
                 elif 'Input mean length:' in line:
-                    avgReadLen = float(line.split(':')[1].strip().replace(',', ''))
+                    avgReadLen = float(line.split('Input mean length:')[1].strip().replace(',', ''))
                 elif 'Good sequences:' in line:
-                    numGood = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
+                    numGood = int(line.split('(')[0].split('Good sequences:')[1].strip().replace(',', ''))
                 elif 'Bad sequences:' in line:
-                    numBad = int(line.split('(')[0].split(':')[1].strip().replace(',', ''))
-
+                    numBad = int(line.split('(')[0].split('Bad sequences:')[1].strip().replace(',', ''))
             percentGood = format((float(numGood) / numReads) * 100, '.3f')
             percentBad = format((float(numBad) / numReads) * 100, '.3f')
             prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, percentGood, numBad, percentBad]
     return prinseqInfo
+
 
 def writePrinseqTableFile(dict, outfile):
     with open(outfile, 'w+') as csvfile:
@@ -57,14 +62,16 @@ def writePrinseqTableFile(dict, outfile):
         del writer
         csvfile.close()
 
+
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        if file.endswith('.err'):
+        if file.endswith('.errs'):
             inFile = open(fileDir + file, 'r')
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
 
-            fileID = output.readline().split(': ')[1].split('-')[0]
+            output.readline()
+            fileID = output.readline().split(': ')[1].split('_')[0]
 
             zeroAlign, oneAlign, multiAlign = -1, -1, -1
             for line in inFile:
@@ -107,7 +114,34 @@ def writeFileMappingDistribution(dict, outfile):
                 totalNonHumanReads = float(dict[x][2])
                 percentBacVir = (float(totalNonHumanReads / totalNumReads) * 100)
                 percentHuman = (float(totalHumanReads / totalNumReads) * 100)
+
+                x = x.rstrip('\n')
+                # print(repr([x, "%.10f" % percentHuman, "%.10f" % percentBacVir]))
                 writer.writerow([x, "%.10f" % percentHuman, "%.10f" % percentBacVir])
+
+
+def writeFileMappingDistributionJSON(dict, outfile):
+    outputData = []
+
+    outfile = open(outfile, 'w+')
+    for x in dict:
+        if not isinstance(dict[x][1], str):
+            totalNumReads = float(dict[x][1])
+            totalHumanReads = float(dict[x][3]) + float(dict[x][4])
+            totalNonHumanReads = float(dict[x][2])
+            percentBacVir = (float(totalNonHumanReads / totalNumReads) * 100)
+            percentHuman = (float(totalHumanReads / totalNumReads) * 100)
+
+            x = x.rstrip('\n')
+
+            rowData = {}
+            rowData["File"] = x
+            rowData["Human"] = float("%.10f" % percentHuman)
+            rowData["Bacteria/Viruses"] = float("%.10f" % percentBacVir)
+
+            outputData.append(rowData)
+
+    outfile.write(json.dumps(outputData))
 
 
 def getSamtoolsResults(fileDir):
@@ -190,6 +224,29 @@ def writeEMALGraphInfo(infile, outfile):
                               row[1].split('[')[0] + ',' + row[0] + '\n')
     outfile.close()
 
+
+def writeEMALGraphInfoJSON(infile, outfile):
+    outfile = open(outfile, 'w+')
+
+    outputData = []
+
+    with open(infile, newline='') as inputFile:
+        for line in inputFile:
+            reader = csv.reader(inputFile, delimiter=',', quotechar='"')
+            for row in reader:
+                rowData = {}
+                string = row[2].split('[')[0] + '=' + row[3].split('[')[0] + '=' + row[4].split('[')[0] + '=' + \
+                         row[5].split('[')[0] + '=' + row[6].split('[')[0] + '=' + row[7].split('[')[0] + '=' + \
+                         row[1].split('[')[0]
+                rowData["Taxonomy"] = string
+                rowData["GRA"] = row[0]
+
+                outputData.append(rowData)
+
+    outfile.write(json.dumps(outputData))
+    outfile.close()
+
+
 # Will determine which data is related to the category that should be summed over
 def gatherSummedOverInfo(list, category):
     dict = {}
@@ -215,20 +272,36 @@ def gatherSummedOverInfo(list, category):
 
     return dict
 
+
 def writeSummedOverInfo(category, dict, outfile):
     with open(outfile, 'w+') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(['GRA',category])
+        writer.writerow(['GRA', category])
         for key in dict:
-            writer.writerow([dict[key],key])
+            writer.writerow([dict[key], key])
         csvfile.close()
+
+
+def writeSummedOverInfoJSON(category, dict, outfile):
+    outfile = open(outfile, 'w+')
+    allData = []
+
+    for key in dict:
+        rowData = {}
+        rowData["GRA"] = dict[key]
+        rowData[category] = key
+
+        allData.append(rowData)
+
+    outfile.write(json.dumps(allData))
+
 
 if __name__ == "__main__":
     # Get the name of the project directory containing all of the results files
     projDir = sys.argv[1]
     projName = sys.argv[2]
 
-    #Ensure the project directory ends with '/'
+    # Ensure the project directory ends with '/'
     if not projDir.endswith('/'):
         projDir += '/'
 
@@ -242,6 +315,9 @@ if __name__ == "__main__":
     print('Gathering Step 2 Results...')
     bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
     writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
+
+    writeFileMappingDistributionJSON(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.json')
+
     writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.csv')
     print('Gathering Step 3 Results...')
     samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
@@ -258,16 +334,21 @@ if __name__ == "__main__":
     writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
     writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
                        projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
+    writeEMALGraphInfoJSON(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
+                           projDir + '6-FinalResult/information/' + 'emal-graph-1.json')
 
-    # Generate single summed over table
+    # # Generate single summed over table
     summedOverResults = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
-    writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOverResults, projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+    writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOverResults,
+                        projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+    writeSummedOverInfoJSON(configOptions['extraTableSummedOver'], summedOverResults,
+                            projDir + '6-FinalResult/information/' + 'emal-tbl-2.json')
 
-    # Generate extra files that sum over each taxonomic level
+    # # Generate extra files that sum over each taxonomic level
     for x in taxonomyLevels:
         emalInfo.insert(0, taxonomyLevels)
         summedOverResults = gatherSummedOverInfo(emalInfo, x.rstrip())
-        writeSummedOverInfo(x, summedOverResults,projDir + '6-FinalResult/information/' +'summedOver-'+x+'.csv')
+        writeSummedOverInfo(x, summedOverResults, projDir + '6-FinalResult/information/' + 'summedOver-' + x + '.csv')
 
     print('Saving all csv files...')
     print('Complete!')
