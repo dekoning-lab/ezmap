@@ -1,2 +1,0 @@
-projectName=QuakeData-MPT9.0
-dateRun=02/06/2016 10:32:07
