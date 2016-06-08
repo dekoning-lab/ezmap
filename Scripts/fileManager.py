@@ -5,7 +5,7 @@ from Scripts.dataset import Dataset
 from distutils.dir_util import copy_tree
 
 # Create Subdirectories for all the intermediate files
-def createSubFolders(projDir):
+def createSubFolders(projDir, projName):
     if not os.path.exists(projDir):
         os.mkdir(projDir, 0o777)
 
@@ -21,10 +21,11 @@ def createSubFolders(projDir):
             os.mkdir(projDir + '/4-OrganismMapping/')
         if not os.path.exists(projDir + '/5-RelativeAbundanceEstimation/'):
             os.mkdir(projDir + '/5-RelativeAbundanceEstimation/')
-        if not os.path.exists(projDir + '/6-FinalResult/'):
-            os.mkdir(projDir + '/6-FinalResult/')
-        if not os.path.exists(projDir + '/6-FinalResult/information/'):
-            os.mkdir(projDir + '/6-FinalResult/information/')
+        if not os.path.exists(projDir + '/6-FinalResult-'+projName+'/'):
+            os.mkdir(projDir + '/6-FinalResult-'+projName+'/')
+        print("!!"+projDir + '/6-FinalResult-'+projName)
+        if not os.path.exists(projDir + '/6-FinalResult-'+projName+'/information/'):
+            os.mkdir(projDir + '/6-FinalResult-'+projName+'/information/')
         return True
     return False
 

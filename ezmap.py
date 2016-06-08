@@ -60,7 +60,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
         return
 
     # Create subdirectories where intermediate files will live
-    createdSubDir = fileman.createSubFolders(projdir)
+    createdSubDir = fileman.createSubFolders(projdir, configOptions['project-name'])
 
     # If sub directories don't exist, don't continue
     if createdSubDir == False:

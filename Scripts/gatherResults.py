@@ -6,7 +6,7 @@ from operator import itemgetter
 
 # Generate a file with the required project info to display pipeline results
 def createProjectInfoFile(projName, projDir):
-    outputfile = open(projDir + '6-FinalResult/information/projInfo.txt', 'w+')
+    outputfile = open(projDir + '6-FinalResult-'+projName+'/information/projInfo.txt', 'w+')
     outputfile.write('projectName=' + projName)
     outputfile.write('\ndateRun=' + time.strftime("%d/%m/%Y %X"))
     outputfile.close()
@@ -310,44 +310,44 @@ if __name__ == "__main__":
     createProjectInfoFile(projName, projDir)
     print('Gathering Step 1 Results...')
     prinseqInfo = getPRINSEQResults(projDir + '1-Cleaning/')
-    writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult/information/' + 'prinseq-tbl-1.csv')
+    writePrinseqTableFile(prinseqInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'prinseq-tbl-1.csv')
     print('Gathering Step 2 Results...')
     bowtieInfo = getBowtie2Results(projDir + '2-HumanMapping/')
-    writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult/information/' + 'bowtie2-tbl-1.csv')
+    writeBowtieTableFile(bowtieInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'bowtie2-tbl-1.csv')
 
-    writeFileMappingDistributionJSON(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.json')
+    writeFileMappingDistributionJSON(bowtieInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'mappedto.json')
 
-    writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult/information/' + 'mappedto.csv')
+    writeFileMappingDistribution(bowtieInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'mappedto.csv')
     print('Gathering Step 3 Results...')
     samtoolsInfo = getSamtoolsResults(projDir + '3-UnmappedCollection/')
-    writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult/information/' + 'samtools-tbl-1.csv')
+    writeSamtoolsTable(samtoolsInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'samtools-tbl-1.csv')
     print('Gathering Step 4 Results...')
     blastInfo = gatherBlastResults(projDir + '4-OrganismMapping/')
-    writeBlastTable(blastInfo, projDir + '6-FinalResult/information/' + 'blastn-tbl-1.csv')
+    writeBlastTable(blastInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'blastn-tbl-1.csv')
     print('Gathering Step 5 Results...')
     emalInfo = gatherEMALResults(projDir + '5-RelativeAbundanceEstimation/')
 
     # Get list of all taxonomic levels considered
     taxonomyLevels = emalInfo[0]
 
-    writeEMALTable(emalInfo, projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv')
-    writeEMALGraphInfo(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
-                       projDir + '6-FinalResult/information/' + 'emal-graph-1.csv')
-    writeEMALGraphInfoJSON(projDir + '6-FinalResult/information/' + 'emal-tbl-1.csv',
-                           projDir + '6-FinalResult/information/' + 'emal-graph-1.json')
+    writeEMALTable(emalInfo, projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-1.csv')
+    writeEMALGraphInfo(projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-1.csv',
+                       projDir + '6-FinalResult-'+projName+'/information/' + 'emal-graph-1.csv')
+    writeEMALGraphInfoJSON(projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-1.csv',
+                           projDir + '6-FinalResult-'+projName+'/information/' + 'emal-graph-1.json')
 
     # # Generate single summed over table
     summedOverResults = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
     writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOverResults,
-                        projDir + '6-FinalResult/information/' + 'emal-tbl-2.csv')
+                        projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-2.csv')
     writeSummedOverInfoJSON(configOptions['extraTableSummedOver'], summedOverResults,
-                            projDir + '6-FinalResult/information/' + 'emal-tbl-2.json')
+                            projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-2.json')
 
     # # Generate extra files that sum over each taxonomic level
     for x in taxonomyLevels:
         emalInfo.insert(0, taxonomyLevels)
         summedOverResults = gatherSummedOverInfo(emalInfo, x.rstrip())
-        writeSummedOverInfo(x, summedOverResults, projDir + '6-FinalResult/information/' + 'summedOver-' + x + '.csv')
+        writeSummedOverInfo(x, summedOverResults, projDir + '6-FinalResult-'+projName+'/information/' + 'summedOver-' + x + '.csv')
 
     print('Saving all csv files...')
     print('Complete!')
