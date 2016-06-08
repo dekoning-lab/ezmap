@@ -28,9 +28,8 @@ EzMap uses a number of free open source programs to generate results. They are l
 
 ----------
 
-
 ## Setup
- 
+**This read me is intended as a quick start guide, more comprehensive details can be found within the wiki.**
 
  1. Download the current release of EzMap.
  2. Unzip it.
@@ -104,15 +103,7 @@ All of the csv files containing results will be found within projectDirecotry/6-
 
 ####Viewing the HTML Report
 
-The final results an also be viewed as part of an HTML report:
-
- 1. Open a new terminal window and navigate to the ```6-FinalResult``` folder.
- 2. Run the following command.
- 
-```
-python3 viewResults.py
-```
-A new browser window will now open displaying the results of your pipeline run.
+The final results an also be viewed as part of an HTML report, simply open the ```report.html``` file in the ```6-FinalResult``` directory.
 
 ##Parameters
 
