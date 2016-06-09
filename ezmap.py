@@ -26,8 +26,8 @@ import Scripts.finalScript as final
 serialSample = False
 
 # Cretaes a txt file of all importnat output files for final report
-def outputFileList(files, projdir):
-    outputfile = open(projdir + '6-FinalResult/information/' + 'filelist.txt', 'w+')
+def outputFileList(files, projdir, projName):
+    outputfile = open(projdir + '6-FinalResult-'+projName+'/information/' + 'filelist.txt', 'w+')
     outputfile.write(
         '<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td>Path</td></tr></thead>')
 
@@ -122,7 +122,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
         startStep += 1
 
     # Output file list and gather all results throughout the pipeline run and compile into final report
-    outputFileList(origFiles, projdir)
+    outputFileList(origFiles, projdir, configOptions['project-name'])
 
     if not serialSample:
         final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
