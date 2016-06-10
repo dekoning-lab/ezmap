@@ -1,6 +1,6 @@
 __author__ = 'patrickczeczko'
 
-import os
+import os, subprocess
 from Scripts.dataset import Dataset
 from distutils.dir_util import copy_tree
 
@@ -23,7 +23,6 @@ def createSubFolders(projDir, projName):
             os.mkdir(projDir + '/5-RelativeAbundanceEstimation/')
         if not os.path.exists(projDir + '/6-FinalResult-'+projName+'/'):
             os.mkdir(projDir + '/6-FinalResult-'+projName+'/')
-        print("!!"+projDir + '/6-FinalResult-'+projName)
         if not os.path.exists(projDir + '/6-FinalResult-'+projName+'/information/'):
             os.mkdir(projDir + '/6-FinalResult-'+projName+'/information/')
         return True
@@ -40,6 +39,9 @@ def getListOfOriginalFiles(fileDir, projDir):
     return origfiles
 
 
-def copyReportFiles(projDir):
+def copyReportFiles(projDir, projName):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
-    copy_tree(cwd + 'ReportFiles', projDir + '6-FinalResult')
+
+    command = 'cp -r ' + cwd + 'ReportFiles/* ' + projDir + '6-FinalResult-' + projName
+    print(command)
+    subprocess.call(command, shell=True)

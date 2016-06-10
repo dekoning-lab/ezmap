@@ -70,7 +70,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
     # Get the project directory to pass to functions that follow
     # projdir = list(origFiles.values())[0].projDirectory
 
-    fileman.copyReportFiles(projdir)
+    fileman.copyReportFiles(projdir, configOptions['project-name'])
 
     # Generate Job script for step 1 and run all jobs
     prinseqJobIDS = []
