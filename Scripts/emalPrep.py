@@ -36,7 +36,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
     script.write(
         'srun ' +
         configOptions['python3-path'] + ' ' + emalPath + 'EMAL-DataPrep.py ' +
-        configOptions['blastn-db-path'] + ' ' +
+        configOptions['blast-db-path'] + ' ' +
         configOptions['emal-gi-taxid-nucldmp-path'] + ' ' +
         '1' + ' ' +
         projdir + '5-RelativeAbundanceEstimation/' +

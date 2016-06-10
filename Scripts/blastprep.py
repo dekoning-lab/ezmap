@@ -71,11 +71,11 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
                  configOptions['python3-path'] + ' ' +
                  cwd + '/tools/BLAST/BLASTWithHitFilter.py ' +
                  blastPath +'blastn ' +
-                 configOptions['blastn-db-path'] + ' ' +
+                 configOptions['blast-db-path'] + ' ' +
                  projdir + '3-UnmappedCollection/${FILENAME}.fasta' +
                  ' ${optionString} ' +
                  projdir + '4-OrganismMapping/ ' +
-                 configOptions['blastn-min-alignment-length'] +
+                 configOptions['blast-min-alignment-length'] +
                  ' ${FILENAMEOUTPUT}')
     script.close()
 

@@ -24,9 +24,9 @@ SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/
 
 BLAST CONFIG OPTIONS
->blast-path=cwd/tools/BLAST/ncbi-blast-2.2.30+/bin/
+>blast-path=cwd/<CHANGE THIS>
 >blast-task=megablast
->blast-db-path=/BLASTPATH/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
+>blast-db-path=<CHANGE THIS>
 >blast-dust=no
 >blast-reward=1
 >blast-penalty=-3
@@ -40,7 +40,7 @@ BLAST CONFIG OPTIONS
 
 EMAL CONFIG OPTIONS
 >emal-path=cwd/tools/EMAL/
->emal-gi-taxid-nucldmp-path=/pathToDMP/EMAL/gi_taxid_nucl.dmp
+>emal-gi-taxid-nucldmp-path=<CHANGE THIS>
 >emal-acceptance-value=0.0001
 
 OUTPUT OPTIONS
