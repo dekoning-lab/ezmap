@@ -130,12 +130,12 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
         print(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)))
         final.collectPipelineResult(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)), projdir, configOptions, emalPostJobIDS)
 
-    print('All required jobs have been created and queued for '+ inputFileDir +'...\nEXITING...')
+    print('\nAll required jobs for '+ inputFileDir +'have been queued...\n')
 
 # Main Function
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline
-    print("Starting EzMap \n\nParsing config file...")
+    print("\nEzMap V1.0\n\nParsing config file...")
     allArgs = arguments.parseCommandLineArguments()
     configOptions = config.parseConfigOptions()
     startStep = int(configOptions['start-at-step'])
@@ -157,4 +157,7 @@ if __name__ == "__main__":
     else:
         runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
 
-    print('All required jobs have been created and queued...\nEXITING...')
+    print('All required jobs have been created and queued...')
+    print('You can now check the status of your jobs using the following command: ')
+    print('squeue\n')
+    print('Once those jobs have completed you can view your results in:\n'+allArgs['projDir']+'6-FinalResult-'+configOptions['project-name']+'/')
