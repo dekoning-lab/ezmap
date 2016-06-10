@@ -25,18 +25,18 @@ SAMTOOLS CONFIG OPTIONS
 
 BLAST CONFIG OPTIONS
 >blast-path=cwd/tools/BLAST/ncbi-blast-2.2.30+/bin/
->blastn-task=megablast
->blastn-db-path=/BLASTPATH/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
->blastn-dust=no
->blastn-reward=1
->blastn-penalty=-3
->blastn-word_size=12
->blastn-gapopen=5
->blastn-gapextend=2
->blastn-evalue=0.0001
->blastn-culling_limit=2
->blastn-perc_identity=90
->blastn-min-alignment-length=45
+>blast-task=megablast
+>blast-db-path=/BLASTPATH/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
+>blast-dust=no
+>blast-reward=1
+>blast-penalty=-3
+>blast-word_size=12
+>blast-gapopen=5
+>blast-gapextend=2
+>blast-evalue=0.0001
+>blast-culling_limit=2
+>blast-perc_identity=90
+>blast-min-alignment-length=45
 
 EMAL CONFIG OPTIONS
 >emal-path=cwd/tools/EMAL/

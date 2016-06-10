@@ -38,10 +38,10 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     optionsString = ''
     for x in configOptions:
-        if 'blastn-' in x:
-            if not 'db-path' in x:
+        if 'blast-' in x:
+            if not 'db-path' or '-path' in x:
                 if not 'min-alignment-length' in x:
-                    param = x.replace('blastn-', '')
+                    param = x.replace('blast-', '')
                     value = configOptions[x]
                     optionsString += param + ',' + str(value) + ','
     optionsString += 'outfmt,' + '6,'
