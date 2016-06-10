@@ -1,0 +1,48 @@
+VMAP CONFIG FILE
+>project-name=VMAPTest
+>python3-path=/PATH/python3.5
+>start-at-step=1
+
+SLURM JOB MANAGER CONFIG OPTIONS
+>slurm-account=dklab-research
+>slurm-share=no
+>slurm-partition=normal
+>slurm-max-num-threads=16
+>slurm-test-only=no
+
+PRINSEQ CONFIG OPTIONS
+>prinseq-path=cwd/tools/PRINSEQ/
+>prinseq-min_qual_score=21
+>prinseq-lc_method=dust
+>prinseq-lc_threshold=7
+
+BOWTIE2 CONFIG OPTIONS
+>bowtie2-path=cwd/tools/BOWTIE2/bowtie2-2.2.5/
+>bowtie2-index-path=cwd/tools/BOWTIE2/hg19/hg19
+
+SAMTOOLS CONFIG OPTIONS
+>samtools-path=cwd/tools/SAMTOOLS/
+
+BLAST CONFIG OPTIONS
+>blast-path=cwd/tools/BLAST/ncbi-blast-2.2.30+/bin/
+>blastn-task=megablast
+>blastn-db-path=/BLASTPATH/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
+>blastn-dust=no
+>blastn-reward=1
+>blastn-penalty=-3
+>blastn-word_size=12
+>blastn-gapopen=5
+>blastn-gapextend=2
+>blastn-evalue=0.0001
+>blastn-culling_limit=2
+>blastn-perc_identity=90
+>blastn-min-alignment-length=45
+
+EMAL CONFIG OPTIONS
+>emal-path=cwd/tools/EMAL/
+>emal-gi-taxid-nucldmp-path=/pathToDMP/EMAL/gi_taxid_nucl.dmp
+>emal-acceptance-value=0.0001
+
+OUTPUT OPTIONS
+- Options for this parameter are: SuperKingdom,Q1,Order,Family,SubFamily,Genus
+>extraTableSummedOver=Family
