@@ -5,16 +5,35 @@ echo "Installing EzMap dependencies..."
 echo "Current Python Version Installed"
 python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))'
 
-echo "Installing Biopython...\n"
-pip3 install biopython
+# Check to see if NumPy is installed
+echo "Checking for NumPy installation..."
+if pip3 list | grep numpy; then
+	echo "NumPy already installed..."
+else
+	echo "Installing NumPy..."
+    pip3 install numpy
+fi
 
-echo "Installing SciPy...\n"
-pip3 install scipy
+# Check to see if SciPy is installed
+echo "Checking for SciPy installation..."
+if pip3 list | grep scipy; then
+	echo "SciPy already installed..."
+else
+	echo "Installing SciPy..."
+    pip3 install scipy
+fi
 
-echo "Installing NumPy...\n"
-pip3 install numpy
+# Check to see if Biopython is installed
+echo "Checking for Biopython installation..."
+if pip3 list | grep biopython; then
+	echo "Biopython already installed..."
+else
+	echo "Installing Biopython..."
+    pip3 install biopython
+fi
 
-echo "Downloading hg19 files for Bowtie2\n"
+# Download hg19 image
+echo "Downloading hg19 files for Bowtie2"
 case $( uname -s ) in
 Linux)  echo Linux
         wget ftp://ftp.ccb.jhu.edu/pub/data/bowtie2_indexes/hg19.zip
@@ -29,6 +48,8 @@ Darwin) echo Darwin
 *)      echo other;;
 esac
 rm hg19.zip
+
+echo "Done... Please check for any error messages listed above"
 
 
 
