@@ -43,5 +43,5 @@ def copyReportFiles(projDir, projName):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
     command = 'cp -r ' + cwd + 'ReportFiles/* ' + projDir + '6-FinalResult-' + projName
-    print(command)
+
     subprocess.call(command, shell=True)
