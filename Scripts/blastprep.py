@@ -39,11 +39,12 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
     optionsString = ''
     for x in configOptions:
         if 'blast-' in x:
-            if not 'db-path' or '-path' in x:
+            if 'db-path' and '-path' not in x:
                 if not 'min-alignment-length' in x:
                     param = x.replace('blast-', '')
                     value = configOptions[x]
                     optionsString += param + ',' + str(value) + ','
+
     optionsString += 'outfmt,' + '6,'
     optionsString += 'num_threads,' + configOptions['slurm-max-num-threads'] + ','
 
