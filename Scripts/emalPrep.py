@@ -40,7 +40,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
         configOptions['emal-gi-taxid-nucldmp-path'] + ' ' +
         '1' + ' ' +
         projdir + '5-RelativeAbundanceEstimation/' +
-        ' output')
+        ' '+configOptions['project-name'])
 
     script.close()
     os.chmod(projdir + '5-RelativeAbundanceEstimation/emalPreScript.sh', 0o755)
@@ -77,11 +77,11 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
         configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Main.py ' +
         '-d ' + projdir + '4-OrganismMapping/ ' +
         '-v -t ' + configOptions['slurm-max-num-threads'] + ' ' +
-        '-c ' + projdir.split('/')[-2] + '.gra ' +
+        '-c ' + configOptions['project-name'] + '.gra ' +
         '-m ' + configOptions['emal-acceptance-value'] + ' ' +
         '-o ' + projdir + '5-RelativeAbundanceEstimation/ ' +
         '-e .tsv '
-        '-i output-combinedGenomeData.csv')
+        '-i '+configOptions['project-name']+'-combinedGenomeData.csv')
 
     script.close()
     os.chmod(projdir + '5-RelativeAbundanceEstimation/emalScript.sh', 0o755)
@@ -116,8 +116,8 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
     script.write(
         'srun ' +
         configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Post.py ' +
-        '-f ' + projdir + '5-RelativeAbundanceEstimation/' + projdir.split('/')[-2] + '.gra ' +
-        '-c ' + projdir.split('/')[-2] + '-emal.csv ' +
+        '-f ' + projdir + '5-RelativeAbundanceEstimation/' + configOptions['project-name'] + '.gra ' +
+        '-c ' + configOptions['project-name'] + '-emal.csv ' +
         '-o ' + projdir + '5-RelativeAbundanceEstimation/')
 
     script.close()

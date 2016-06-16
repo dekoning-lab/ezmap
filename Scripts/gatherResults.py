@@ -1,6 +1,7 @@
 #__author__ = 'patrickczeczko'
 
 import sys, os, csv, time, json
+from Bio import Entrez
 from operator import itemgetter
 
 
@@ -17,8 +18,8 @@ def checkForExtraOptions(file):
     configFile = open(file, 'r')
     configOptions = {}
     for line in configFile:
-        if '#extraTableSummedOver' in line:
-            key, value = line.strip('#').split('=')
+        if '>extraTableSummedOver' in line:
+            key, value = line.strip('>').split('=')
             configOptions[key] = value
     return configOptions
 
@@ -105,7 +106,7 @@ def writeFileMappingDistribution(dict, outfile):
     with open(outfile, 'w+') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
 
-        writer.writerow(['File', 'Human', 'Bacteria/Viruses'])
+        writer.writerow(['File', 'Human', 'Non-Human'])
         for x in dict:
             if not isinstance(dict[x][1], str):
                 totalNumReads = float(dict[x][1])
@@ -136,7 +137,7 @@ def writeFileMappingDistributionJSON(dict, outfile):
             rowData = {}
             rowData["File"] = x
             rowData["Human"] = float("%.10f" % percentHuman)
-            rowData["Bacteria/Viruses"] = float("%.10f" % percentBacVir)
+            rowData["Non-Human"] = float("%.10f" % percentBacVir)
 
             outputData.append(rowData)
 
@@ -294,6 +295,87 @@ def writeSummedOverInfoJSON(category, dict, outfile):
 
     outfile.write(json.dumps(allData))
 
+def getAllTaxInfo (taxIDs):
+    Entrez.email = "pkczeczk@ucalgary.ca"
+    search_results = Entrez.read(Entrez.efetch("taxonomy", id=",".join(taxIDs)))
+    allTaxInfo = {}
+
+    for i in range(0, len(search_results)):
+        taxonomicInfo = search_results[i]
+
+        # Pull relevant information about that virus
+        taxid = taxonomicInfo['TaxId']
+        lineage = taxonomicInfo['LineageEx']
+        species = taxonomicInfo['ScientificName']
+
+        lineage[1]['Rank'] = 'Q1'
+
+        allTaxInfo[taxid] = {'lineage': lineage, 'species': species}
+
+    return allTaxInfo
+
+def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory):
+    if not projDir.endswith('/'):
+        projDir = projDir + '/'
+
+    fileDIR = projDir + '4-OrganismMapping/'
+    combGenomeData = projDir + '5-RelativeAbundanceEstimation/'+projName+'-combinedGenomeData.csv'
+    genomeTaxon = {}
+    results = {}
+
+    print(taxonomyLevels)
+
+    # Get all of the taxonomic ids in the set
+    inputFile = open(combGenomeData, "r")
+    for line in inputFile:
+        genomeID, taxonID, genomeLen = line.split(',')
+        genomeTaxon[int(genomeID)] = [int(taxonID), int(genomeLen)]
+
+    # Get all taxonomic information for those IDs from ENTREZ
+    allTaxIDS = []
+    for key in genomeTaxon.keys():
+        allTaxIDS.append(str(genomeTaxon[key][0]))
+
+    allTaxInfo = getAllTaxInfo(allTaxIDS)
+
+    for taxLevel in taxonomyLevels:
+        results[taxLevel.upper()] = {}
+
+    # process each blast result file
+    for file in os.listdir(fileDIR):
+        if '.tsv' in file:
+            with open(fileDIR + file) as csvfile:
+                reader = csv.reader(csvfile, delimiter='\t')
+                for row in reader:
+                    print(fileDIR + file)
+                    nucID = int(row[1].split('|')[1])
+                    print(nucID)
+                    # Convert that reads nucID to its taxID
+                    if nucID in genomeTaxon:
+                        taxID = str(genomeTaxon[nucID][0])
+
+                        for data in allTaxInfo[taxID]['lineage']:
+                            taxLevel = data['Rank'].upper()
+                            name = data['ScientificName'] + ' [' + data['TaxId'] + ']'
+                            print(name)
+                            print(taxLevel)
+
+                            print(results)
+                            #Check if that name is already in results
+                            if taxLevel in results:
+                                if name in results[taxLevel]:
+                                    results[taxLevel][name] += 1
+                                else:
+                                    results[taxLevel][name] = 1
+    print(results)
+    for level in results:
+        with open(outputDirectory+'actualAbundanceSummedOver'+level+'.csv', 'w+') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+
+            writer.writerow([level,'# Reads Mapped'])
+
+            for virus in results[level]:
+                writer.writerow([virus,results[level][virus]])
 
 if __name__ == "__main__":
     # Get the name of the project directory containing all of the results files
@@ -305,7 +387,7 @@ if __name__ == "__main__":
         projDir += '/'
 
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
-    configOptions = checkForExtraOptions(cwd + 'param.config')
+    configOptions = checkForExtraOptions(cwd + 'config.txt')
 
     createProjectInfoFile(projName, projDir)
     print('Gathering Step 1 Results...')
@@ -336,7 +418,7 @@ if __name__ == "__main__":
     writeEMALGraphInfoJSON(projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-1.csv',
                            projDir + '6-FinalResult-'+projName+'/information/' + 'emal-graph-1.json')
 
-    # # Generate single summed over table
+    # Generate single summed over table
     summedOverResults = gatherSummedOverInfo(emalInfo, configOptions['extraTableSummedOver'].rstrip())
     writeSummedOverInfo(configOptions['extraTableSummedOver'], summedOverResults,
                         projDir + '6-FinalResult-'+projName+'/information/' + 'emal-tbl-2.csv')
@@ -348,6 +430,8 @@ if __name__ == "__main__":
         emalInfo.insert(0, taxonomyLevels)
         summedOverResults = gatherSummedOverInfo(emalInfo, x.rstrip())
         writeSummedOverInfo(x, summedOverResults, projDir + '6-FinalResult-'+projName+'/information/' + 'summedOver-' + x + '.csv')
+
+    calculateActualAbunbdance(taxonomyLevels, projName, projDir, projDir + '6-FinalResult-'+projName+'/information/')
 
     print('Saving all csv files...')
     print('Complete!')

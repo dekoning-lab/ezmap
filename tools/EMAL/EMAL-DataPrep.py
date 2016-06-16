@@ -59,7 +59,6 @@ def processfile(fileName, start, stop, currentChunk, numOfDataChunks, outputQueu
                     outputString = str(t[0]) + ',' + str(t[1]) + ',' + str(t[2]) + ',\n'
                     outputArray.append(outputString)
 
-
     else:
         with open(fileName, 'r') as fh:
             fh.seek(start)
