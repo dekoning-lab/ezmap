@@ -323,8 +323,6 @@ def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory
     genomeTaxon = {}
     results = {}
 
-    print(taxonomyLevels)
-
     # Get all of the taxonomic ids in the set
     inputFile = open(combGenomeData, "r")
     for line in inputFile:
@@ -347,9 +345,8 @@ def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory
             with open(fileDIR + file) as csvfile:
                 reader = csv.reader(csvfile, delimiter='\t')
                 for row in reader:
-                    print(fileDIR + file)
                     nucID = int(row[1].split('|')[1])
-                    print(nucID)
+
                     # Convert that reads nucID to its taxID
                     if nucID in genomeTaxon:
                         taxID = str(genomeTaxon[nucID][0])
@@ -357,17 +354,14 @@ def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory
                         for data in allTaxInfo[taxID]['lineage']:
                             taxLevel = data['Rank'].upper()
                             name = data['ScientificName'] + ' [' + data['TaxId'] + ']'
-                            print(name)
-                            print(taxLevel)
 
-                            print(results)
                             #Check if that name is already in results
                             if taxLevel in results:
                                 if name in results[taxLevel]:
                                     results[taxLevel][name] += 1
                                 else:
                                     results[taxLevel][name] = 1
-    print(results)
+
     for level in results:
         with open(outputDirectory+'actualAbundanceSummedOver'+level+'.csv', 'w+') as csvfile:
             writer = csv.writer(csvfile, delimiter=',')
