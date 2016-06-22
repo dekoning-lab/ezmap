@@ -34,10 +34,8 @@ def getPRINSEQResults(fileDir):
             # output = open(fileDir + os.path.splitext(file)[0] + '.out')
             # fileID = output.readline().split(' ')[0]
             for line in inFile:
-                if 'Parsing and processing input data:' in line:
-                    fileID = line.split('Parsing and processing input data:')[1].rstrip("\n").replace(" ", "").replace(
-                        "\"", "")
-                elif 'Input sequences:' in line:
+                fileID = file.split('-prinseq')[0]
+                if 'Input sequences:' in line:
                     numReads = int(line.split('Input sequences:')[1].strip().replace(',', ''))
                 elif 'Input mean length:' in line:
                     avgReadLen = float(line.split('Input mean length:')[1].strip().replace(',', ''))
@@ -45,11 +43,12 @@ def getPRINSEQResults(fileDir):
                     numGood = int(line.split('(')[0].split('Good sequences:')[1].strip().replace(',', ''))
                 elif 'Bad sequences:' in line:
                     numBad = int(line.split('(')[0].split('Bad sequences:')[1].strip().replace(',', ''))
+
             percentGood = format((float(numGood) / numReads) * 100, '.3f')
             percentBad = format((float(numBad) / numReads) * 100, '.3f')
             prinseqInfo[fileID] = [fileID, numReads, avgReadLen, numGood, percentGood, numBad, percentBad]
-    return prinseqInfo
 
+    return prinseqInfo
 
 def writePrinseqTableFile(dict, outfile):
     with open(outfile, 'w+') as csvfile:
@@ -276,9 +275,9 @@ def gatherSummedOverInfo(list, category):
 def writeSummedOverInfo(category, dict, outfile):
     with open(outfile, 'w+') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(['GRA', category])
+        writer.writerow(['GRA', category.rstrip()])
         for key in dict:
-            writer.writerow([dict[key], key])
+            writer.writerow([dict[key], key.rstrip()])
         csvfile.close()
 
 
@@ -289,7 +288,7 @@ def writeSummedOverInfoJSON(category, dict, outfile):
     for key in dict:
         rowData = {}
         rowData["GRA"] = dict[key]
-        rowData[category] = key
+        rowData[category] = key.rstrip()
 
         allData.append(rowData)
 

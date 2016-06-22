@@ -47,15 +47,11 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        'TEMP3=${fileOutputArray[$SLURM_ARRAY_TASK_ID]}\n',
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
-                       'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'
-                       'perl ' + prinseqPath + 'prinseq-lite.pl '
-                                                  '-fastq ' + os.path.abspath(origFilePath) + '/${TEMP2} '
-                                                                             '-out_format $out_format '
-                                                                             '-min_qual_score $min_qual_score '
-                                                                             '-lc_method $lc_method '
-                                                                             '-lc_threshold $lc_threshold '
-                                                                             '-log -out_good ' + os.path.abspath(projdir) + '/1-Cleaning/${FILENAMEOUTPUT} ' +
-                       '-out_bad null ' +
+                       'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'+
+                       '' + prinseqPath+'prinseqMultipleThread.sh '+ os.path.abspath(origFilePath) + '/ ${TEMP} ' +
+                                    os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
+                                    configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] +
+                                    ' ' + configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
                        '\n'])
     script.close()
 
