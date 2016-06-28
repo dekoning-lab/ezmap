@@ -1,4 +1,4 @@
-VMAP CONFIG FILE
+EZMAP CONFIG FILE
 >project-name=EzMapTest
 >python3-path=/hyperion/home/patrick/usr/local/bin/python3.5
 >start-at-step=1

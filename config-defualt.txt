@@ -1,5 +1,5 @@
-VMAP CONFIG FILE
->project-name=VMAPTest
+EZMAP CONFIG FILE
+>project-name=EZMAPTest
 >python3-path=/PATH/python3.5
 >start-at-step=1
 
