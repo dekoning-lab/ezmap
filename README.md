@@ -57,7 +57,6 @@ To run EzMap make sure you have installed it correctly and have configured the f
 2. Navigate to the EzMap folder.
 3. The following is the most basic command that EzMap will run.
 
-
 ```
 python3 ezmap.py -d /path/to/fasta/files/ -p /path/to/output/folder/
 ```
