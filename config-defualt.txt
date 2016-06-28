@@ -4,10 +4,10 @@ VMAP CONFIG FILE
 >start-at-step=1
 
 SLURM JOB MANAGER CONFIG OPTIONS
->slurm-account=dklab-research
+>slurm-account=<CHANGE THIS>
 >slurm-share=no
 >slurm-partition=normal
->slurm-max-num-threads=16
+>slurm-max-num-threads=8
 >slurm-test-only=no
 
 PRINSEQ CONFIG OPTIONS

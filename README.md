@@ -47,7 +47,7 @@ Before running EzMap it is important to have a few things setup.
 
  1. Create a **new folder** where all of the results will be placed (referred to as the project directory).
  2. Make sure that you have moved all the original FASTQ files into a folder that contains only those files.
- 3. Configure the parameters within the param.config file that can be found in the main EzMap folder. *See the parameters section bellow to see what can be modified.*
+ 3. Configure the parameters within the config.txt file that can be found in the main EzMap folder. *See the parameters section bellow to see what can be modified.*
 
 ## Running EzMap
 
@@ -59,7 +59,7 @@ To run EzMap make sure you have installed it correctly and have configured the f
 
 
 ```
-python3 ezmap.py -d /path/to/fasta/files/ -projDir /path/to/output/folder/
+python3 ezmap.py -d /path/to/fasta/files/ -p /path/to/output/folder/
 ```
 The above command will start submitting the different EzMap steps to the SLURM job manager.
 
@@ -97,7 +97,6 @@ The project directory specified prior to running the pipeline will contain 6 fol
 			csv files
 		->WEB
 		report.html
-		viewResults.py
 ```
 All of the csv files containing results will be found within projectDirecotry/6-FinalResult/information/
 
@@ -168,5 +167,5 @@ Descriptions for the BLAST parameters can be found at http://www.ncbi.nlm.nih.go
 #####Output Parameters
 | Parameter     | Description   | Possible Values| Default |
 |---|---|---|---|
-|```#extraTableSummedOver```|An additonal table is generated for the final report which shows  the caluaclated genome relative abundances summed by a different category then just the species. *Note: The chosen value must be spelled exactly as shown for this to function.*|SuperKingdom, Q1, Order, Family, SubFamily, Genus |Family|
+|```#extraTableSummedOver```|An additional table is generated for the final report which shows  the caluaclated genome relative abundances summed by a different category then just the species. *Note: The chosen value must be spelled exactly as shown for this to function.*|SuperKingdom, Q1, Order, Family, SubFamily, Genus |Family|
 
