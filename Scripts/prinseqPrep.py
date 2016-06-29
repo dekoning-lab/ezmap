@@ -56,6 +56,10 @@ def generateSLURMScript(dataSets, projdir, configOptions):
     script.close()
 
     os.chmod(projdir + '1-Cleaning/prinseqScript.sh', 0o755)
+    os.chmod(prinseqPath + 'combineLogFiles.py', 0o755)
+    os.chmod(prinseqPath + 'fastq-splitter.pl', 0o755)
+    os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
+    os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):
