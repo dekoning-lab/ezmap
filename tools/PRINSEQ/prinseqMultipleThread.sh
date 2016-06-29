@@ -53,7 +53,7 @@ echo "Combining results..."
 awk 'FNR==1{print ""}1' ${outputDIR}${inputFileName}*.part*.fastq > ${outputDIR}${inputFileName}-prinseq.fastq
 
 # Combine the results of the prinseq log files
-/hyperion/home/patrick/usr/local/bin/python3.5 /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
+python3 /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
 
 echo "Removing temporary files..."
 # Remove unnecessary part files
@@ -61,3 +61,4 @@ rm ${inputDIR}${inputFileName}*.part*
 rm ${outputDIR}${inputFileName}*.part*.fastq
 
 echo "Done...!"
+
