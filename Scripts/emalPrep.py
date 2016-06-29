@@ -24,7 +24,7 @@ def generatePreScript(dataSets, projdir, configOptions, blastjobids):
 
     script = open(projdir + '5-RelativeAbundanceEstimation/emalPreScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'EMALPREP', projdir + '5-RelativeAbundanceEstimation/', configOptions)
 
     IDList = ''
     for i in blastjobids:
@@ -63,7 +63,7 @@ def generateMainScript(dataSets, projdir, configOptions, emalPrejobids):
 
     script = open(projdir + '5-RelativeAbundanceEstimation/emalScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'EMAL', projdir + '5-RelativeAbundanceEstimation/', configOptions)
 
     IDList = ''
     for i in emalPrejobids:
@@ -104,7 +104,7 @@ def generatePostScript(dataSets, projdir, configOptions, emalJobIDS):
 
     script = open(projdir + '5-RelativeAbundanceEstimation/emalPostScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 5, projdir + '5-RelativeAbundanceEstimation/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'EMALPOST', projdir + '5-RelativeAbundanceEstimation/', configOptions)
 
     IDList = ''
     for i in emalJobIDS:

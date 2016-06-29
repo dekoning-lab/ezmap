@@ -24,7 +24,7 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
 
     script = open(projdir + '2-HumanMapping/bowtie2Script.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 2, projdir + '2-HumanMapping/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'BOWTIE2', projdir + '2-HumanMapping/', configOptions)
 
     filelist = ''
     fileOutputList = ''

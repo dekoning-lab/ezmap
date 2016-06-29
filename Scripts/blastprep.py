@@ -24,7 +24,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, samtoolsJobIDS):
 
     script = open(projdir + '4-OrganismMapping/blastnScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 4, projdir + '4-OrganismMapping/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'BLAST', projdir + '4-OrganismMapping/', configOptions)
 
     IDList = ''
     for i in samtoolsJobIDS:

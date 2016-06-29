@@ -8,7 +8,7 @@ def collectPipelineResult(projName, projDir, configOptions, finalJobIDS):
 
     script = open(projDir + '6-FinalResult-'+projName+'/information/resultsScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 6, projDir + '6-FinalResult/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'FINALRESULTS', projDir + '6-FinalResult/', configOptions)
 
     IDList = ''
     for i in finalJobIDS:

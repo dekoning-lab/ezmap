@@ -22,7 +22,7 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
 
     script = open(projdir + '3-UnmappedCollection/samtoolsScript.sh', 'w+')
 
-    slurmScript.getSBATCHSettings(script, 3, projdir + '3-UnmappedCollection/', configOptions)
+    slurmScript.getSBATCHSettings(script, 'SAMTOOLS', projdir + '3-UnmappedCollection/', configOptions)
 
     IDList = ''
     for i in bowtie2JobIDS:
