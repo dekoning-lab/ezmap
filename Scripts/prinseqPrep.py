@@ -4,6 +4,7 @@ import subprocess
 import os
 import Scripts.slurmScript as slurmScript
 
+
 # Generates bash script to launch all required jobs within job manager
 def generateSLURMScript(dataSets, projdir, configOptions):
     print('Setting up jobs for Step 1...')
@@ -47,12 +48,12 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        'TEMP3=${fileOutputArray[$SLURM_ARRAY_TASK_ID]}\n',
                        'TEMP4=${TEMP3#\\\'}\n',
                        'FILENAMEOUTPUT=${TEMP4%\\\'}\n\n'
-                       'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n'+
-                       '' + prinseqPath+'prinseqMultipleThread.sh '+ os.path.abspath(origFilePath) + '/ ${TEMP} ' +
-                                    os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
-                                    configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] +
-                                    ' ' + configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
-                       '\n'])
+                       'echo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n' +
+                       '' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
+                       os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
+                       configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
+                       configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
+                       configOptions['python3-path'] + ' \n'])
     script.close()
 
     os.chmod(projdir + '1-Cleaning/prinseqScript.sh', 0o755)
@@ -61,12 +62,14 @@ def generateSLURMScript(dataSets, projdir, configOptions):
     os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
     os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
 
+
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')
     numOfFiles = len(dataSets)
 
-    proc = subprocess.Popen(['sbatch','--array=0-' + str(numOfFiles-1), projDir + '1-Cleaning/prinseqScript.sh'],stdout=subprocess.PIPE)
+    proc = subprocess.Popen(['sbatch', '--array=0-' + str(numOfFiles - 1), projDir + '1-Cleaning/prinseqScript.sh'],
+                            stdout=subprocess.PIPE)
 
     outs, errs = proc.communicate()
     outs = str(outs).strip('b\'Submitted batch job ').strip('\\n')

@@ -16,6 +16,7 @@ import sys, os
 import Scripts.arguments as arguments
 import Scripts.configOptions as config
 import Scripts.fileManager as fileman
+import Scripts.ensureScriptPermissions as ensureScriptPermissions
 import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
 import Scripts.samtoolsPrep as samtools
@@ -25,9 +26,10 @@ import Scripts.finalScript as final
 
 serialSample = False
 
+
 # Cretaes a txt file of all importnat output files for final report
 def outputFileList(files, projdir, projName):
-    outputfile = open(projdir + '6-FinalResult-'+projName+'/information/' + 'filelist.txt', 'w+')
+    outputfile = open(projdir + '6-FinalResult-' + projName + '/information/' + 'filelist.txt', 'w+')
     outputfile.write(
         '<table class="table table-striped table-bordered"><thead><tr><td>Filename</td><td>Path</td></tr></thead>')
 
@@ -127,10 +129,12 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
     if not serialSample:
         final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
     else:
-        print(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)))
-        final.collectPipelineResult(configOptions['project-name']+'-'+os.path.basename(os.path.normpath(projdir)), projdir, configOptions, emalPostJobIDS)
+        print(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)))
+        final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)),
+                                    projdir, configOptions, emalPostJobIDS)
 
-    print('\nAll required jobs for '+ inputFileDir +'have been queued...\n')
+    print('\nAll required jobs for ' + inputFileDir + ' have been queued...\n')
+
 
 # Main Function
 if __name__ == "__main__":
@@ -138,6 +142,9 @@ if __name__ == "__main__":
     print("\nEzMap V1.0\n\nParsing config file...")
     allArgs = arguments.parseCommandLineArguments()
     configOptions = config.parseConfigOptions()
+
+    ensureScriptPermissions.checkForScriptPermisions(configOptions)
+
     startStep = int(configOptions['start-at-step'])
 
     if allArgs['serialSample'] == True:
@@ -160,4 +167,5 @@ if __name__ == "__main__":
     print('All required jobs have been created and queued...')
     print('You can now check the status of your jobs using the following command: ')
     print('squeue\n')
-    print('Once those jobs have completed you can view your results in:\n'+allArgs['projDir']+'6-FinalResult-'+configOptions['project-name']+'/')
+    print('Once those jobs have completed you can view your results in:\n' + allArgs['projDir'] + '6-FinalResult-' +
+          configOptions['project-name'] + '/')

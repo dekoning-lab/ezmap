@@ -22,6 +22,7 @@ out_format=$6 #3
 min_qual_score=$7 #21
 lc_method=$8 #dust
 lc_threshold=$9 #7
+pythonPath=${10}
 
 echo "Splitting ${FILE} into ${numParts} parts...\n"
 # Split the fastq file into the number of threads to process with
@@ -53,7 +54,7 @@ echo "Combining results..."
 awk 'FNR==1{print ""}1' ${outputDIR}${inputFileName}*.part*.fastq > ${outputDIR}${inputFileName}-prinseq.fastq
 
 # Combine the results of the prinseq log files
-python3 /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
+${pythonPath} /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
 
 echo "Removing temporary files..."
 # Remove unnecessary part files
