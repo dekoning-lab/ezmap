@@ -24,7 +24,7 @@ SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/
 
 BLAST CONFIG OPTIONS
->blast-path=/hyperion/work/patrick/PipelineDev/tools/BLAST/ncbi-blast-2.2.30+/bin/
+>blast-path=/hyperion/work/patrick/pipelineTest2/tools/BLAST/ncbi-blast-2.4.0+/bin/
 >blast-task=megablast
 >blast-db-path=/hyperion/work/patrick/PipelineDev/tools/BLAST/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
 >blast-dust=no

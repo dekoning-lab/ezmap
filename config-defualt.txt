@@ -24,7 +24,7 @@ SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/
 
 BLAST CONFIG OPTIONS
->blast-path=cwd/<CHANGE THIS>
+>blast-path=cwd/tools/BLAST/ncbi-blast-2.4.0+/bin/
 >blast-task=megablast
 >blast-db-path=<CHANGE THIS>
 >blast-dust=no

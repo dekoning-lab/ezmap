@@ -32,23 +32,6 @@ else
     pip3 install biopython
 fi
 
-# Download hg19 image
-echo "Downloading hg19 files for Bowtie2"
-case $( uname -s ) in
-Linux)  echo Linux
-        wget ftp://ftp.ccb.jhu.edu/pub/data/bowtie2_indexes/hg19.zip
-        mkdir tools/BOWTIE2/hg19
-        unzip hg19.zip -d tools/BOWTIE2/hg19;;
-
-Darwin) echo Darwin
-        curl -O ftp://ftp.ccb.jhu.edu/pub/data/bowtie2_indexes/hg19.zip
-        mkdir tools/BOWTIE2/hg19
-        unzip hg19.zip -d tools/BOWTIE2/hg19;;
-
-*)      echo other;;
-esac
-rm hg19.zip
-
 echo "Done... Please check for any error messages listed above"
 
 
