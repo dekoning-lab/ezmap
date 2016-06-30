@@ -22,3 +22,7 @@ def collectPipelineResult(projName, projDir, configOptions, finalJobIDS):
 
     proc = subprocess.Popen(
         ['sbatch', projDir + '/6-FinalResult-'+projName+'/information/resultsScript.sh'], stdout=subprocess.PIPE)
+
+    script.close()
+
+    os.chmod(projDir + '6-FinalResult-'+projName+'/information/resultsScript.sh', 0o755)
