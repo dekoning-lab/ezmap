@@ -6,7 +6,7 @@ import Scripts.slurmScript as slurmScript
 def collectPipelineResult(projName, projDir, configOptions, finalJobIDS):
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
 
-    script = open(projDir + '6-FinalResult-'+projName+'/information/resultsScript.sh', 'w+')
+    script = open(projDir + '6-FinalResult-' + projName + '/information/resultsScript.sh', 'w+')
 
     slurmScript.getSBATCHSettings(script, 'FINALRESULTS', projDir + '6-FinalResult/', configOptions)
 
@@ -20,9 +20,7 @@ def collectPipelineResult(projName, projDir, configOptions, finalJobIDS):
     script.write(
         configOptions['python3-path'] + ' ' + cwd + 'Scripts/gatherResults.py ' + projDir + ' ' + projName)
 
-    proc = subprocess.Popen(
-        ['sbatch', projDir + '/6-FinalResult-'+projName+'/information/resultsScript.sh'], stdout=subprocess.PIPE)
+    command = 'sbatch -p ' + configOptions['slurm-partition'] + ' -J EZMAP-FINALRESULTS --wrap "sh ' + os.path.abspath(
+        projDir) + '/6-FinalResult-' + projName + '/information/resultsScript.sh' + '"'
 
-    script.close()
-
-    os.chmod(projDir + '6-FinalResult-'+projName+'/information/resultsScript.sh', 0o755)
+    os.system(command)
