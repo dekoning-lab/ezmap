@@ -33,9 +33,9 @@ combinedGenomeDataFile = ''
 information = {}
 pi = []
 pMatrix = []
-totalNumberOfReads = 0 # sij
-totalGenomeSizes = 0
 genomeTaxon = {}
+totalNumberOfReads = 0  # sij
+totalGenomeSizes = 0
 
 # Command Line Options
 numberOfThreads = 4
@@ -132,8 +132,6 @@ def gatherInformation(fileList):
     global combinedGenomeDataFile
 
     totalNumberOfReads = 0
-    # Dictionary that contains direct associations between genome and taxon ID's
-    genomeTaxon = {}
 
     # Dictionary to contain all pertinent information about genomes
     # including basic taxonomic identification number
@@ -146,6 +144,7 @@ def gatherInformation(fileList):
     inputFile = open(combinedGenomeDataFile, "r")
     for line in inputFile:
         genomeID, taxonID, genomeLen = line.split(',')
+        genomeLen = genomeLen.strip('\n')
         genomeTaxon[int(genomeID)] = [int(taxonID), int(genomeLen)]
 
     # Gather information on files present within set to be analyzed
@@ -153,21 +152,19 @@ def gatherInformation(fileList):
         with open(file, 'r') as inFile:
             for read in inFile:
                 linePar = read.split('\t')
+
                 genomeID = int(linePar[1].split('|')[1])
                 readID = linePar[0]
 
                 try:
-                    taxonID = genomeTaxon[genomeID][0] # The taxonID for the read from that line in the blast file
-                    genomeLen = int(genomeTaxon[genomeID][1]) # The length of the genome for that read
+                    taxonID = genomeTaxon[genomeID][0]  # The taxonID for the read from that line in the blast file
+                    genomeLen = int(genomeTaxon[genomeID][1])  # The length of the genome for that read
 
-                    totalGenomeSizes += genomeLen
+                    # totalGenomeSizes += genomeLen
                     totalNumberOfReads += 1
 
-                    if taxonID in information:
-                        oldGenome = information[taxonID][2]
-                        information[taxonID][2] = genomeLen + oldGenome
-                    else:
-                        information[taxonID] = [taxonID, genomeID, genomeLen, 0]
+                    if genomeID not in information:
+                        information[genomeID] = [genomeID, taxonID, genomeLen, 0]
 
                     # Read is already in the blast hits. AKA the read maps to multiple genomes
                     if readID in blastHits:
@@ -181,12 +178,12 @@ def gatherInformation(fileList):
                 except:
                     missing = genomeID
 
+
     logfile.write("Total number of reads that match taxon information: " + str(totalNumberOfReads) + '\n')
 
-    return information, genomeTaxon, totalNumberOfReads, blastHits
+    return information, genomeTaxon, totalNumberOfReads, blastHits  # Create a list to be used to store the pi values
 
-# Create a list to be used to store the pi values
-#
+# Creates the pi vector and notes the index values of each genome in information
 def makePiVectorIndicies(information):
     list = []
     for x in information:
@@ -197,15 +194,18 @@ def makePiVectorIndicies(information):
     vector = [0.0 for col in range(len(list))]
     return information, vector
 
+
 # Initialize pi vector to number of reads in genome over the total reads in set
-def initializePiVector(blastHits,information,piVector):
+def initializePiVector(blastHits, information, piVector):
     for read in blastHits:
         for genomeMappedToRead in blastHits[read]:
-            piVector[information[genomeTaxon[genomeMappedToRead][0]][3]] += 1
+            piIndex = information[genomeMappedToRead][3]
+            piVector[piIndex] += 1
 
     piVectorStandardized = standardizeVector(piVector)
 
     return piVectorStandardized
+
 
 # Standardizes a list of values
 def standardizeVector(vector):
@@ -216,8 +216,9 @@ def standardizeVector(vector):
         vector[i] = float(vector[i]) / total
     return vector
 
+
 # Calculate sij/lj
-def calculateHitsOverLength (blastHits, information):
+def calculateHitsOverLength(blastHits, information):
     sijOverlj = {}
 
     for read in blastHits:
@@ -225,45 +226,126 @@ def calculateHitsOverLength (blastHits, information):
             sijOverlj[read] = {}
 
         for genomeMapped in blastHits[read]:
-            sijOverlj[read][genomeMapped] = blastHits[read][genomeMapped]/genomeTaxon[genomeMapped][1]
+            sijOverlj[read][genomeMapped] = blastHits[read][genomeMapped] / genomeTaxon[genomeMapped][1]
 
     return sijOverlj
 
 
 # Calculate Zij
-def eStep(blastHits, sijOverlj , piVector):
-    z = {} # Dictionary with all zij vlaues
+def eStep(blastHits, sijOverlj, piVector):
+    z = {}  # Dictionary with all zij vlaues
 
-    for read in blastHits:
+    for read in blastHits: # Zi
         # if the read is not in z yet add a dictionary to hold data
         if read not in z:
             z[read] = {}
 
         # for each genome in the blast hits for that read
-        for genomeMapped in blastHits[read]:
+        for genomeMapped in blastHits[read]: # Zij
             # determine the pi value at time t for that that genome
-            piValue = piVector[information[genomeTaxon[genomeMapped][0]][3]] # pij at time t
+            piIndex = information[genomeMapped][3]
+            piValue = piVector[piIndex]  # pij at time t
 
             # determine the sij/lj value for that read at that genome
             sijOverljValue = sijOverlj[read][genomeMapped]
 
             # determine sum of sik/lk for all genomes at that read
             sumsikoverlk = 0
-            for genomeJ in sijOverlj[read]:
-                sumsikoverlk += sijOverlj[read][genomeJ]*piVector[information[genomeTaxon[genomeJ][0]][3]]
+            for genomeK in sijOverlj[read]:
+                sumsikoverlk += (sijOverlj[read][genomeK] * piVector[information[genomeK][3]])
 
             # calculate zij = ((sij/lj)*pij)/(sum((sik/lk)*pik))
-            z[read][genomeMapped] = (sijOverljValue*piValue)/(sumsikoverlk)
+            z[read][genomeMapped] = (sijOverljValue * piValue) / (sumsikoverlk)
 
     return z
 
-def mStep():
-    
+#
+def mStep(z, oldPi):
+    newPi = []
 
+    for spot in oldPi:
+        newPi.append(0.0)
 
+    for read in z: # Zi
+        for genomej in z[read]:
+            newPi[information[genomej][3]] += z[read][genomej]
 
-    print()
+    newPi = standardizeVector(newPi)
 
+    return newPi
+
+# Compare each list and determine if the differences in value as small enough
+# between iterations to accept result
+def compareLists(old, new, acceptance):
+    global logfile
+    diff = []
+    accept = True
+
+    for i in range(len(old)):
+        diff.append(abs(old[i] - new[i]))
+    for i in diff:
+        if i > acceptance:
+            accept = False
+    logfile.write(str(old) + '\n')
+    logfile.write(str(new) + '\n')
+    logfile.write(str(diff) + '\n')
+    return accept
+
+def calculateGenomeRelativeAbundacies (finalPi):
+    abundancies = []
+
+    for genomeJ in information:
+        abundancies.append(0)
+
+    sumPiKoverLk = 0
+    for genomeK in information:
+        piK = finalPi[information[genomeK][3]]
+        lK = information[genomeK][2]
+
+        sumPiKoverLk += (piK/lK)
+
+    for genomeJ in information:
+        piJ = finalPi[information[genomeJ][3]]
+        lenJ = information[genomeJ][2]
+
+        abundancies[information[genomeJ][3]] = (piJ)/((lenJ)*(sumPiKoverLk))
+
+    return abundancies
+
+# This function writes the results to a CSV file.
+# Format (Columns):
+#   1: NCBI Nucleotide ID
+#   2: NCBI Taxonomy ID
+#   3: Relative Abundance for that genome
+def outputCSV(information, gra):
+    global outputFileName
+
+    outputFile = open(outputDir + outputFileName, 'w+')
+
+    genomeIDs = ["GenomeID"]
+    taxonIDs = ["TaxonID"]
+    abundances = ["Relative Abundancies"]
+
+    # Places all abundances in the correct locations
+    for x in gra:
+        abundances.append(x)
+        genomeIDs.append(0)
+        taxonIDs.append(0)
+
+    for x in information:
+        index = information[x][3] + 1
+        genomeIDs[index] = information[x][1]
+        taxonIDs[index] = information[x][0]
+
+    csv = []
+
+    for i in range(0, len(genomeIDs)):
+        csv.append([genomeIDs[i], taxonIDs[i], abundances[i]])
+
+    for i in range(0, len(csv)):
+        for j in range(0, len(csv[i])):
+            outputFile.write(str(csv[i][j]) + ',')
+        outputFile.write('\n')
 
 # Main Function
 if __name__ == '__main__':
@@ -297,8 +379,6 @@ if __name__ == '__main__':
         # Determine necessary initial information
         information, genomeTaxon, totalNumberOfReads, blastHits = gatherInformation(BLASTFileArray)
 
-        print(blastHits)
-
         if verbose:
             print("Starting run...")
             print("1. Calculating Initial PiVector...")
@@ -307,6 +387,7 @@ if __name__ == '__main__':
         information, pi = makePiVectorIndicies(information)
         pi = initializePiVector(blastHits,information,pi)
 
+        count = 0  # number of cycles
         if verbose:
             print("2. Calculating Zij...")
 
@@ -314,56 +395,40 @@ if __name__ == '__main__':
         z = eStep(blastHits, sijOverlj, pi)
 
         oldPi = pi
-        newPi = mStep()
 
-        #
-        #     if verbose:
-        #         print(pi)
-        #         print("3.Initializing MLEs...")
-        #
-        #     # Calculate dictionary of maximum likelihood estimates
-        #     pDiction = initializePDictionary(BLASTFileArray, information, genomeTaxon)
-        #     pDiction = standardizePDictionary(pDiction)
-        #
-        #     if verbose:
-        #         print("4.Starting Abundance Calculation...")
-        #         print("This could take a while perhaps you would like to grab a beverage...")
-        #
-        #     start = time.time()  # Grab the start time
-        #     # Starting the calculation of EM algorithm steps
-        #     count = 0  # number of cycles
-        #
-        #     # Completes one set of E & M step calculations and retain previous Pi Vector for comparison purposes
-        #     oldPi = pi
-        #     outputQ = eStep(pDiction, pi, numberOfThreads, information)
-        #     newPi = mStep(pi, outputQ, numberOfThreads)
-        #     count += 1
-        #     accept = compareLists(oldPi, newPi, acceptanceValue)
-        #     logfile.write(str(count) + ' Cycles completed\n')
-        #
-        #     # If acceptance criteria are not met E & M calculations continue
-        #     while accept == False:
-        #         oldPi = newPi
-        #         outputQ = eStep(pDiction, newPi, numberOfThreads, information)
-        #         newPi = mStep(newPi, outputQ, numberOfThreads)
-        #         count += 1
-        #         logfile.write(str(count) + ' Cycles completed\n')
-        #         accept = compareLists(oldPi, newPi, acceptanceValue)
-        #
-        #         if verbose:
-        #             print(str(count) + ' Cycles completed')
-        #
-        #     newPi = standardizeVector(newPi)
-        #     end = time.time()  # Grab the end time
-        #     if verbose:
-        #         print("Abundance Calculations took: " + str(end - start))
-        #         print("5. Calculation Complete! Took " + str(count) + " cycles")
-        #         print("6. Outputting results to CSV file!")
-        #
-        #     # Complete process and output relevant information to CSV file
-        #     outputCSV(information, newPi)
-        # else:
-        #     print('No files found to process')
-        #
-        # print("Calculations completed successfully!")
-        # print("Exiting...")
+        if verbose:
+            print("3. Calculating revised pi values...")
+        newPi = mStep(z,oldPi)
+        count += 1
+
+        if verbose:
+            print(str(count) + ' Cycles completed')
+
+        accept = compareLists(oldPi,newPi,acceptanceValue)
+
+        while accept == False:
+            oldPi = newPi
+            z = eStep(blastHits, sijOverlj, oldPi)
+            newPi = mStep(z,oldPi)
+            count += 1
+            if verbose:
+                print(str(count) + ' Cycles completed')
+            accept = compareLists(oldPi, newPi, acceptanceValue)
+
+        if verbose:
+            print("4. Calculating final GRA values...")
+        gra = calculateGenomeRelativeAbundacies(newPi)
+
+        if verbose:
+            print ("Values calculated in "+str(count)+" cycles!")
+            print ("Final GRA:")
+            print (gra)
+
+        # Complete process and output relevant information to CSV file
+        outputCSV(information, gra)
+
+        print("Calculations completed successfully!")
+        print("Exiting...")
+
+    else:
+        print('No files found to process')
