@@ -286,6 +286,9 @@ def compareLists(old, new, acceptance):
     diff = []
     accept = True
 
+    print(old)
+    print(new)
+
     for i in range(len(old)):
         diff.append(abs(old[i] - new[i]))
     for i in diff:
@@ -341,8 +344,8 @@ def outputCSV(information, gra):
 
     for x in information:
         index = information[x][3] + 1
-        genomeIDs[index] = information[x][1]
-        taxonIDs[index] = information[x][0]
+        genomeIDs[index] = information[x][0]
+        taxonIDs[index] = information[x][1]
 
     csv = []
 
