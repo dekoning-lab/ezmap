@@ -178,10 +178,10 @@ def gatherInformation(fileList):
                 except:
                     missing = genomeID
 
-
     logfile.write("Total number of reads that match taxon information: " + str(totalNumberOfReads) + '\n')
 
     return information, genomeTaxon, totalNumberOfReads, blastHits  # Create a list to be used to store the pi values
+
 
 # Creates the pi vector and notes the index values of each genome in information
 def makePiVectorIndicies(information):
@@ -235,13 +235,13 @@ def calculateHitsOverLength(blastHits, information):
 def eStep(blastHits, sijOverlj, piVector):
     z = {}  # Dictionary with all zij vlaues
 
-    for read in blastHits: # Zi
+    for read in blastHits:  # Zi
         # if the read is not in z yet add a dictionary to hold data
         if read not in z:
             z[read] = {}
 
         # for each genome in the blast hits for that read
-        for genomeMapped in blastHits[read]: # Zij
+        for genomeMapped in blastHits[read]:  # Zij
             # determine the pi value at time t for that that genome
             piIndex = information[genomeMapped][3]
             piValue = piVector[piIndex]  # pij at time t
@@ -259,6 +259,7 @@ def eStep(blastHits, sijOverlj, piVector):
 
     return z
 
+
 #
 def mStep(z, oldPi):
     newPi = []
@@ -266,13 +267,17 @@ def mStep(z, oldPi):
     for spot in oldPi:
         newPi.append(0.0)
 
-    for read in z: # Zi
+    for read in z:  # Zi
         for genomej in z[read]:
             newPi[information[genomej][3]] += z[read][genomej]
+
+    for genomeJ in information:
+        newPi[information[genomeJ][3]] = newPi[information[genomeJ][3]] / totalNumberOfReads
 
     newPi = standardizeVector(newPi)
 
     return newPi
+
 
 # Compare each list and determine if the differences in value as small enough
 # between iterations to accept result
@@ -291,7 +296,8 @@ def compareLists(old, new, acceptance):
     logfile.write(str(diff) + '\n')
     return accept
 
-def calculateGenomeRelativeAbundacies (finalPi):
+
+def calculateGenomeRelativeAbundacies(finalPi):
     abundancies = []
 
     for genomeJ in information:
@@ -302,15 +308,16 @@ def calculateGenomeRelativeAbundacies (finalPi):
         piK = finalPi[information[genomeK][3]]
         lK = information[genomeK][2]
 
-        sumPiKoverLk += (piK/lK)
+        sumPiKoverLk += (piK / lK)
 
     for genomeJ in information:
         piJ = finalPi[information[genomeJ][3]]
         lenJ = information[genomeJ][2]
 
-        abundancies[information[genomeJ][3]] = (piJ)/((lenJ)*(sumPiKoverLk))
+        abundancies[information[genomeJ][3]] = (piJ) / ((lenJ) * (sumPiKoverLk))
 
     return abundancies
+
 
 # This function writes the results to a CSV file.
 # Format (Columns):
@@ -346,6 +353,7 @@ def outputCSV(information, gra):
         for j in range(0, len(csv[i])):
             outputFile.write(str(csv[i][j]) + ',')
         outputFile.write('\n')
+
 
 # Main Function
 if __name__ == '__main__':
@@ -385,44 +393,47 @@ if __name__ == '__main__':
 
         # Calculate initial values for Pi Vector
         information, pi = makePiVectorIndicies(information)
-        pi = initializePiVector(blastHits,information,pi)
+        pi = initializePiVector(blastHits, information, pi)
 
         count = 0  # number of cycles
         if verbose:
             print("2. Calculating Zij...")
+        start = time.time()  # Grab the start time
 
-        sijOverlj = calculateHitsOverLength(blastHits,information)
+        sijOverlj = calculateHitsOverLength(blastHits, information)
         z = eStep(blastHits, sijOverlj, pi)
 
         oldPi = pi
 
         if verbose:
             print("3. Calculating revised pi values...")
-        newPi = mStep(z,oldPi)
+        newPi = mStep(z, oldPi)
         count += 1
 
         if verbose:
-            print(str(count) + ' Cycles completed')
+            print('\t' + str(count) + ' Cycles completed')
 
-        accept = compareLists(oldPi,newPi,acceptanceValue)
+        accept = compareLists(oldPi, newPi, acceptanceValue)
 
         while accept == False:
             oldPi = newPi
             z = eStep(blastHits, sijOverlj, oldPi)
-            newPi = mStep(z,oldPi)
+            newPi = mStep(z, oldPi)
             count += 1
             if verbose:
-                print(str(count) + ' Cycles completed')
+                print('\t' + str(count) + ' Cycles completed')
             accept = compareLists(oldPi, newPi, acceptanceValue)
 
+        end = time.time()  # Grab the end time
         if verbose:
             print("4. Calculating final GRA values...")
         gra = calculateGenomeRelativeAbundacies(newPi)
 
         if verbose:
-            print ("Values calculated in "+str(count)+" cycles!")
-            print ("Final GRA:")
-            print (gra)
+            print("Abundance Calculations took: " + str(end - start)+ " sec")
+            print("Values calculated in " + str(count) + " cycles!")
+            print("Final GRA:")
+            print(gra)
 
         # Complete process and output relevant information to CSV file
         outputCSV(information, gra)
