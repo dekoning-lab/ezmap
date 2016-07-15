@@ -40,7 +40,9 @@ EzMap uses [SLURM](http://slurm.schedmd.com) job manager to work on a cluster.
 ```
 sudo sh setup.sh
 ```
+
  5. To download the required hg19 database and BLAST+ executables run the download libs script:
+
  ```
  sh downloadLibs.sh
  ```
