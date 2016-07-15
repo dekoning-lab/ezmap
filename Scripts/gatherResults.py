@@ -66,7 +66,8 @@ def writePrinseqTableFile(dict, outfile):
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        if file.endswith('.err'):
+        print(file)
+        if file.endswith('.errs'):
             inFile = open(fileDir + file, 'r')
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
 
@@ -184,7 +185,7 @@ def writeBlastTable(dict, outfile):
         writer = csv.writer(csvfile, delimiter=',')
 
         writer.writerow(
-            ['Filename', '# of Blast Hits'])
+            ['Filename', '# of High Quality Blast Hits'])
         for x in dict:
             writer.writerow(dict[x])
         csvfile.close()
@@ -260,6 +261,7 @@ def gatherSummedOverInfo(list, category):
 
     if (index != -1):
         list.pop(0)
+
         for x in list:
             key = x[index]
             if key in dict:
@@ -267,7 +269,8 @@ def gatherSummedOverInfo(list, category):
                 GRA += float(x[0])
                 dict[key] = GRA
             else:
-                dict[key] = float(x[0])
+                if x[0] != 'GRA':
+                    dict[key] = float(x[0])
 
     return dict
 
@@ -277,7 +280,7 @@ def writeSummedOverInfo(category, dict, outfile):
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(['GRA', category.rstrip()])
         for key in dict:
-            writer.writerow([dict[key], key.rstrip()])
+            writer.writerow([dict[key], key.strip('\n')])
         csvfile.close()
 
 
@@ -287,8 +290,9 @@ def writeSummedOverInfoJSON(category, dict, outfile):
 
     for key in dict:
         rowData = {}
+
         rowData["GRA"] = dict[key]
-        rowData[category] = key.rstrip()
+        rowData[category.strip('\n')] = key.strip('\n')
 
         allData.append(rowData)
 

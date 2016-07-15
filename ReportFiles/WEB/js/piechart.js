@@ -11,7 +11,13 @@ d3.json("information/emal-tbl-2.json", function(error, data, taxLevel) {
     .append("svg:g")                //make a group to hold our pie chart
     .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
-    var taxLevel = Object.getOwnPropertyNames(data[0])[1] //Get the summed over taxonomic level
+    //Get the summed over taxonomic level
+    if (Object.getOwnPropertyNames(data[0])[0] == 'GRA') {
+        taxLevel = Object.getOwnPropertyNames(data[0])[1]
+    }
+    if (Object.getOwnPropertyNames(data[0])[1] == 'GRA') {
+        taxLevel = Object.getOwnPropertyNames(data[0])[0]
+    }
     
     var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
     .outerRadius(r);
