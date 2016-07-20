@@ -66,12 +66,11 @@ def writePrinseqTableFile(dict, outfile):
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        print(file)
-        if file.endswith('.errs'):
+        if file.endswith('.err'):
             inFile = open(fileDir + file, 'r')
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
 
-            fileID = output.readline().split(': ')[1].split('_')[0].rstrip('\n').replace("\"","")
+            fileID = output.readline().split(': ')[1].rstrip('\n').replace("\"","")
 
             zeroAlign, oneAlign, multiAlign = -1, -1, -1
             for line in inFile:
