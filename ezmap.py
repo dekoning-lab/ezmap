@@ -143,6 +143,11 @@ if __name__ == "__main__":
     allArgs = arguments.parseCommandLineArguments()
     configOptions = config.parseConfigOptions()
 
+    # If a commandline option was set to provide a project name override the one within the config file to the
+    # commandline project name
+    if 'projectName' in allArgs:
+        configOptions['project-name'] = allArgs['projectName']
+
     ensureScriptPermissions.checkForScriptPermisions(configOptions)
 
     startStep = int(configOptions['start-at-step'])

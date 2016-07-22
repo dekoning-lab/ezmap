@@ -15,6 +15,9 @@ def parseCommandLineArguments():
     parser.add_argument("-s", "--serialSample" ,action="store_true", required=False,
                         help="Setting this method means that each of the directories in -d will contain a sample time "
                              "point and should therefore be run individually")
+    parser.add_argument("-pn", "--projectName", type=str, required=False,
+                        help="Set the project name from the commandline and override the one provided in the config "
+                             "file.")
 
     args = parser.parse_args()
 
@@ -29,5 +32,8 @@ def parseCommandLineArguments():
         allArgs['serialSample'] = True
     else:
         allArgs['serialSample'] = False
+
+    if args.projectName:
+        allArgs['projectName'] = args.projectName
 
     return allArgs
