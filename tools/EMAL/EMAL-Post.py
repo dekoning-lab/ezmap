@@ -177,8 +177,8 @@ def createNewCSV(dataDic, outputFilename):
         writer.writerow(('GRA', 'Species', 'SuperKingdom', 'Q1', 'Order', 'Family', 'SubFamily', 'Genus'))
         for i in dataDic:
             info = dataDic[i]
-            print(info)
-            for j in range(len(info)):
+
+            for j in range(2,len(info)):
                 if len(info[j]) > 1:
                     for k in range(len(info[j])):
                         if info[j][k] == None:
