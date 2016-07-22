@@ -118,7 +118,15 @@ All of the csv files containing results will be found within projectDirecotry/6-
 
 ####Viewing the HTML Report
 
-The final results an also be viewed as part of an HTML report, simply open the ```report.html``` file in the ```6-FinalResult``` directory.
+#### Safari
+The final results can also be viewed as part of an HTML report, simply open the ```report.html``` file in the ```6-FinalResult``` directory.
+
+#### Chrome or Firefox
+When using Google Chrome or Mozilla Firefox browsers to view results:
+1. Open a new terminal window.
+2. Navigate to the folder containing the results from your EzMap run. (It should be titled ```6-FinalResult-ProjectName```).
+3. Execute the following command: ```python3 viewResults.py```.
+4. A new browser window should open with results.
 
 ##Parameters
 
