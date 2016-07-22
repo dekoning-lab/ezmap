@@ -55,7 +55,6 @@ d3.json("information/mappedto.json", function (error, data) {
                 , file: d.File
                 , y0: y0
                 , y1: y0 += +d[name]
-
             };
         });
         d.total = d.ages[d.ages.length - 1].y1;
@@ -105,7 +104,7 @@ d3.json("information/mappedto.json", function (error, data) {
             return y(d.y0) - y(d.y1);
         })
         .style("fill", function (d) {
-            return color(d.name);
+            return colorMaker(d.name);
         })
         .on('mouseover', tip.show)
         .on('mouseout', tip.hide);
@@ -122,7 +121,7 @@ d3.json("information/mappedto.json", function (error, data) {
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", color);
+        .style("fill", colorMaker);
 
     legend.append("text")
         .attr("x", width - 22)

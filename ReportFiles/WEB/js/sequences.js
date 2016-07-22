@@ -8,8 +8,15 @@ var file = "../../information/emal-graph-1.csv";
 var colorScale = ['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#e6550d', '#fd8d3c', '#fdae6b', '#fdd0a2', '#31a354', '#74c476', '#a1d99b', '#c7e9c0', '#756bb1', '#9e9ac8', '#bcbddc', '#dadaeb', '#636363', '#969696', '#bdbdbd', '#d9d9d9']
 
 function colorMaker(x) {
-    var selectedColor = (((x.charCodeAt(0) + x.charCodeAt(1) + x.charCodeAt(2))) % colorScale.length)
-    return colorScale[selectedColor];
+    if (x != null) {
+        x = x.split('[')[0].replace(' ', '');
+        var num = 0;
+        for (var i = 0, len = x.length; i < len; i++) {
+            num += x.charCodeAt(i);
+        }
+        var selectedColor = num % colorScale.length;
+        return colorScale[selectedColor];
+    }
 }
 
 // Total size of all segments; we set this later, after loading the data.
