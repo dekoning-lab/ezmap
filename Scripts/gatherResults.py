@@ -66,7 +66,7 @@ def writePrinseqTableFile(dict, outfile):
 def getBowtie2Results(fileDir):
     bowtieInfo = {}
     for file in os.listdir(fileDir):
-        if file.endswith('.err'):
+        if file.endswith('.err') or file.endswith('.errs'):
             inFile = open(fileDir + file, 'r')
             output = open(fileDir + os.path.splitext(file)[0] + '.out')
 
