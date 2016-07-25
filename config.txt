@@ -1,31 +1,36 @@
-EZMAP CONFIG FILE
+#EZMAP CONFIG FILE
 >project-name=EzMapTest
 >python3-path=/hyperion/home/patrick/usr/local/bin/python3.5
 >start-at-step=1
+# Can be either slurm or torque
+>job-manager=torque
 
-PBS TORQUE JOB MANAGER CONFIG OPTIONS
+#PBS TORQUE JOB MANAGER CONFIG OPTIONS
+>pbs-queue=batch
+>pbs-max-num-threads=4
+>pbs-max-num-nodes=2
 
-SLURM JOB MANAGER CONFIG OPTIONS
+#SLURM JOB MANAGER CONFIG OPTIONS
 >slurm-account=dklab-research
 >slurm-share=no
 >slurm-partition=normal
 >slurm-max-num-threads=16
 >slurm-test-only=no
 
-PRINSEQ CONFIG OPTIONS
+#PRINSEQ CONFIG OPTIONS
 >prinseq-path=cwd/tools/PRINSEQ/
 >prinseq-min_qual_score=21
 >prinseq-lc_method=dust
 >prinseq-lc_threshold=7
 
-BOWTIE2 CONFIG OPTIONS
+#BOWTIE2 CONFIG OPTIONS
 >bowtie2-path=cwd/tools/BOWTIE2/bowtie2-2.2.5/
 >bowtie2-index-path=cwd/tools/BOWTIE2/hg19/hg19
 
-SAMTOOLS CONFIG OPTIONS
+#SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/
 
-BLAST CONFIG OPTIONS
+#BLAST CONFIG OPTIONS
 >blast-path=/hyperion/work/patrick/pipelineTest2/tools/BLAST/ncbi-blast-2.4.0+/bin/
 >blast-task=megablast
 >blast-db-path=/hyperion/work/patrick/PipelineDev/tools/BLAST/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
@@ -40,11 +45,11 @@ BLAST CONFIG OPTIONS
 >blast-perc_identity=90
 >blast-min-alignment-length=45
 
-EMAL CONFIG OPTIONS
+#EMAL CONFIG OPTIONS
 >emal-path=cwd/tools/EMAL/
 >emal-gi-taxid-nucldmp-path=/hyperion/work/patrick/quakeDataProcessing/EMAL/gi_taxid_nucl.dmp
 >emal-acceptance-value=0.0001
 
-OUTPUT OPTIONS
+#OUTPUT OPTIONS
 - Options for this parameter are: SuperKingdom,Q1,Order,Family,SubFamily,Genus
 >extraTableSummedOver=Family

@@ -78,6 +78,8 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
     prinseqJobIDS = []
     if (startStep == 1):
         prinseq.generateSLURMScript(origFiles, projdir, configOptions)
+        return
+
         prinseqJobIDS = prinseq.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
