@@ -3,6 +3,8 @@ EZMAP CONFIG FILE
 >python3-path=/hyperion/home/patrick/usr/local/bin/python3.5
 >start-at-step=1
 
+PBS TORQUE JOB MANAGER CONFIG OPTIONS
+
 SLURM JOB MANAGER CONFIG OPTIONS
 >slurm-account=dklab-research
 >slurm-share=no
