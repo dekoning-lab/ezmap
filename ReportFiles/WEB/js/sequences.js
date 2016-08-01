@@ -22,7 +22,7 @@ function colorMaker(x) {
 // Total size of all segments; we set this later, after loading the data.
 var totalSize = 0;
 
-var vis = d3.select("#chart").append("svg:svg")
+var vis = d3.select("#genomeRelativeAbundanceChart").append("svg:svg")
     .attr("width", width)
     .attr("height", height)
     .append("svg:g")
@@ -96,9 +96,9 @@ function createVisualization(json) {
             return colorMaker(d.name);
         })
         .style("opacity", 1)
-        .on("mouseover", mouseover);
+        .on("mouseover", mouseoverGRA);
 
-    var svgWidth = d3.select('#chart').select("svg").style('height').replace('px', '');
+    var svgWidth = d3.select('#genomeRelativeAbundanceChart').select("svg").style('height').replace('px', '');
     var textHeight = 60;
     var topValue = (textHeight / -2);
 
@@ -112,7 +112,7 @@ function createVisualization(json) {
 };
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
-function mouseover(d) {
+function mouseoverGRA(d) {
     if (this.nodeName == 'path') {
         var percentage = (100 * d.value / totalSize).toPrecision(3);
         var percentageString = percentage + "%";
@@ -147,7 +147,7 @@ function mouseover(d) {
 
         updateTable(sequenceArray);
         // Fade all the segments.
-        d3.selectAll("#chart path")
+        d3.selectAll("#genomeRelativeAbundanceChart path")
             .style("opacity", 0.25);
 
         // Then highlight only those that are an ancestor of the current segment.
@@ -199,8 +199,8 @@ function getAncestors(node) {
 // often that sequence occurred.
 function buildHierarchy(csv) {
     var root = {
-        "name": "root"
-        , "children": []
+        "name": "root",
+        "children": []
     };
     for (var i = 0; i < csv.length; i++) {
         var sequence = csv[i][0];
@@ -227,8 +227,8 @@ function buildHierarchy(csv) {
                 // If we don't already have a child node for this branch, create it.
                 if (!foundChild) {
                     childNode = {
-                        "name": nodeName
-                        , "children": []
+                        "name": nodeName,
+                        "children": []
                     };
                     children.push(childNode);
                 }
@@ -236,8 +236,8 @@ function buildHierarchy(csv) {
             } else {
                 // Reached the end of the sequence; create a leaf node.
                 childNode = {
-                    "name": nodeName
-                    , "size": size
+                    "name": nodeName,
+                    "size": size
                 };
                 children.push(childNode);
             }

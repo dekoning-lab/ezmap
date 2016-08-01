@@ -39,13 +39,25 @@ $(document).ready(function () {
 
     $('.panel').on('show.bs.collapse', function (e) {
         $('#' + e.currentTarget.id + 'Icon').removeClass('fa-chevron-righ').addClass('fa-chevron-down');
-    })
+    });
+
     $('.panel').on('hide.bs.collapse', function (e) {
         $('#' + e.currentTarget.id + 'Icon').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-    })
+    });
+
     $('#panel7').on('show.bs.collapse', function (e) {
-        doneResizing();
-    })
+        $('#genomeRelativeAbundanceChart').html('');
+        $('#fileDistributionGraph').html('');
+
+        initializeGRAGraph();
+        initializeFileDistGraph();
+    });
+
+    $('#panel6').on('show.bs.collapse', function (e) {
+        $('#summedPieChart').html('');
+
+        initializePieChart();
+    });
 
     $('#downloadFileMappingDist').on("click", saveFileMappingSVG);
     $('#downloadGRA').on("click", saveGRASVG);
@@ -68,13 +80,15 @@ function getProjectInformation() {
 }
 
 function initializeGRAGraph() {
-    $.getScript("WEB/js/sequences.js", function (data, textStatus, jqxhr) {
-        $.getScript("WEB/js/piechart.js", function (data, textStatus, jqxhr) {});
-    });
+    $.getScript("WEB/js/sequences.js", function (data, textStatus, jqxhr) {});
 }
 
 function initializeFileDistGraph() {
     $.getScript("WEB/js/mappedTo.js", function (data, textStatus, jqxhr) {});
+}
+
+function initializePieChart() {
+    $.getScript("WEB/js/piechart.js", function (data, textStatus, jqxhr) {});
 }
 
 function saveFileMappingSVG() {
@@ -84,8 +98,8 @@ function saveFileMappingSVG() {
         alert("blob not supported");
     }
 
-    $('#mappedTo-graph').find("svg").attr("title", "test2").attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg");
-    var innerHTML = $('#mappedTo-graph').html();
+    $('#fileDistributionGraph').find("svg").attr("title", "test2").attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg");
+    var innerHTML = $('#fileDistributionGraph').html();
 
     var blob = new Blob([innerHTML], {
         type: "image/svg+xml"
@@ -110,11 +124,13 @@ function saveGRASVG() {
 }
 
 function doneResizing() {
-    $('#chart').html('');
+    $('#genomeRelativeAbundanceChart').html('');
     $('#summedPieChart').html('');
+    $('#fileDistributionGraph').html('');
+
     initializeGRAGraph();
-    $('#mappedTo-graph').html('');
     initializeFileDistGraph();
+    initializePieChart();
 }
 
 function csvToTable(file, $table, id, caption) {
@@ -160,13 +176,13 @@ function csvToTable(file, $table, id, caption) {
         }
         if (id == 'emalTblOne' || id == 'emalTblTwo') {
             $table.DataTable({
-                "data": dataSet
-                , "columns": header
-                , "paging": true
-                , "info": false
-                , "responsive": true
-                , "order": [[0, "desc"]]
-                , "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                "data": dataSet,
+                "columns": header,
+                "paging": true,
+                "info": false,
+                "responsive": true,
+                "order": [[0, "desc"]],
+                "fnCreatedRow": function (nRow, aData, iDataIndex) {
                     var name = aData[1]
                     name = name.substring(0, name.indexOf('['))
                     $(nRow).attr('id', name);
@@ -174,12 +190,12 @@ function csvToTable(file, $table, id, caption) {
             });
         } else {
             $table.dataTable({
-                "data": dataSet
-                , "columns": header
-                , "paging": true
-                , "info": false
-                , "responsive": true
-            , });
+                "data": dataSet,
+                "columns": header,
+                "paging": true,
+                "info": false,
+                "responsive": true,
+            });
         }
     });
 

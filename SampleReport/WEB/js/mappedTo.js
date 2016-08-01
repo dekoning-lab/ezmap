@@ -1,11 +1,11 @@
 var margin = {
-        top: 20
-        , right: 90
-        , bottom: 30
-        , left: 70
-    }
-    , width = $('#collapseSeven').width() - margin.left - margin.right
-    , height = ($(window).height() / 12 * 7) - margin.top - margin.bottom;
+        top: 20,
+        right: 90,
+        bottom: 30,
+        left: 70
+    },
+    width = $('#collapseSeven').width() - margin.left - margin.right,
+    height = ($(window).height() / 12 * 7) - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width - 100], .1);
@@ -32,7 +32,7 @@ var yAxis = d3.svg.axis()
     .orient("left")
     .tickFormat(d3.format(".2s"));
 
-var svg = d3.select("#mappedTo-graph").append("svg")
+var svg = d3.select("#fileDistributionGraph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -51,10 +51,10 @@ d3.json("information/mappedto.json", function (error, data) {
         var y0 = 0;
         d.ages = color.domain().map(function (name) {
             return {
-                name: name
-                , file: d.File
-                , y0: y0
-                , y1: y0 += +d[name]
+                name: name,
+                file: d.File,
+                y0: y0,
+                y1: y0 += +d[name]
             };
         });
         d.total = d.ages[d.ages.length - 1].y1;
