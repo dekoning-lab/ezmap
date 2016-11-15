@@ -1,2 +1,0 @@
-projectName=EZMapSampleOuput
-dateRun=02/06/2016 10:44:18
