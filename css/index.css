@@ -1,8 +1,19 @@
 p {
-    font-size: 18px !important;
+    font-size: 20px !important;
     text-align: justify
 }
 
 nav li a {
     font-size: 15px;
+}
+
+#buttonDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: auto;
+}
+
+#buttonDivChild {
+    overflow: auto;
 }
