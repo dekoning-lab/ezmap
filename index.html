@@ -38,13 +38,10 @@
                 <ul class="nav navbar-nav">
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Links <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="https://github.com/dekoning-lab/ezmap" target="_blank">EzMap Github Repo</a></li>
-                            <li><a href="http://lab.jasondk.io" target="_blank">DeKoning Lab</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="https://github.com/dekoning-lab/ezmap" target="_blank"><i class="fa fa-github" aria-hidden="true"></i> EzMap Github Repo</a></li>
+                    <li><a href="http://lab.jasondk.io" target="_blank">DeKoning Lab Website</a></li>
+                    <li><a href="https://github.com/dekoning-lab/ezmap/wiki" target="_blank"><i class="fa fa-file-text" aria-hidden="true"></i> Wiki</a></li>
+
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -58,18 +55,37 @@
             <h2 class="col-lg-12">Ez Metagenomic Abundance Pipeline (EzMap)</h2>
             <p class="col-lg-12">EzMap is a pipeline designed to allow for the estimation community structure from raw DNA sequence data. EzMap has been designed to work with viral sequence data, however it can also be used with other information sources such as bacterial and fungal communities.</p>
         </div>
+        <hr>
+        <div class="row">
+            <h2 class="col-lg-12">The Pipeline</h2>
+            <p class="col-lg-7">EzMap is designed to filter, map and estimate community structure simply form FASTQ formatted DNA sequence reads. The pipeline uses the current state of the art bioinformatics tools to complete the analysis. Moving from Raw Reads all the way to complete interactive reporting while also retaining intermediate files to enable further analysis of data.
+                <br>
+                <br>EzMap is also designed to be customizable by allowing the user to specify host organism genomes to filter out and specify important parameters and threshold for each stage of the pipeline. This allows you to customize EzMap to better suit you analysis. </p>
+            <img class="col-lg-5" src="img/FLOWCHART.jpg" />
+        </div>
+        <hr>
+        <div class="row">
+            <h2 class="col-lg-12">Interacitve SVG Images</h2>
+            <img class="col-lg-6" src="img/ezmapStarburstDemoShort.gif" />
+            <p class="col-lg-6">EzMap uses the D3 javascript library to generate dynamic interactive SVG images for each run of the pipeline. This images are compiled into a final interactive HTML report that can be viewed in a internet browser. These figures allow quick and easy analysis of the results allowing the user to export the data in an interactive manner just by mousing over the images. These scalable images can also be saved in an SVG format to the desktop to be used within presentations or figures without scaling or pixelation issues. </p>
+        </div>
+        <hr>
         <div class="row">
             <h3 class="col-lg-12">Sample HTML Pipeline Report</h3>
-            <p class="col-lg-12">EzMap's pipeline provides two forms of output available to the user upon completion. The first is a interactive HTML webpage report that displays the results with dynamic figures, and the second is a set of Comma Separated Value (CSV) files that allow for further analysis. By choosing on of the options bellow you can see what this sample report looks like.</p>
-            <a class="btn btn-success col-lg-4 col-lg-offset-1" href="SampleReport/report.html" target="_blank">View Online</a>
-            <a class="btn btn-info col-lg-4  col-lg-offset-2 " href="SampleReport.zip" target="_blank">Download Report and Run Locally</a>
+            <p class="col-lg-6">EzMap's pipeline provides two forms of output available to the user upon completion. The first is a interactive HTML webpage report that displays the results with dynamic figures, and the second is a set of Comma Separated Value (CSV) files that allow for further analysis. By choosing on of the options bellow you can see what this sample report looks like.</p>
+            <div class="col-lg-6">
+                <a class="btn btn-success col-lg-4 col-lg-offset-1" href="SampleReport/report.html" target="_blank">View Online</a>
+                <a class="btn btn-info col-lg-4  col-lg-offset-2 " href="SampleReport.zip" target="_blank">Download Report and Run Locally</a>
+            </div>
         </div>
+        <div class="row"></div>
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script src="https://use.fontawesome.com/bd39f054ec.js"></script>
 </body>
 
 </html>
