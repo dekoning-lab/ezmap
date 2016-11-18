@@ -26,7 +26,6 @@ import Scripts.finalScript as final
 
 serialSample = False
 
-
 # Cretaes a txt file of all importnat output files for final report
 def outputFileList(files, projdir, projName):
     outputfile = open(projdir + '6-FinalResult-' + projName + '/information/' + 'filelist.txt', 'w+')
