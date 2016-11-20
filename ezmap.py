@@ -89,7 +89,7 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
             alignerJobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
         elif configOptions['aligner-to-use'] == 'hisat2':
             hisat2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
-            alignerJobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
+            alignerJobIDS = hisat2.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
     # Generate Job script for step 3 and run all jobs

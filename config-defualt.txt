@@ -22,7 +22,7 @@ BOWTIE2 CONFIG OPTIONS
 >bowtie2-index-path=cwd/tools/BOWTIE2/hg19/hg19
 
 HISAT2 CONFIG OPTIONS
->hisat2-path=cwd/tools/HISAT2/
+>hisat2-path=cwd/tools/HISAT2/hisat2-2.0.5-Linux/
 >hisat2-index-path=cwd/tools/HISAT2/hg19/genome
 
 SAMTOOLS CONFIG OPTIONS
