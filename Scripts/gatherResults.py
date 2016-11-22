@@ -297,7 +297,7 @@ def writeSummedOverInfoJSON(category, dict, outfile):
 
     outfile.write(json.dumps(allData))
 
-def getAllTaxInfo (taxIDs):
+def getAllTaxInfo (taxIDs, configOptions):
     Entrez.email = ""
 
     l = taxIDs
@@ -331,7 +331,7 @@ def getAllTaxInfo (taxIDs):
 
     return allTaxInfo
 
-def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory):
+def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory, configOptions):
     if not projDir.endswith('/'):
         projDir = projDir + '/'
 
@@ -351,7 +351,7 @@ def calculateActualAbunbdance(taxonomyLevels, projName, projDir, outputDirectory
     for key in genomeTaxon.keys():
         allTaxIDS.append(str(genomeTaxon[key][0]))
 
-    allTaxInfo = getAllTaxInfo(allTaxIDS)
+    allTaxInfo = getAllTaxInfo(allTaxIDS, configOptions)
 
     for taxLevel in taxonomyLevels:
         results[taxLevel.upper()] = {}
@@ -442,7 +442,7 @@ if __name__ == "__main__":
         summedOverResults = gatherSummedOverInfo(emalInfo, x.rstrip())
         writeSummedOverInfo(x, summedOverResults, projDir + '6-FinalResult-'+projName+'/information/' + 'summedOver-' + x + '.csv')
 
-    calculateActualAbunbdance(taxonomyLevels, projName, projDir, projDir + '6-FinalResult-'+projName+'/information/')
+    calculateActualAbunbdance(taxonomyLevels, projName, projDir, projDir + '6-FinalResult-'+projName+'/information/', configOptions)
 
     print('Saving all csv files...')
     print('Complete!')

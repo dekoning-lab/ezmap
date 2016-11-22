@@ -1,8 +1,9 @@
 EZMAP CONFIG FILE
 >project-name=EzMapTest
 >python3-path=/hyperion/home/patrick/usr/local/bin/python3.5
->start-at-step=7
+>start-at-step=1
 >aligner-to-use=hisat2
+>user-email=
 
 SLURM JOB MANAGER CONFIG OPTIONS
 >slurm-account=dklab-research
