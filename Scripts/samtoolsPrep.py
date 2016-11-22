@@ -39,7 +39,11 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
     filelist = ''
     fileOutputList = ''
     for x in dataSets:
-        filelist += '' + dataSets[x].bowtie2OutputName + '.sam '
+        if configOptions['aligner-to-use'] == 'bowtie2':
+            filelist += '' + dataSets[x].bowtie2OutputName + '.sam '
+        elif configOptions['aligner-to-use'] == 'hisat2':
+            filelist += '' + dataSets[x].hisat2OutputName + '.sam '
+
         fileOutputList += '' + dataSets[x].samtoolsOutputName + ' '
         filePath = dataSets[x].projDirectory + '3-UnmappedCollection/'
 

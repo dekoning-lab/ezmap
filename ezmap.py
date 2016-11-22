@@ -19,13 +19,13 @@ import Scripts.fileManager as fileman
 import Scripts.ensureScriptPermissions as ensureScriptPermissions
 import Scripts.prinseqPrep as prinseq
 import Scripts.bowtie2Prep as bowtie2
+import Scripts.hisat2Prep as hisat2
 import Scripts.samtoolsPrep as samtools
 import Scripts.blastprep as blast
 import Scripts.emalPrep as emal
 import Scripts.finalScript as final
 
 serialSample = False
-
 
 # Cretaes a txt file of all importnat output files for final report
 def outputFileList(files, projdir, projName):
@@ -82,16 +82,20 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
         startStep += 1
 
     # Generate Job script for step 2 and run all jobs
-    bowtie2JobIDS = []
+    alignerJobIDS = []
     if (startStep == 2):
-        bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
-        bowtie2JobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
+        if configOptions['aligner-to-use'] == 'bowtie2':
+            bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
+            alignerJobIDS = bowtie2.processAllFiles(projdir, configOptions, origFiles)
+        elif configOptions['aligner-to-use'] == 'hisat2':
+            hisat2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
+            alignerJobIDS = hisat2.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 
     # Generate Job script for step 3 and run all jobs
     samtoolsJobIDS = []
     if (startStep == 3):
-        samtools.generateSLURMScript(origFiles, projdir, configOptions, bowtie2JobIDS)
+        samtools.generateSLURMScript(origFiles, projdir, configOptions, alignerJobIDS)
         samtoolsJobIDS = samtools.processAllFiles(projdir, configOptions, origFiles)
         startStep += 1
 

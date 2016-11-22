@@ -14,6 +14,7 @@ class Dataset:
     # Information based on what output files should be named
     prinseqOutputName = ""
     bowtie2OutputName = ""
+    hisat2OutputName = ""
     samtoolsOutputName = ""
     blastnOutputName = ""
     EMALOutputName = ""
@@ -38,6 +39,7 @@ class Dataset:
 
         self.prinseqOutputName = root + "-prinseq"
         self.bowtie2OutputName = root + "-bwt2"
+        self.hisat2OutputName = root + "-hst2"
         self.samtoolsOutputName = root + "-samtool"
         self.blastnOutputName = root + "-blastn"
         self.EMALOutputName = root + "-emal"
