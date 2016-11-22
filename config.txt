@@ -1,7 +1,7 @@
 EZMAP CONFIG FILE
 >project-name=EzMapTest
 >python3-path=/hyperion/home/patrick/usr/local/bin/python3.5
->start-at-step=1
+>start-at-step=7
 >aligner-to-use=hisat2
 
 SLURM JOB MANAGER CONFIG OPTIONS
