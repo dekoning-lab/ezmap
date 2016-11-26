@@ -176,23 +176,24 @@ def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, pro
         prinseq.generateSHScript(origFiles, projdir, configOptions)
         startStep += 1
 
-    # # Generate Job script for step 2 and run all jobs
-    # if (startStep == 2):
-    #     if configOptions['aligner-to-use'] == 'bowtie2':
-    #         bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
-    #     elif configOptions['aligner-to-use'] == 'hisat2':
-    #         hisat2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
-    #     startStep += 1
-    #
-    # # Generate Job script for step 3 and run all jobs
-    # if (startStep == 3):
-    #     samtools.generateSLURMScript(origFiles, projdir, configOptions, alignerJobIDS)
-    #     startStep += 1
-    #
-    # # Generate Job script for step 4 and run all jobs
-    # if (startStep == 4):
-    #     blast.generateSLURMScript(origFiles, projdir, configOptions, samtoolsJobIDS)
-    #     startStep += 1
+    # Generate Job script for step 2 and run all jobs
+    if (startStep == 2):
+        if configOptions['aligner-to-use'] == 'bowtie2':
+            print ()
+            # bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions)
+        elif configOptions['aligner-to-use'] == 'hisat2':
+            hisat2.generateSHScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # Generate Job script for step 3 and run all jobs
+    if (startStep == 3):
+        samtools.generateSHScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # Generate Job script for step 4 and run all jobs
+    if (startStep == 4):
+        blast.generateSHScript(origFiles, projdir, configOptions)
+        startStep += 1
     #
     # # Generate Job script for step 5 and run all jobs
     # if (startStep == 5):

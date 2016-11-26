@@ -9,7 +9,7 @@ SLURM JOB MANAGER CONFIG OPTIONS
 >slurm-account=dklab-research
 >slurm-share=no
 >slurm-partition=normal
->slurm-max-num-threads=16
+>slurm-max-num-threads=4
 >slurm-test-only=no
 
 PRINSEQ CONFIG OPTIONS

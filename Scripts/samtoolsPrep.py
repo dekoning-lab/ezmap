@@ -69,6 +69,60 @@ def generateSLURMScript(dataSets, projdir, configOptions, bowtie2JobIDS):
 
     os.chmod(projdir + '3-UnmappedCollection/samtoolsScript.sh', 0o755)
 
+def generateSHScript(dataSets, projdir, configOptions):
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    samtoolsPath = configOptions['samtools-path']
+
+    # Checks to see if path ends in / character
+    if not samtoolsPath.endswith('/'):
+        samtoolsPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/SAMTOOLS/' in samtoolsPath:
+        samtoolsPath = samtoolsPath.replace('cwd', cwd)
+
+    script = open(projdir + 'ezmapScript.sh', 'a+')
+
+    script.writelines(['\n# SAMTOOLS STEP\n'])
+
+    script.write('# SAMTOOLS PARAMETERS\n')
+    script.writelines(['inFileDir=' + os.path.abspath(projdir) + '/2-HumanMapping/\n',
+                       'outFileDir=' + os.path.abspath(projdir) + '/3-UnmappedCollection/\n',
+                       'samtoolsPath=' + samtoolsPath + 'samtools\n\n'])
+
+    filelist = ''
+    fileOutputList = ''
+    for x in dataSets:
+        if configOptions['aligner-to-use'] == 'bowtie2':
+            filelist += '' + dataSets[x].bowtie2OutputName + '.sam '
+        elif configOptions['aligner-to-use'] == 'hisat2':
+            filelist += '' + dataSets[x].hisat2OutputName + '.sam '
+
+        fileOutputList += '' + dataSets[x].samtoolsOutputName + ' '
+        filePath = dataSets[x].projDirectory + '3-UnmappedCollection/'
+
+    script.write('fileArray=( ' + filelist + ')\n')
+    script.write('fileOutputArray=( ' + fileOutputList + ')\n\n')
+
+    script.writelines(['COUNTER=0\n',
+                       'while [  $COUNTER -lt ${#fileArray[@]} ];\n',
+                       'do\n',
+                       '\tTEMP=${fileArray[$COUNTER]}\n',
+                       '\tTEMP2=${TEMP#\\\'}\n',
+                       '\tFILENAME=${TEMP2%\\\'}\n\n',
+                       '\tTEMP3=${fileOutputArray[$COUNTER]}\n',
+                       '\tTEMP4=${TEMP3#\\\'}\n',
+                       '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
+                       '\techo ${FILENAME} $SLURM_ARRAY_TASK_ID $TEMP \n\n',
+                       '\t${samtoolsPath} view -f4 ${inFileDir}${FILENAME} | '
+                       '${samtoolsPath} view -Sb - | '
+                       '${samtoolsPath} view - | '
+                       'awk \'{OFS="\\t"; print ">"$1"\\n"$10}\' - > ' + os.path.abspath(filePath) + '/${FILENAMEOUTPUT}.fasta',
+                       '\tlet COUNTER=COUNTER+1\n',
+                       'done\n'])
+    script.close()
+
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 3 jobs...')

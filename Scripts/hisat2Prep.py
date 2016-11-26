@@ -3,6 +3,7 @@ __author__ = 'patrickczeczko'
 import os, subprocess
 import Scripts.slurmScript as slurmScript
 
+
 # Generates bash script to launch all required jobs within job manager
 def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
     print('Setting up jobs for Step 2...')
@@ -66,7 +67,64 @@ def generateSLURMScirpt(dataSets, projdir, configOptions, prinseqJobIDS):
                        'srun $COMMAND'])
     script.close()
 
-    os.chmod(projdir + '2-HumanMapping/hisat2Script.sh', 0o755)
+
+def generateSHScript(dataSets, projdir, configOptions):
+    maxThreads = configOptions['slurm-max-num-threads']
+
+    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    os.environ["HISAT2_HOME"] = cwd + 'tools/HISAT2/'
+
+    hisat2Path = configOptions['hisat2-path']
+
+    # Checks to see if path ends in / character
+    if not hisat2Path.endswith('/'):
+        hisat2Path += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/HISAT2/' in hisat2Path:
+        hisat2Path = hisat2Path.replace('cwd', cwd)
+
+    if 'cwd/tools/HISAT2' in configOptions['hisat2-index-path']:
+        hisat2IndexPath = configOptions['hisat2-index-path'].replace('cwd', cwd)
+    else:
+        hisat2IndexPath = configOptions['hisat2-index-path']
+
+    script = open(projdir + 'ezmapScript.sh', 'a+')
+
+    script.writelines(['\n# HISAT2 STEP\n'])
+
+    filelist = ''
+    fileOutputList = ''
+    for x in dataSets:
+        filelist += '' + dataSets[x].prinseqOutputName + ' '
+        fileOutputList += '' + dataSets[x].hisat2OutputName + ' '
+        origFilePath = dataSets[x].projDirectory + '/'
+
+    script.write('numCores=' + maxThreads + '\n\n')
+
+    script.write('fileArray=( ' + filelist + ')\n')
+    script.write('fileOutputArray=( ' + fileOutputList + ')\n\n')
+
+    script.writelines(['COUNTER=0\n',
+                       'while [  $COUNTER -lt ${#fileArray[@]} ];\n',
+                       'do\n',
+                       '\tTEMP=${fileArray[$COUNTER]}\n',
+                       '\tTEMP2=${TEMP#\\\'}\n',
+                       '\tFILENAME=${TEMP2%\\\'}\n\n',
+                       '\tTEMP3=${fileOutputArray[$COUNTER]}\n',
+                       '\tTEMP4=${TEMP3#\\\'}\n',
+                       '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
+                       '\techo "Input file: ${FILENAME}"\n',
+                       '\t' + hisat2Path + 'hisat2 ' +
+                       '-p ${numCores} ' +
+                       '-x ' + hisat2IndexPath + ' ' +
+                       '-U ' + os.path.abspath(projdir) + '/1-Cleaning/${FILENAME}.fastq ' +
+                       '-S ' + os.path.abspath(projdir) + '/2-HumanMapping/${FILENAMEOUTPUT}.sam\n\n',
+                       '\tlet COUNTER=COUNTER+1\n',
+                       'done\n'])
+    script.close()
+
 
 # Launch job to run within job manager
 def processAllFiles(projDir, configOptions, dataSets):

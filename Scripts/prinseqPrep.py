@@ -3,7 +3,7 @@ __author__ = 'patrickczeczko'
 import subprocess
 import os
 import Scripts.slurmScript as slurmScript
-
+import datetime
 
 # Generates bash script to launch all required jobs within job manager
 def generateSLURMScript(dataSets, projdir, configOptions):
@@ -79,13 +79,15 @@ def generateSHScript (dataSets, projdir, configOptions):
 
     script.write('#!/bin/bash\n\n')
 
-    script.write('## PRINSEQ PARAMETERS\n')
+    script.write('# EzMap Desktop mode  execution script. Generated on '+datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+    script.write('\n# EzMap documentation and more can be found at http://dekoning-lab.github.io/ezmap/')
+
+    script.writelines(['\n\n# PRINSEQ STEP\n'])
+    script.write('# PRINSEQ PARAMETERS\n')
     script.writelines(['out_format=3\n',
                        'min_qual_score=' + configOptions['prinseq-min_qual_score'] + '\n',
                        'lc_method=' + configOptions['prinseq-lc_method'] + '\n',
                        'lc_threshold=' + configOptions['prinseq-lc_threshold'] + '\n\n'])
-
-    script.writelines(['#PRINSEQ STEP\n'])
 
     filelist = ''
     fileOutputList = ''
