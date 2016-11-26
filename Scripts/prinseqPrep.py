@@ -77,20 +77,43 @@ def generateSHScript (dataSets, projdir, configOptions):
 
     script = open(projdir + 'ezmapScript.sh', 'w+')
 
+    script.write('#!/bin/bash\n\n')
+
     script.write('## PRINSEQ PARAMETERS\n')
     script.writelines(['out_format=3\n',
                        'min_qual_score=' + configOptions['prinseq-min_qual_score'] + '\n',
                        'lc_method=' + configOptions['prinseq-lc_method'] + '\n',
                        'lc_threshold=' + configOptions['prinseq-lc_threshold'] + '\n\n'])
 
-    script.writelines(['PRINSEQ STEP\n'])
+    script.writelines(['#PRINSEQ STEP\n'])
 
+    filelist = ''
+    fileOutputList = ''
     for x in dataSets:
-        print (x)
+        filelist += '"' + dataSets[x].origFileName + '" '
+        fileOutputList += '"' + dataSets[x].prinseqOutputName + '" '
+        origFilePath = dataSets[x].origFilePath + '/'
 
-        script.write('')
+    script.write('declare -a fileArray=(' + filelist + ')\n')
+    script.write('declare -a fileOutputArray=(' + fileOutputList + ')\n\n')
 
-
+    script.writelines(['COUNTER=0\n',
+                       'while [  $COUNTER -lt ${#fileArray[@]} ];\n',
+                       'do\n',
+                           '\tTEMP=${fileArray[$COUNTER]}\n',
+                           '\tTEMP2=${TEMP#\\\'}\n',
+                           '\tFILENAME=${TEMP2%\\\'}\n\n',
+                           '\tTEMP3=${fileOutputArray[$COUNTER]}\n',
+                           '\tTEMP4=${TEMP3#\\\'}\n',
+                           '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
+                           '\techo ${FILENAME} $TEMP \n',
+                           '\techo ' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
+                           os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
+                           configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
+                           configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
+                           configOptions['python3-path'] + ' \n\n'
+                           '\tlet COUNTER=COUNTER+1\n',
+                       'done\n'])
     script.close()
 
     os.chmod(projdir + 'ezmapScript.sh', 0o755)
