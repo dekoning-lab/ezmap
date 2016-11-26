@@ -18,22 +18,29 @@ def parseCommandLineArguments():
     parser.add_argument("-pn", "--projectName", type=str, required=False,
                         help="Set the project name from the commandline and override the one provided in the config "
                              "file.")
+    parser.add_argument("-dm", "--desktopMode",action="store_true", required=False,
+                        help="Setting this will run ezmap in a single node mode that does not require a job manager. "
+                             "This intended for the use of ezmap on a single workstation")
 
     args = parser.parse_args()
 
     allArgs = {}
+
     allArgs['directory'] = args.directory
     if args.projDir.endswith("/"):
         allArgs['projDir'] = args.projDir
     else:
         allArgs['projDir'] = args.projDir + '/'
 
+    allArgs['serialSample'] = False
     if args.serialSample == True:
         allArgs['serialSample'] = True
-    else:
-        allArgs['serialSample'] = False
 
     if args.projectName:
         allArgs['projectName'] = args.projectName
+
+    allArgs['desktopMode'] = False
+    if args.desktopMode == True:
+        allArgs['desktopMode'] = True
 
     return allArgs

@@ -24,7 +24,7 @@ BOWTIE2 CONFIG OPTIONS
 
 HISAT2 CONFIG OPTIONS
 >hisat2-path=cwd/tools/HISAT2/hisat2-2.0.5-Linux/
->hisat2-index-path=cwd/tools/HISAT2/hg19/genome
+>hisat2-index-path=/mnt/hgfs/patrickczeczko/Desktop/HISATFILES/hg19-hisat/genome
 
 SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/

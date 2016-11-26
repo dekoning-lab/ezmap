@@ -62,8 +62,43 @@ def generateSLURMScript(dataSets, projdir, configOptions):
     os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
     os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
 
+def generateSHScript (dataSets, projdir, configOptions):
+    # Get the current working directory and path to PRINSEQ
+    cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
+    prinseqPath = configOptions['prinseq-path']
 
-# Launch job to run within job manager
+    # Checks to see if path ends in / character
+    if not prinseqPath.endswith('/'):
+        prinseqPath += '/'
+
+    # Checks to see if default path should be used
+    if 'cwd/tools/PRINSEQ/' in prinseqPath:
+        prinseqPath = prinseqPath.replace('cwd/', cwd)
+
+    script = open(projdir + 'ezmapScript.sh', 'w+')
+
+    script.write('## PRINSEQ PARAMETERS\n')
+    script.writelines(['out_format=3\n',
+                       'min_qual_score=' + configOptions['prinseq-min_qual_score'] + '\n',
+                       'lc_method=' + configOptions['prinseq-lc_method'] + '\n',
+                       'lc_threshold=' + configOptions['prinseq-lc_threshold'] + '\n\n'])
+
+    script.writelines(['PRINSEQ STEP\n'])
+
+    for x in dataSets:
+        print (x)
+
+        script.write('')
+
+
+    script.close()
+
+    os.chmod(projdir + 'ezmapScript.sh', 0o755)
+    os.chmod(prinseqPath + 'combineLogFiles.py', 0o755)
+    os.chmod(prinseqPath + 'fastq-splitter.pl', 0o755)
+    os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
+    os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
+
 def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')
     numOfFiles = len(dataSets)

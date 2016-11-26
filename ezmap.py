@@ -39,8 +39,8 @@ def outputFileList(files, projdir, projName):
                                                                                                           '&#47;') + '</td></tr>')
     outputfile.write('</tbody></table>')
 
-
-def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
+# Runs EzMap on a single time point using the SLURM job manager
+def runEzMapOnTimePointSLURM(configOptions, startAtStep, inputFileDir, projdir):
     startStep = startAtStep
 
     print(inputFileDir)
@@ -71,7 +71,6 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
 
     # Get the project directory to pass to functions that follow
     # projdir = list(origFiles.values())[0].projDirectory
-
     fileman.copyReportFiles(projdir, configOptions['project-name'])
 
     # Generate Job script for step 1 and run all jobs
@@ -139,6 +138,86 @@ def runEzMapOnTimePoint(configOptions, startAtStep, inputFileDir, projdir):
 
     print('\nAll required jobs for ' + inputFileDir + ' have been queued...\n')
 
+# Run EzMap on a single time point in desktop mode
+def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, projdir):
+    startStep = startAtStep
+
+    print(inputFileDir)
+    print(projdir)
+
+    if not inputFileDir.endswith("/"):
+        inputFileDir = inputFileDir + '/'
+
+    if not projdir.endswith("/"):
+        projdir = projdir + '/'
+
+    # Get list of FASTQ files to process
+    origFiles = fileman.getListOfOriginalFiles(inputFileDir, projdir)
+
+    # Check if there is at least one file to process
+    if len(origFiles) < 1:
+        print('No files found to process!')
+        print('Exiting...')
+        return
+
+    # Create subdirectories where intermediate files will live
+    createdSubDir = fileman.createSubFolders(projdir, configOptions['project-name'])
+
+    # If sub directories don't exist, don't continue
+    if createdSubDir == False:
+        print("Error unable to create intermediate file directories")
+        return
+
+    # Get the project directory to pass to functions that follow
+    # projdir = list(origFiles.values())[0].projDirectory
+    fileman.copyReportFiles(projdir, configOptions['project-name'])
+
+    if (startStep == 1):
+        prinseq.generateSHScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # # Generate Job script for step 2 and run all jobs
+    # if (startStep == 2):
+    #     if configOptions['aligner-to-use'] == 'bowtie2':
+    #         bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
+    #     elif configOptions['aligner-to-use'] == 'hisat2':
+    #         hisat2.generateSLURMScirpt(origFiles, projdir, configOptions, prinseqJobIDS)
+    #     startStep += 1
+    #
+    # # Generate Job script for step 3 and run all jobs
+    # if (startStep == 3):
+    #     samtools.generateSLURMScript(origFiles, projdir, configOptions, alignerJobIDS)
+    #     startStep += 1
+    #
+    # # Generate Job script for step 4 and run all jobs
+    # if (startStep == 4):
+    #     blast.generateSLURMScript(origFiles, projdir, configOptions, samtoolsJobIDS)
+    #     startStep += 1
+    #
+    # # Generate Job script for step 5 and run all jobs
+    # if (startStep == 5):
+    #     emalPre = emal.generatePreScript(origFiles, projdir, configOptions, blastJobIDS)
+    #     startStep += 1
+    #
+    # # Generate Job script for step 6 and run all jobs
+    # if (startStep == 6):
+    #     emalMain = emal.generateMainScript(origFiles, projdir, configOptions, emalPreJobIDS)
+    #     startStep += 1
+    #
+    # # Generate Job script for step 7 and run all jobs
+    # if (startStep == 7):
+    #     emalPost = emal.generatePostScript(origFiles, projdir, configOptions, emalMainJobIDS)
+    #     startStep += 1
+    #
+    # # Output file list and gather all results throughout the pipeline run and compile into final report
+    # outputFileList(origFiles, projdir, configOptions['project-name'])
+    #
+    # if not serialSample:
+    #     final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
+    # else:
+    #     print(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)))
+    #     final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)),
+    #                                 projdir, configOptions, emalPostJobIDS)
 
 # Main Function
 if __name__ == "__main__":
@@ -156,25 +235,32 @@ if __name__ == "__main__":
 
     startStep = int(configOptions['start-at-step'])
 
-    if allArgs['serialSample'] == True:
-        serialSample = True
-        # Get list of directories within the sample directory
-        for name in os.listdir(allArgs['directory']):
-            if os.path.isdir(os.path.join(allArgs['directory'], name)):
-                if not allArgs['directory'].endswith('/'):
-                    allArgs['directory'] = allArgs['directory'] + '/'
+    # If running in desktop mode
+    if allArgs['desktopMode']:
+        print ('Running EzMap in desktop mode\n')
 
-                if not os.path.exists(allArgs['projDir'] + name):
-                    print(allArgs['projDir'] + name)
-                    os.mkdir(allArgs['projDir'] + name, 0o777)
-
-                runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'] + name, allArgs['projDir'] + name)
+        runEzMapOnTimePointDesktopMode(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
 
     else:
-        runEzMapOnTimePoint(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
+        if allArgs['serialSample'] == True:
+            serialSample = True
+            # Get list of directories within the sample directory
+            for name in os.listdir(allArgs['directory']):
+                if os.path.isdir(os.path.join(allArgs['directory'], name)):
+                    if not allArgs['directory'].endswith('/'):
+                        allArgs['directory'] = allArgs['directory'] + '/'
 
-    print('All required jobs have been created and queued...')
-    print('You can now check the status of your jobs using the following command: ')
-    print('squeue\n')
-    print('Once those jobs have completed you can view your results in:\n' + allArgs['projDir'] + '6-FinalResult-' +
-          configOptions['project-name'] + '/')
+                    if not os.path.exists(allArgs['projDir'] + name):
+                        print(allArgs['projDir'] + name)
+                        os.mkdir(allArgs['projDir'] + name, 0o777)
+
+                    runEzMapOnTimePointSLURM(configOptions, startStep, allArgs['directory'] + name, allArgs['projDir'] + name)
+
+        else:
+            runEzMapOnTimePointSLURM(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
+
+        print('All required jobs have been created and queued...')
+        print('You can now check the status of your jobs using the following command: ')
+        print('squeue\n')
+        print('Once those jobs have completed you can view your results in:\n' + allArgs['projDir'] + '6-FinalResult-' +
+              configOptions['project-name'] + '/')
