@@ -67,11 +67,12 @@ def generateSHPreScript(dataSets, projdir, configOptions):
     script = open(projdir + 'ezmapScript.sh', 'a+')
 
     script.writelines(['\n# EMAL PREP STEP\n'])
+    script.write('echo "Staring Step 5 - EMAL PREP\\n\\n"\n\n')
 
     script.writelines([configOptions['python3-path'] + ' ' + emalPath + 'EMAL-DataPrep.py ' +
                        configOptions['blast-db-path'] + ' ' +
                        configOptions['emal-gi-taxid-nucldmp-path'] + ' ' +
-                       '1' + ' ' +
+                       configOptions['slurm-max-num-threads'] + ' ' +
                        projdir + '5-RelativeAbundanceEstimation/' +
                        ' ' + configOptions['project-name']])
     script.close()
@@ -134,6 +135,7 @@ def generateSHMainScript(dataSets, projdir, configOptions):
     script = open(projdir + 'ezmapScript.sh', 'a+')
 
     script.writelines(['\n\n# EMAL MAIN STEP\n'])
+    script.write('echo "Staring Step 6 - EMAL MAIN\\n\\n"\n\n')
 
     script.writelines([configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Main.py ' +
                        '-d ' + projdir + '4-OrganismMapping/ ' +
@@ -142,7 +144,7 @@ def generateSHMainScript(dataSets, projdir, configOptions):
                        '-m ' + configOptions['emal-acceptance-value'] + ' ' +
                        '-o ' + projdir + '5-RelativeAbundanceEstimation/ ' +
                        '-e .tsv '
-                       '-i ' + configOptions['project-name'] + '-combinedGenomeData.csv'])
+                       '-i ' + projdir + '5-RelativeAbundanceEstimation/' + configOptions['project-name'] + '-combinedGenomeData.csv'])
     script.close()
 
 
@@ -198,7 +200,8 @@ def generateSHPostScript(dataSets, projdir, configOptions):
 
     script = open(projdir + 'ezmapScript.sh', 'a+')
 
-    script.writelines(['\n\n# EMAL MAIN STEP\n'])
+    script.writelines(['\n\n# EMAL POST STEP\n'])
+    script.write('echo "Staring Step 7 - EMAL POST\\n\\n"\n\n')
 
     script.writelines([configOptions['python3-path'] + ' ' + emalPath + 'EMAL-Post.py ' +
                        '-f ' + projdir + '5-RelativeAbundanceEstimation/' + configOptions['project-name'] + '.gra ' +

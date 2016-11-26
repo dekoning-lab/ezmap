@@ -94,6 +94,8 @@ def generateSHScript(dataSets, projdir, configOptions):
 
     script.writelines(['\n# HISAT2 STEP\n'])
 
+    script.write('echo "Staring Step 2 - HISAT2\\n\\n"\n\n')
+
     filelist = ''
     fileOutputList = ''
     for x in dataSets:
@@ -123,6 +125,7 @@ def generateSHScript(dataSets, projdir, configOptions):
                        '-S ' + os.path.abspath(projdir) + '/2-HumanMapping/${FILENAMEOUTPUT}.sam\n\n',
                        '\tlet COUNTER=COUNTER+1\n',
                        'done\n'])
+
     script.close()
 
 

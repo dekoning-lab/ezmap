@@ -101,6 +101,7 @@ def generateSHScript(dataSets, projdir, configOptions):
     script = open(projdir + 'ezmapScript.sh', 'a+')
 
     script.writelines(['\n# BLAST STEP\n'])
+    script.write('echo "Staring Step 4 - BLAST\\n\\n"\n\n')
 
     script.write('# BLASTN PARAMETERS ##\n')
 

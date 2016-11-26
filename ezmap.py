@@ -42,9 +42,7 @@ def outputFileList(files, projdir, projName):
 
 def executeDesktopModeScript (pathToScript):
     print('Executing Desktop Mode Script...')
-    proc = subprocess.Popen(
-        [pathToScript],
-        stdout=subprocess.PIPE)
+    os.system('bash '+pathToScript)
 
 # Runs EzMap on a single time point using the SLURM job manager
 def runEzMapOnTimePointSLURM(configOptions, startAtStep, inputFileDir, projdir):
@@ -220,16 +218,16 @@ def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, pro
         emalPost = emal.generateSHPostScript(origFiles, projdir, configOptions)
         startStep += 1
 
-    # executeDesktopModeScript(projdir+'ezmapScript.sh')
+    executeDesktopModeScript(projdir+'ezmapScript.sh')
 
     # Output file list and gather all results throughout the pipeline run and compile into final report
-    # outputFileList(origFiles, projdir, configOptions['project-name'])
+    outputFileList(origFiles, projdir, configOptions['project-name'])
 
-    # if not serialSample:
-    #     final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
-    # else:
-    #     print(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)))
-    #     final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)), projdir, configOptions, emalPostJobIDS)  # Main Function
+    if not serialSample:
+        final.collectPipelineResultDM(configOptions['project-name'], projdir, configOptions)
+    else:
+        print(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)))
+        final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)), projdir, configOptions)  # Main Function
 
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline

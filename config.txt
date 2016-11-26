@@ -9,7 +9,7 @@ SLURM JOB MANAGER CONFIG OPTIONS
 >slurm-account=dklab-research
 >slurm-share=no
 >slurm-partition=normal
->slurm-max-num-threads=2
+>slurm-max-num-threads=4
 >slurm-test-only=no
 
 PRINSEQ CONFIG OPTIONS
@@ -24,15 +24,15 @@ BOWTIE2 CONFIG OPTIONS
 
 HISAT2 CONFIG OPTIONS
 >hisat2-path=cwd/tools/HISAT2/hisat2-2.0.5-Linux/
->hisat2-index-path=/mnt/hgfs/patrickczeczko/Desktop/HISATFILES/hg19-hisat/genome
+>hisat2-index-path=cwd/tools/HISAT2/hg19-hisat/genome
 
 SAMTOOLS CONFIG OPTIONS
 >samtools-path=cwd/tools/SAMTOOLS/
 
 BLAST CONFIG OPTIONS
->blast-path=/hyperion/work/patrick/pipelineTest2/tools/BLAST/ncbi-blast-2.4.0+/bin/
+>blast-path=cwd/tools/BLAST/ncbi-blast-2.4.0+/bin/
 >blast-task=megablast
->blast-db-path=/hyperion/work/patrick/PipelineDev/tools/BLAST/ncbi-blast-2.2.30+/db/viral.1.1.genomic.fna
+>blast-db-path=/mnt/hgfs/patrickczeczko/GithubRepos/ezmap/tools/BLAST/ncbi-blast-2.4.0+/db/viral.1.1.genomic.fna
 >blast-dust=no
 >blast-reward=1
 >blast-penalty=-3
@@ -46,7 +46,7 @@ BLAST CONFIG OPTIONS
 
 EMAL CONFIG OPTIONS
 >emal-path=cwd/tools/EMAL/
->emal-gi-taxid-nucldmp-path=/hyperion/work/patrick/quakeDataProcessing/EMAL/gi_taxid_nucl.dmp
+>emal-gi-taxid-nucldmp-path=/mnt/hgfs/patrickczeczko/GithubRepos/ezmap/tools/EMAL/gi_taxid_nucl.dmp
 >emal-acceptance-value=0.0001
 
 OUTPUT OPTIONS

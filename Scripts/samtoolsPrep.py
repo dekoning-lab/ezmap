@@ -85,6 +85,7 @@ def generateSHScript(dataSets, projdir, configOptions):
     script = open(projdir + 'ezmapScript.sh', 'a+')
 
     script.writelines(['\n# SAMTOOLS STEP\n'])
+    script.write('echo "Staring Step 3 - SAMTOOLS\\n\\n"\n\n')
 
     script.write('# SAMTOOLS PARAMETERS\n')
     script.writelines(['inFileDir=' + os.path.abspath(projdir) + '/2-HumanMapping/\n',
@@ -118,7 +119,7 @@ def generateSHScript(dataSets, projdir, configOptions):
                        '\t${samtoolsPath} view -f4 ${inFileDir}${FILENAME} | '
                        '${samtoolsPath} view -Sb - | '
                        '${samtoolsPath} view - | '
-                       'awk \'{OFS="\\t"; print ">"$1"\\n"$10}\' - > ' + os.path.abspath(filePath) + '/${FILENAMEOUTPUT}.fasta',
+                       'awk \'{OFS="\\t"; print ">"$1"\\n"$10}\' - > ' + os.path.abspath(filePath) + '/${FILENAMEOUTPUT}.fasta\n',
                        '\tlet COUNTER=COUNTER+1\n',
                        'done\n'])
     script.close()

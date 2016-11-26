@@ -53,6 +53,7 @@ def parseCommandLineArguments():
     global acceptanceValue
     global fileExtension
     global combinedGenomeDataFile
+    global outputDir
 
     # Creates argument parser instance
     parser = argparse.ArgumentParser()

@@ -23,27 +23,28 @@ min_qual_score=$7 #21
 lc_method=$8 #dust
 lc_threshold=$9 #7
 pythonPath=${10}
+prinseqPath=${11}
 
-echo "Splitting ${FILE} into ${numParts} parts...\n"
+echo "Splitting ${FILE} into ${numParts} parts..."
 # Split the fastq file into the number of threads to process with
 perl ${TOOLSDIR}fastq-splitter.pl --check --n-parts ${numParts} ${inputDIR}${FILE}
 COUNTER=1
 
 inputFileName="${FILE%.*}"
 
-echo "Cleaning each part of the original file...\n"
+echo "Cleaning each part of the original file..."
 # For each piece of the original fastq process using prinseq
 for fullfile in ${inputDIR}${inputFileName}.part*.fastq; do
     filename=$(basename "$fullfile")
     extension="${filename##*.}"
     filename="${filename%.*}"
 
-    echo "perl /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null"
+    echo "perl ${prinseqPath}prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null"
 
     if [ $COUNTER == $numParts ] ; then
-        perl /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null
+        perl ${prinseqPath}prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null
     else
-        perl /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null &
+        perl ${prinseqPath}prinseq-lite.pl -fastq ${fullfile} -out_format $out_format -min_qual_score $min_qual_score -lc_method $lc_method -lc_threshold $lc_threshold -log -out_good ${outputDIR}${filename}-prinseq -out_bad null &
     fi
 
     let COUNTER=COUNTER+1
@@ -54,7 +55,7 @@ echo "Combining results..."
 awk 'FNR==1{print ""}1' ${outputDIR}${inputFileName}*.part*.fastq > ${outputDIR}${inputFileName}-prinseq.fastq
 
 # Combine the results of the prinseq log files
-${pythonPath} /hyperion/work/patrick/pipelineTest2/tools/PRINSEQ/combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
+${pythonPath} ${prinseqPath}combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
 
 echo "Removing temporary files..."
 # Remove unnecessary part files

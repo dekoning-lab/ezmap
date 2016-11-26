@@ -5,6 +5,7 @@ import os
 import Scripts.slurmScript as slurmScript
 import datetime
 
+
 # Generates bash script to launch all required jobs within job manager
 def generateSLURMScript(dataSets, projdir, configOptions):
     print('Setting up jobs for Step 1...')
@@ -53,7 +54,7 @@ def generateSLURMScript(dataSets, projdir, configOptions):
                        os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
                        configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
                        configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
-                       configOptions['python3-path'] + ' \n'])
+                       configOptions['python3-path'] + ' ' + prinseqPath + ' \n'])
     script.close()
 
     os.chmod(projdir + '1-Cleaning/prinseqScript.sh', 0o755)
@@ -62,7 +63,8 @@ def generateSLURMScript(dataSets, projdir, configOptions):
     os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
     os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
 
-def generateSHScript (dataSets, projdir, configOptions):
+
+def generateSHScript(dataSets, projdir, configOptions):
     # Get the current working directory and path to PRINSEQ
     cwd = os.path.dirname(os.path.abspath(__file__)).strip('Scripts')
     prinseqPath = configOptions['prinseq-path']
@@ -79,10 +81,13 @@ def generateSHScript (dataSets, projdir, configOptions):
 
     script.write('#!/bin/bash\n\n')
 
-    script.write('# EzMap Desktop mode  execution script. Generated on '+datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+    script.write(
+        '# EzMap Desktop mode  execution script. Generated on ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     script.write('\n# EzMap documentation and more can be found at http://dekoning-lab.github.io/ezmap/')
 
     script.writelines(['\n\n# PRINSEQ STEP\n'])
+    script.write('echo "Staring Step 1 - PRINSEQ\\n\\n"\n\n')
+
     script.write('# PRINSEQ PARAMETERS\n')
     script.writelines(['out_format=3\n',
                        'min_qual_score=' + configOptions['prinseq-min_qual_score'] + '\n',
@@ -102,20 +107,21 @@ def generateSHScript (dataSets, projdir, configOptions):
     script.writelines(['COUNTER=0\n',
                        'while [  $COUNTER -lt ${#fileArray[@]} ];\n',
                        'do\n',
-                           '\tTEMP=${fileArray[$COUNTER]}\n',
-                           '\tTEMP2=${TEMP#\\\'}\n',
-                           '\tFILENAME=${TEMP2%\\\'}\n\n',
-                           '\tTEMP3=${fileOutputArray[$COUNTER]}\n',
-                           '\tTEMP4=${TEMP3#\\\'}\n',
-                           '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
-                           '\techo ${FILENAME} $TEMP \n',
-                           '\t' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
-                           os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
-                           configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
-                           configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
-                           configOptions['python3-path'] + ' \n\n'
-                           '\tlet COUNTER=COUNTER+1\n',
+                       '\tTEMP=${fileArray[$COUNTER]}\n',
+                       '\tTEMP2=${TEMP#\\\'}\n',
+                       '\tFILENAME=${TEMP2%\\\'}\n\n',
+                       '\tTEMP3=${fileOutputArray[$COUNTER]}\n',
+                       '\tTEMP4=${TEMP3#\\\'}\n',
+                       '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
+                       '\techo ${FILENAME} $TEMP \n',
+                       '\t' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
+                       os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
+                       configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
+                       configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
+                       configOptions['python3-path'] + ' ' + prinseqPath + ' \n\n'
+                                                                           '\tlet COUNTER=COUNTER+1\n',
                        'done\n'])
+
     script.close()
 
     os.chmod(projdir + 'ezmapScript.sh', 0o755)
@@ -123,6 +129,7 @@ def generateSHScript (dataSets, projdir, configOptions):
     os.chmod(prinseqPath + 'fastq-splitter.pl', 0o755)
     os.chmod(prinseqPath + 'prinseq-lite.pl', 0o755)
     os.chmod(prinseqPath + 'prinseqMultipleThread.sh', 0o755)
+
 
 def processAllFiles(projDir, configOptions, dataSets):
     print('Starting step 1 jobs...')

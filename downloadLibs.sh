@@ -4,10 +4,7 @@
 
 case $( uname -s ) in
 Linux)  echo Linux
-        echo "Downloading hg19 files for Bowtie2"
-        wget ftp://ftp.ccb.jhu.edu/pub/data/bowtie2_indexes/hg19.zip
-        mkdir tools/BOWTIE2/hg19
-        unzip hg19.zip -d tools/BOWTIE2/hg19
+
 
         echo "Downloading BLAST+ 2.4.0 files"
         wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast%2B/2.4.0/ncbi-blast-2.4.0%2B-x64-linux.tar.gz
