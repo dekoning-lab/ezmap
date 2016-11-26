@@ -11,7 +11,7 @@
 # =================================================
 
 __author__ = 'patrickczeczko'
-import sys, os
+import sys, os, subprocess
 
 import Scripts.arguments as arguments
 import Scripts.configOptions as config
@@ -27,6 +27,7 @@ import Scripts.finalScript as final
 
 serialSample = False
 
+
 # Cretaes a txt file of all importnat output files for final report
 def outputFileList(files, projdir, projName):
     outputfile = open(projdir + '6-FinalResult-' + projName + '/information/' + 'filelist.txt', 'w+')
@@ -38,6 +39,12 @@ def outputFileList(files, projdir, projName):
         outputfile.write('<tr><td>' + files[x].origFileName + '</td><td>' + files[x].origFilePath.replace('/',
                                                                                                           '&#47;') + '</td></tr>')
     outputfile.write('</tbody></table>')
+
+def executeDesktopModeScript (pathToScript):
+    print('Executing Desktop Mode Script...')
+    proc = subprocess.Popen(
+        [pathToScript],
+        stdout=subprocess.PIPE)
 
 # Runs EzMap on a single time point using the SLURM job manager
 def runEzMapOnTimePointSLURM(configOptions, startAtStep, inputFileDir, projdir):
@@ -126,6 +133,8 @@ def runEzMapOnTimePointSLURM(configOptions, startAtStep, inputFileDir, projdir):
         emalPostJobIDS = emal.processAllFiles(projdir, configOptions, origFiles, 3, emalPost)
         startStep += 1
 
+
+
     # Output file list and gather all results throughout the pipeline run and compile into final report
     outputFileList(origFiles, projdir, configOptions['project-name'])
 
@@ -137,6 +146,7 @@ def runEzMapOnTimePointSLURM(configOptions, startAtStep, inputFileDir, projdir):
                                     projdir, configOptions, emalPostJobIDS)
 
     print('\nAll required jobs for ' + inputFileDir + ' have been queued...\n')
+
 
 # Run EzMap on a single time point in desktop mode
 def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, projdir):
@@ -194,33 +204,33 @@ def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, pro
     if (startStep == 4):
         blast.generateSHScript(origFiles, projdir, configOptions)
         startStep += 1
-    #
-    # # Generate Job script for step 5 and run all jobs
-    # if (startStep == 5):
-    #     emalPre = emal.generatePreScript(origFiles, projdir, configOptions, blastJobIDS)
-    #     startStep += 1
-    #
-    # # Generate Job script for step 6 and run all jobs
-    # if (startStep == 6):
-    #     emalMain = emal.generateMainScript(origFiles, projdir, configOptions, emalPreJobIDS)
-    #     startStep += 1
-    #
-    # # Generate Job script for step 7 and run all jobs
-    # if (startStep == 7):
-    #     emalPost = emal.generatePostScript(origFiles, projdir, configOptions, emalMainJobIDS)
-    #     startStep += 1
-    #
-    # # Output file list and gather all results throughout the pipeline run and compile into final report
+
+    # Generate Job script for step 5 and run all jobs
+    if (startStep == 5):
+        emalPre = emal.generateSHPreScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # Generate Job script for step 6 and run all jobs
+    if (startStep == 6):
+        emalMain = emal.generateSHMainScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # Generate Job script for step 7 and run all jobs
+    if (startStep == 7):
+        emalPost = emal.generateSHPostScript(origFiles, projdir, configOptions)
+        startStep += 1
+
+    # executeDesktopModeScript(projdir+'ezmapScript.sh')
+
+    # Output file list and gather all results throughout the pipeline run and compile into final report
     # outputFileList(origFiles, projdir, configOptions['project-name'])
-    #
+
     # if not serialSample:
     #     final.collectPipelineResult(configOptions['project-name'], projdir, configOptions, emalPostJobIDS)
     # else:
     #     print(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)))
-    #     final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)),
-    #                                 projdir, configOptions, emalPostJobIDS)
+    #     final.collectPipelineResult(configOptions['project-name'] + '-' + os.path.basename(os.path.normpath(projdir)), projdir, configOptions, emalPostJobIDS)  # Main Function
 
-# Main Function
 if __name__ == "__main__":
     # Get all user set arguments before starting pipeline
     print("\nEzMap V1.0\n\nParsing config file...")
@@ -240,7 +250,22 @@ if __name__ == "__main__":
     if allArgs['desktopMode']:
         print ('Running EzMap in desktop mode\n')
 
-        runEzMapOnTimePointDesktopMode(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
+        if allArgs['serialSample'] == True:
+            serialSample = True
+            # Get list of directories within the sample directory
+            for name in os.listdir(allArgs['directory']):
+                if os.path.isdir(os.path.join(allArgs['directory'], name)):
+                    if not allArgs['directory'].endswith('/'):
+                        allArgs['directory'] = allArgs['directory'] + '/'
+
+                    if not os.path.exists(allArgs['projDir'] + name):
+                        print(allArgs['projDir'] + name)
+                        os.mkdir(allArgs['projDir'] + name, 0o777)
+
+                    runEzMapOnTimePointDesktopMode(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
+
+        else:
+            runEzMapOnTimePointDesktopMode(configOptions, startStep, allArgs['directory'], allArgs['projDir'])
 
     else:
         if allArgs['serialSample'] == True:
@@ -255,7 +280,8 @@ if __name__ == "__main__":
                         print(allArgs['projDir'] + name)
                         os.mkdir(allArgs['projDir'] + name, 0o777)
 
-                    runEzMapOnTimePointSLURM(configOptions, startStep, allArgs['directory'] + name, allArgs['projDir'] + name)
+                    runEzMapOnTimePointSLURM(configOptions, startStep, allArgs['directory'] + name,
+                                             allArgs['projDir'] + name)
 
         else:
             runEzMapOnTimePointSLURM(configOptions, startStep, allArgs['directory'], allArgs['projDir'])

@@ -109,7 +109,7 @@ def generateSHScript (dataSets, projdir, configOptions):
                            '\tTEMP4=${TEMP3#\\\'}\n',
                            '\tFILENAMEOUTPUT=${TEMP4%\\\'}\n\n',
                            '\techo ${FILENAME} $TEMP \n',
-                           '\techo ' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
+                           '\t' + prinseqPath + 'prinseqMultipleThread.sh ' + os.path.abspath(origFilePath) + '/ ${TEMP} ' +
                            os.path.abspath(projdir) + '/1-Cleaning/ ' + prinseqPath + ' ' +
                            configOptions['slurm-max-num-threads'] + ' 3 ' + configOptions['prinseq-min_qual_score'] + ' ' +
                            configOptions['prinseq-lc_method'] + ' ' + configOptions['prinseq-lc_threshold'] + ' ' +
