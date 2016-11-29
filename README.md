@@ -14,13 +14,14 @@ EzMap uses Python3 and a select few required modules:
 
 - Python3
 - [NumPy & SciPy](http://docs.scipy.org/doc/)
-- [Biopython](http://biopython.org)
+- [Biopython](http://biopython.org) (Version 1.68 or newer is required)
 
 #### Programs Used by EzMap
 EzMap uses a number of free open source programs to generate results:
 
 - [PRINSEQ](http://prinseq.sourceforge.net)
 - [Bowtie 2](http://bowtie-bio.sourceforge.net)
+- [HISAT2](http://ccb.jhu.edu/software/hisat2/index.shtml)
 - [SAMTools](http://samtools.sourceforge.net)
 - [NCBI BLAST](http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 - EMAL (Custom script written by the de Koning Lab _included with installation files_)
@@ -65,6 +66,23 @@ Before running EzMap it is important to have a few things setup.
  3. Configure the parameters within the `config.txt` file that can be found in the main EzMap folder. *See the parameters section below to see what can be modified.*
 
 ## Running EzMap
+
+### On a Workstation or Desktop
+To obtain the best performance with EzMap we recommend running it on a SLURM based computation cluster. However EzMap 
+can be run a standard Workstation or Desktop, with at least 6GB of RAM and for better performance and a Quad Core processor.
+
+To run EzMap on a desktop computer setup the Pipeline in the same way as you would on a SLURM cluster 
+(instructions available above). Once you have configured the config.txt file and parameters correctly perform the following:
+
+1. Open up a new terminal window.
+2. Navigate to the EzMap folder.
+3. The following is the command that will run EzMap in desktop mode.
+
+```
+python3 ezmap.py -dm -d /path/to/fasta/files/ -p /path/to/output/folder/
+```
+
+### On a SLURM based Cluster
 
 To run EzMap make sure you have installed it correctly and have configured the files and parameters correctly.
 
@@ -136,7 +154,7 @@ When using Google Chrome or Mozilla Firefox browsers to view results:
 |-d or --directory| The full system path to the folder containing only the original FASTQ files. **Specify the full file path**| `/path/to/dir` |
 |-p or --projDir| The full system path to the folder where all output will be placed. **Specify the full file path.**|`/path/to/dir`|
 |-s | This option is to enable the pipeline to run across a set of serial samples. If this is present it will use the directory specified by -d as the top level directory and each of its children will be considered a individual set of samples| -s |
-
+|-dm | This option will make EzMap run in desktop mode, in which all work will be run on a single node/computer. | -dm |
 
 ####config.txt Options
 The config file is designed to allow a number of parameters to be set as hardcoded values rather then command line options. Each option occupies a single line within the file. The option always starts with a # and has a = between the option name and its value. When modifying these parameters please ensure there are no space before or after the =.
@@ -147,8 +165,9 @@ The config file is designed to allow a number of parameters to be set as hardcod
 |---|---|---|---|
 |```#project-name```|The name of the project. This will be displayed exactly as spelled in the final report | ```<string>```|
 |```#python3-path```|The full file path to python3 within the system. If python3 is installed across the system then enter only ```python3```| /path/python3 |
-|```#start-at-step```|Use this parameter to start the pipeline at a different step in case of previous data processing or pipeline failure at a different step | 1 |
-
+|```#start-at-step```|Use this parameter to start the pipeline at a different step in case of previous data processing or pipeline failure at a different step | 1 to 8 |
+|```#aligner-to-use```| This option allows the user to select between HISAT2 or BowTie2 as the aligner of choice within the EzMap Pipeline | hisat2 or bwt2 |
+|```#user-email```| This parameter is used by the final steps of the pipeline, to make calls for information to the NCBI Entrez database. This is used so that NCBI is able to identify a given user| johnsmith@example.com |
 
 #####SLURM Parameters
 | Parameter     | Description   | Possible Values| Default |
