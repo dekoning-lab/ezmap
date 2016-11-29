@@ -38,16 +38,25 @@ EzMap uses [SLURM](http://slurm.schedmd.com) job manager to work on a cluster.
  3. Place the entire EzMap folder somewhere accessible on your computer
  4. To install Numpy, Scipy, & Biopython run the setup bash script inside of the EzMap folder:
 
-```
-sudo sh setup.sh
-```
-
+ ```
+ sudo sh setup.sh
+ ```
  5. To download the required hg19 database and BLAST+ executables run the download libs script:
-
+ 
+ If you will be using both Bowtie2 and HISAT2 as the aligners, use the following command:
  ```
  sh downloadLibs.sh
  ```
-
+ 
+ If you will be using HISAT2 as the aligner use the following command:
+ ```
+ sh downloadLibs.sh HISAT2
+ ```
+ 
+ If you will be using BowTie2 as the aligner use the following command:
+ ```
+ sh downloadLibs.sh BWT2
+ ```
 
 Once the script completes you have all the EzMap prerequisites correctly setup on your computer.
 
