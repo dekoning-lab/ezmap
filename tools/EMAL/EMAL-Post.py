@@ -103,8 +103,6 @@ def getAllTaxInfo(taxIDs):
     Entrez.email = "pkczeczk@ucalgary.ca"
     search_results = Entrez.read(Entrez.efetch("taxonomy", id=",".join(taxIDs)))
 
-    print(search_results)
-
     for i in range(0, len(search_results)):
         taxonomicInfo = search_results[i]
 
