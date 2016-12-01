@@ -308,10 +308,8 @@ def getAllTaxInfo (taxIDs, configOptions):
     #Get all tax ids information in groups of 100
     for i in range(0, len(l), n):
         smallTaxIDSubList = l[i:i + n]
-        print (smallTaxIDSubList)
 
         returnedData = Entrez.read(Entrez.efetch("taxonomy", id=smallTaxIDSubList))
-        print (returnedData)
 
         search_results += returnedData
 

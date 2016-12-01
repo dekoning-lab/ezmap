@@ -27,7 +27,8 @@ prinseqPath=${11}
 
 echo "Splitting ${FILE} into ${numParts} parts..."
 # Split the fastq file into the number of threads to process with
-perl ${TOOLSDIR}fastq-splitter.pl --check --n-parts ${numParts} ${inputDIR}${FILE}
+${pythonPath} ${prinseqPath}splitFASTQ.py ${inputDIR}${FILE} ${numParts}
+
 COUNTER=1
 
 inputFileName="${FILE%.*}"

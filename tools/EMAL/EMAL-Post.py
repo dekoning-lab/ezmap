@@ -127,7 +127,7 @@ def grabEntrezRecord(TaxID):
 def processOneLine(line, outputQ):
     parse = line.split(',')
     TaxID = parse[1]
-    print(TaxID)
+
     lineage, species = grabEntrezRecord(TaxID)
 
     noRank = False
