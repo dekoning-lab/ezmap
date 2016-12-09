@@ -187,8 +187,7 @@ def runEzMapOnTimePointDesktopMode(configOptions, startAtStep, inputFileDir, pro
     # Generate Job script for step 2 and run all jobs
     if (startStep == 2):
         if configOptions['aligner-to-use'] == 'bowtie2':
-            print ()
-            # bowtie2.generateSLURMScirpt(origFiles, projdir, configOptions)
+            bowtie2.generateSHScript(origFiles, projdir, configOptions)
         elif configOptions['aligner-to-use'] == 'hisat2':
             hisat2.generateSHScript(origFiles, projdir, configOptions)
         startStep += 1
