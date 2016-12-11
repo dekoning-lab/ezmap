@@ -111,7 +111,7 @@ def generateSHScript(dataSets, projdir, configOptions):
                        '\t' + bowtie2Path + 'bowtie2 --sensitive ' +
                        '-x ' + cwd + '/tools/BOWTIE2/hg19/hg19 ' +
                        '-U ' + os.path.abspath(projdir) + '/1-Cleaning/${FILENAME}.fastq ' +
-                       '-S ' + os.path.abspath(projdir) + '/2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}"\n\n',
+                       '-S ' + os.path.abspath(projdir) + '/2-HumanMapping/${FILENAMEOUTPUT}.sam -p ${numCores}\n\n',
                        '\tlet COUNTER=COUNTER+1\n',
                        'done\n'])
     script.close()

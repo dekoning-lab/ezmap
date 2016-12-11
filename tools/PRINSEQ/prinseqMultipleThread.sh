@@ -33,9 +33,10 @@ COUNTER=1
 
 inputFileName="${FILE%.*}"
 
-echo "Cleaning each part of the original file..."
-# For each piece of the original fastq process using prinseq
+ For each piece of the original fastq process using prinseq
 for fullfile in ${inputDIR}${inputFileName}.part*.fastq; do
+    echo "Cleaning each part of the original file..."
+
     filename=$(basename "$fullfile")
     extension="${filename##*.}"
     filename="${filename%.*}"
@@ -51,9 +52,12 @@ for fullfile in ${inputDIR}${inputFileName}.part*.fastq; do
     let COUNTER=COUNTER+1
 done
 
+wait
+
 echo "Combining results..."
-# Combine the resulting cleaned sequences
-awk 'FNR==1{print ""}1' ${outputDIR}${inputFileName}*.part*.fastq > ${outputDIR}${inputFileName}-prinseq.fastq
+echo "cat ${outputDIR}${inputFileName}*.part*-prinseq.fastq > ${outputDIR}${inputFileName}-prinseq.fastq"
+
+cat ${outputDIR}${inputFileName}*.part*-prinseq.fastq > ${outputDIR}${inputFileName}-prinseq.fastq
 
 # Combine the results of the prinseq log files
 ${pythonPath} ${prinseqPath}combineLogFiles.py ${outputDIR}${inputFileName}-prinseq.fastq.log echo ${inputDIR}*part*.log
@@ -63,5 +67,6 @@ echo "Removing temporary files..."
 rm ${inputDIR}${inputFileName}*.part*
 rm ${outputDIR}${inputFileName}*.part*.fastq
 
-echo "Done...!"
+wait
 
+echo "Done...!"
