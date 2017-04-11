@@ -4,6 +4,8 @@
 
 EzMap is a pipeline designed to allow for the estimation community structure from raw DNA sequence data. EzMap has been designed to work with viral sequence data, however it can also be used with other information sources such as bacterial and fungal communities.
 
+*EzMap has been [published](https://academic.oup.com/bioinformatics/article/3104470/EzMap-A-Simple-Pipeline-for-Reproducible-Analysis) in Bioinformatics. Please cite: Czezcko P, Greenway SC, and APJ de Koning (2017). EzMap: A Simple Pipeline for Reproducible Analysis of the Human Virome. Bioinformatics (Oxford), btx202.*
+
 ## Features
   - Support for Viral, Bacterial and Fungal community structure estimation
   - Graphical HTML report generation
